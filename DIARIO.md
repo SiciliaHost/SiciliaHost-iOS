@@ -40,21 +40,23 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Stato attuale
 
-- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario di **tutti** i 211 file Kotlin in `docs/INVENTARIO.md`.
-- **F1 (livello dati) scritta, MAI compilata**: tutti i modelli, `FirestoreService` completo, servizi callable
-  (host/inviti/membri/Alloggiati, annunci, prezzi, contenuti sito), Lookup Alloggiati, `AccessSession`, FanOut,
-  parser delle risposte e messaggi d'errore, con i test portati da Android. Resta fuori solo il login Google/Apple (F3).
+- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario di **tutti** i 211 file Kotlin in `docs/INVENTARIO.md`
+  (`python tools/gen_inventario.py --check`: righe ancora aperte 131 su 211).
+- **F1 (livello dati) e F2 (logica pura) scritte, MAI compilate.** Checklist funzioni in `docs/funzioni/F1.md` e `F2.md`.
+  F2 comprende: finanze e statistiche, categorie di spesa, spese fisse, import Booking (CSV + lettore `.xls` OLE2/BIFF8 scritto a mano),
+  piano di importazione, parte pura dell'iCal, geometria, Nominatim, annuncio Airbnb, import servizi, foto, MRZ, link d'invito.
 - Presenti dall'avvio: login email/password, gate + `TabView` con 5 schede (segnaposto tranne Home che elenca le case).
-- Da fare: F2–F11 (vedi piano). Nessuna schermata vera ancora.
+- Da fare: F3–F11 (vedi piano). Nessuna schermata vera ancora.
 
 ## Prossimi passi (in ordine)
 
 0. **[Mac, appena disponibile — binario G]** `brew install xcodegen && xcodegen generate`, `GoogleService-Info.plist` in
-   `SiciliaHost/Resources/`, compilare, correggere gli errori, far girare i test. Annotare nel registro cosa si è corretto.
-   Più si scrive senza compilare più errori si accumulano: farlo dopo F2 al più tardi.
-1. **F2 — Logica pura e utilità** (`data/utils`, `data/mrz`, `data/invite` + test omonimi). Vedi `docs/PIANO.md`.
-   Decisione da prendere lì: libreria per leggere gli Excel di Booking (xls/xlsx) o elaborazione lato server.
-2. F3 login Google/Apple + shell + stile, poi F4…F11 come da piano.
+   `SiciliaHost/Resources/`, compilare, correggere gli errori, far girare i test. Provare anche il file reale:
+   `BOOKING_XLS_FIXTURE="…/Androidapp/Arrivo con recapiti_ 2026-01-01 - 2026-07-30.xls"` (il file contiene dati personali
+   di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
+1. **F3 — Accesso, shell, stile, navigazione** (46 file: login Apple/Google, MainScreen, onboarding, intro, tour, termini host,
+   profilo, tema, layout adattivo). Prima scrivere `docs/funzioni/F3.md` rileggendo i 46 file Android.
+2. Poi F4 (Home), F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case/sito), F10 (sfondo), F11 (rilascio).
 
 ## Decisioni prese
 
@@ -74,6 +76,12 @@ e correggere gli errori (vedi Prossimi passi).
 - **Scritture esplicite con `NSNull`** (`Core/Models/FirestoreData.swift`): niente `Codable` per scrivere, perché omette i
   `nil` e nei merge non cancellerebbe il campo (l'Android scrive null). Letture: `Codable` tollerante (`Decoding.swift`).
 - Il profilo utente si scrive con esattamente `id`, `email`, `fcmToken` (le regole accettano solo quelli).
+- **Date sempre in UTC** (millisecondi, mezzanotti UTC) per mesi/settimane/periodi, come l'Android: `Core/Logic/TimeUtils.swift`.
+  Mesi abbreviati italiani fissi ("gen"…"dic") invece dei dati del sistema, per non cambiare etichette con la versione di iOS.
+- **Excel Booking `.xls`**: lettore OLE2/BIFF8 scritto a mano (`XlsReader.swift`), perché su iOS non c'è Apache POI. Alternativa
+  scartata: elaborazione lato server (nuova Cloud Function nel repo del sito). Il CSV (stesse colonne) resta supportato.
+  Limiti noti: primo foglio, niente formule, niente mini-stream (file < 4 KB), file reali > 4 KB validati solo in Python.
+- **User-Agent OSM per iOS**: `SiciliaHostManager/1.0 (iOS; +https://siciliahost.com; info@siciliahost.com)` (`osmUserAgent`).
 - Bundle ID **provvisorio**: `com.siciliahost.manager` (vedi "Da fare dall'utente").
 
 ## Da fare dall'utente (solo lui può)
@@ -86,6 +94,20 @@ e correggere gli errori (vedi Prossimi passi).
 - Decidere se pubblicare la repo su GitHub (finora esiste solo in locale).
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — F2 (logica pura e utilità)
+- Riletti per intero i 37 file Android di F2 (21 sorgenti + 16 test) e la parte pura di `ICalSyncWorker`; checklist in `docs/funzioni/F2.md`.
+- Scritti in `SiciliaHost/Core/Logic/`: `TimeUtils`, `Finance` (calcolatore, categorie, periodi, statistiche, spese fisse, orfane),
+  `BookingStats`, `FinanceInsights`, `BookingImport` (piano + parser CSV/righe), `XlsReader`, `ICalSync`, `GeoMath`, `ServiceImport`,
+  `ListingImport` (Airbnb + Nominatim + User-Agent OSM), `Photos`, `IdentityParsers` (MRZ + link d'invito).
+- Test: `FinanceTests`, `BookingTests`, `LogicTests`, `XlsReaderTests` (file `.xls` sintetico costruito nel test: OLE2 + SST con CONTINUE + NUMBER/RK).
+  Il costruttore sintetico e l'algoritmo di lettura sono stati verificati in Python (`xls_proto.py` nello scratchpad della sessione) sui 3 export reali
+  di Booking presenti nella repo Android: 30/40/44 righe, 0 cancellate, paese `de`, motivo `Svago`, dispositivo `Computer`, commissione 174,24 — come il test Android.
+- Differenze volute rispetto all'Android: `PhotoEncoder` riceve `Data` (ImageIO) e non un Uri; date inesistenti nel CSV (31/02) scartate; `safeErrorReason` ha anche la
+  versione a due stringhe (`typeName`, `message`) per i test; l'ordine di parità dei suggerimenti sulle spese segue l'ordine delle categorie.
+- **Non verificato**: nulla compilato né eseguito in Swift. Rischi al primo build: tuple con etichette nei test, `guard var (a, b) = …`, `String(decoding:as: UTF16.self)`
+  (ho aggiunto `utf16LE`), concorrenza (`Sendable`), `UTType` in `Photos.swift`. Percorso mini-stream dell'`.xls` non coperto da test.
+- Fermo qui: prossima è F3.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — piano completo + F1 (livello dati) [revisione dopo il controllo del consulente]
 - Aggiunti: baseline Android (branch+commit), `tools/gen_inventario.py --check` (percorsi relativi, rileva file Android mancanti e righe aperte),

@@ -58,43 +58,43 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `data/invite/InviteLink.kt` | 29 |  | — |
-| `data/mrz/MrzData.kt` | 14 |  | — |
-| `data/mrz/MrzParser.kt` | 108 |  | — |
-| `data/utils/AirbnbListingScraper.kt` | 80 |  | — |
-| `data/utils/BookingExcelParser.kt` | 268 |  | — |
-| `data/utils/BookingImportPlan.kt` | 55 |  | — |
-| `data/utils/BookingStats.kt` | 195 |  | — |
-| `data/utils/DateRangeUtils.kt` | 6 |  | — |
-| `data/utils/ExpenseCategory.kt` | 46 |  | — |
-| `data/utils/FinanceInsights.kt` | 156 |  | — |
-| `data/utils/FinancePeriod.kt` | 37 |  | — |
-| `data/utils/FinanceStats.kt` | 132 |  | — |
-| `data/utils/FinancialCalculator.kt` | 39 |  | — |
-| `data/utils/GeoMath.kt` | 81 |  | — |
-| `data/utils/NominatimClient.kt` | 77 |  | — |
-| `data/utils/OrphanExpenses.kt` | 12 |  | — |
-| `data/utils/OsmUserAgent.kt` | 12 |  | — |
-| `data/utils/PhotoEncoder.kt` | 73 |  | — |
-| `data/utils/PhotoLogic.kt` | 41 |  | — |
-| `data/utils/RecurringExpenses.kt` | 75 |  | — |
-| `data/utils/ServiceImport.kt` | 84 |  | — |
-| 🧪 `data/invite/InviteLinkTest.kt` | 51 |  | — |
-| 🧪 `data/mrz/MrzParserTest.kt` | 112 |  | — |
-| 🧪 `data/utils/AirbnbListingScraperTest.kt` | 46 |  | — |
-| 🧪 `data/utils/BookingExcelParserTest.kt` | 221 |  | — |
-| 🧪 `data/utils/BookingImportPlanTest.kt` | 54 |  | — |
-| 🧪 `data/utils/BookingStatsTest.kt` | 141 |  | — |
-| 🧪 `data/utils/DateRangeUtilsTest.kt` | 31 |  | — |
-| 🧪 `data/utils/FinanceStatsTest.kt` | 96 |  | — |
-| 🧪 `data/utils/FinancialCalculatorTest.kt` | 94 |  | — |
-| 🧪 `data/utils/GeoMathTest.kt` | 154 |  | — |
-| 🧪 `data/utils/NominatimClientTest.kt` | 74 |  | — |
-| 🧪 `data/utils/OrphanExpensesTest.kt` | 28 |  | — |
-| 🧪 `data/utils/OsmUserAgentTest.kt` | 34 |  | — |
-| 🧪 `data/utils/PhotoLogicTest.kt` | 58 |  | — |
-| 🧪 `data/utils/RecurringExpensesTest.kt` | 62 |  | — |
-| 🧪 `data/utils/ServiceImportTest.kt` | 95 |  | — |
+| `data/invite/InviteLink.kt` | 29 | `Core/Logic/IdentityParsers.swift` | scritto |
+| `data/mrz/MrzData.kt` | 14 | `Core/Logic/IdentityParsers.swift` | scritto |
+| `data/mrz/MrzParser.kt` | 108 | `Core/Logic/IdentityParsers.swift` | scritto |
+| `data/utils/AirbnbListingScraper.kt` | 80 | `Core/Logic/ListingImport.swift` | scritto |
+| `data/utils/BookingExcelParser.kt` | 268 | `Core/Logic/BookingImport.swift, XlsReader.swift` | scritto (xls: lettore OLE2/BIFF8 scritto a mano, validato in Python sui file reali) |
+| `data/utils/BookingImportPlan.kt` | 55 | `Core/Logic/BookingImport.swift` | scritto |
+| `data/utils/BookingStats.kt` | 195 | `Core/Logic/BookingStats.swift` | scritto |
+| `data/utils/DateRangeUtils.kt` | 6 | `Core/Logic/TimeUtils.swift` | scritto |
+| `data/utils/ExpenseCategory.kt` | 46 | `Core/Logic/Finance.swift` | scritto |
+| `data/utils/FinanceInsights.kt` | 156 | `Core/Logic/FinanceInsights.swift` | scritto |
+| `data/utils/FinancePeriod.kt` | 37 | `Core/Logic/Finance.swift` | scritto |
+| `data/utils/FinanceStats.kt` | 132 | `Core/Logic/Finance.swift` | scritto |
+| `data/utils/FinancialCalculator.kt` | 39 | `Core/Logic/Finance.swift` | scritto |
+| `data/utils/GeoMath.kt` | 81 | `Core/Logic/GeoMath.swift` | scritto |
+| `data/utils/NominatimClient.kt` | 77 | `Core/Logic/ListingImport.swift` | scritto |
+| `data/utils/OrphanExpenses.kt` | 12 | `Core/Logic/Finance.swift` | scritto |
+| `data/utils/OsmUserAgent.kt` | 12 | `Core/Logic/ListingImport.swift (osmUserAgent, UA iOS)` | scritto |
+| `data/utils/PhotoEncoder.kt` | 73 | `Core/Logic/Photos.swift` | scritto (ImageIO; riceve Data, non Uri) |
+| `data/utils/PhotoLogic.kt` | 41 | `Core/Logic/Photos.swift` | scritto |
+| `data/utils/RecurringExpenses.kt` | 75 | `Core/Logic/Finance.swift` | scritto |
+| `data/utils/ServiceImport.kt` | 84 | `Core/Logic/ServiceImport.swift` | scritto |
+| 🧪 `data/invite/InviteLinkTest.kt` | 51 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/mrz/MrzParserTest.kt` | 112 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/utils/AirbnbListingScraperTest.kt` | 46 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/utils/BookingExcelParserTest.kt` | 221 | `SiciliaHostTests/BookingTests.swift, XlsReaderTests.swift` | scritto (xls con file sintetico + file reale opzionale) |
+| 🧪 `data/utils/BookingImportPlanTest.kt` | 54 | `SiciliaHostTests/BookingTests.swift` | scritto |
+| 🧪 `data/utils/BookingStatsTest.kt` | 141 | `SiciliaHostTests/BookingTests.swift, FinanceTests.swift` | scritto |
+| 🧪 `data/utils/DateRangeUtilsTest.kt` | 31 | `SiciliaHostTests/FinanceTests.swift` | scritto |
+| 🧪 `data/utils/FinanceStatsTest.kt` | 96 | `SiciliaHostTests/FinanceTests.swift` | scritto |
+| 🧪 `data/utils/FinancialCalculatorTest.kt` | 94 | `SiciliaHostTests/FinanceTests.swift` | scritto |
+| 🧪 `data/utils/GeoMathTest.kt` | 154 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/utils/NominatimClientTest.kt` | 74 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/utils/OrphanExpensesTest.kt` | 28 | `SiciliaHostTests/FinanceTests.swift` | scritto |
+| 🧪 `data/utils/OsmUserAgentTest.kt` | 34 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/utils/PhotoLogicTest.kt` | 58 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| 🧪 `data/utils/RecurringExpensesTest.kt` | 62 | `SiciliaHostTests/FinanceTests.swift` | scritto |
+| 🧪 `data/utils/ServiceImportTest.kt` | 95 | `SiciliaHostTests/LogicTests.swift` | scritto |
 
 ## F3 — Accesso, shell, stile e navigazione
 
@@ -268,8 +268,8 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `services/LocalNotifier.kt` | 45 |  | — |
 | `services/MyFirebaseMessagingService.kt` | 38 |  | — |
 | `sync/BookingExcelReminderWorker.kt` | 49 |  | — |
-| `sync/ICalSyncWorker.kt` | 251 |  | — |
-| 🧪 `sync/ICalSyncWorkerTest.kt` | 171 |  | — |
+| `sync/ICalSyncWorker.kt` | 251 | `Core/Logic/ICalSync.swift (parte pura: parseEvents, buildSyncPlan, safeErrorReason)` | parziale→F10 (download, scrittura, pianificazione) |
+| 🧪 `sync/ICalSyncWorkerTest.kt` | 171 | `SiciliaHostTests/LogicTests.swift` | scritto |
 
 ## Risorse e manifest
 
