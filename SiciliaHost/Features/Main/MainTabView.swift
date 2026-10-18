@@ -1,18 +1,33 @@
 import SwiftUI
 
+/// Schermata principale: sezioni sfogliabili con un gesto (come il pager dell'Android) sotto una barra di vetro
+/// flottante. Le sezioni di primo livello non hanno intestazione, solo contenuto.
 struct MainTabView: View {
     let scope: AccessScope?
     let onSignOut: () -> Void
+    @State private var selected: MainTab = .home
 
     var body: some View {
-        TabView {
-            ForEach(MainTabs.visible(for: scope)) { tab in
-                NavigationStack {
-                    content(for: tab)
-                        .navigationTitle(tab.rawValue)
+        let tabs = MainTabs.visible(for: scope)
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selected) {
+                ForEach(tabs) { tab in
+                    NavigationStack {
+                        content(for: tab)
+                            .toolbar(.hidden, for: .navigationBar)
+                            // La barra flottante non deve coprire la fine delle liste.
+                            .safeAreaPadding(.bottom, Dimens.bottomBarInset)
+                    }
+                    .tag(tab)
                 }
-                .tabItem { Label(tab.rawValue, systemImage: tab.systemImage) }
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+
+            SiciliaNavBar(tabs: tabs, selected: $selected)
+                .padding(.bottom, 8)
+        }
+        .onChange(of: tabs) { _, newTabs in
+            if !newTabs.contains(selected) { selected = .home }
         }
     }
 
@@ -34,10 +49,20 @@ struct PlaceholderView: View {
     let androidSource: String
 
     var body: some View {
-        ContentUnavailableView(
-            "\(feature): da portare",
-            systemImage: "hammer",
-            description: Text("Sorgente Android: \(androidSource). Vedi docs/MAPPA_PORTING.md.")
-        )
+        VStack(spacing: 10) {
+            Image(systemName: "hammer")
+                .font(.system(size: 28))
+                .foregroundStyle(Theme.onSurfaceVariant)
+            SectionLabel(feature)
+            Text("Schermata da portare dall'app Android")
+                .appStyle(.bodyMedium)
+                .foregroundStyle(Theme.onSurface)
+            Text(androidSource)
+                .appStyle(.bodySmall)
+                .foregroundStyle(Theme.onSurfaceVariant)
+        }
+        .multilineTextAlignment(.center)
+        .padding(Dimens.screenPadding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

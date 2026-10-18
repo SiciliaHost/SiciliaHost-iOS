@@ -45,7 +45,8 @@ e correggere gli errori (vedi Prossimi passi).
 - **F1 (livello dati) e F2 (logica pura) scritte, MAI compilate.** Checklist funzioni in `docs/funzioni/F1.md` e `F2.md`.
   F2 comprende: finanze e statistiche, categorie di spesa, spese fisse, import Booking (CSV + lettore `.xls` OLE2/BIFF8 scritto a mano),
   piano di importazione, parte pura dell'iCal, geometria, Nominatim, annuncio Airbnb, import servizi, foto, MRZ, link d'invito.
-- Presenti dall'avvio: login email/password, gate + `TabView` con 5 schede (segnaposto tranne Home che elenca le case).
+- **F3 in corso — stile di marca scritto** (`docs/funzioni/F3.md`): palette identica all'Android (chiaro/scuro), tipografia compatta, sfondo ambiente, vetro, pulsanti, card,
+  barra di navigazione a pillola, login e icona/logo dell'app. Login email/password, gate + 5 sezioni (segnaposto tranne Home che elenca le case).
 - Da fare: F3–F11 (vedi piano). Nessuna schermata vera ancora.
 
 ## Prossimi passi (in ordine)
@@ -56,8 +57,7 @@ e correggere gli errori (vedi Prossimi passi).
    (da verificare al primo build: `xcodebuild` inoltra al test solo le variabili col prefisso `TEST_RUNNER_`; in alternativa impostare
    `BOOKING_XLS_FIXTURE` nell'ambiente dello scheme, Test → Arguments. Senza, il test fa `XCTSkip` e sembra passato: controllare che non sia "skipped".
    Il file contiene dati personali di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
-1. **F3 — Accesso, shell, stile, navigazione** (46 file: login Apple/Google, MainScreen, onboarding, intro, tour, termini host,
-   profilo, tema, layout adattivo). Prima scrivere `docs/funzioni/F3.md` rileggendo i 46 file Android.
+1. **Completare F3** (24 file ancora aperti): login Apple/Google, MainScreen completo, onboarding, intro, tour, termini host, profilo, navigazione, deep link inviti, FontScale. Elenco in `docs/funzioni/F3.md`.
 2. Poi F4 (Home), F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case/sito), F10 (sfondo), F11 (rilascio).
 
 ## Decisioni prese
@@ -107,6 +107,14 @@ e correggere gli errori (vedi Prossimi passi).
 - Rispondere a: Bundle ID definitivo; **iPad sì/no**; quale branch Android è la baseline; se le Cloud Functions usate sono deployate.
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — pubblicazione GitHub + stile di marca (F3, parte 1)
+- Repo privata creata: `github.com/SiciliaHost/SiciliaHost-iOS`. **Il push è stato RIFIUTATO**: il token di `gh` non ha lo scope `workflow` e la cronologia contiene
+  `.github/workflows/ios.yml`. Per sbloccare: l'utente esegue `! gh auth refresh -h github.com -s workflow` (apre il browser), poi `git push -u origin main`.
+- Cronologia riscritta prima del push per togliere dati reali di un ospite copiati dai test Android (sostituiti con dati inventati).
+- Stile: porting di `theme/*` e `ui/style/*` + barra di navigazione a pillola + login nello stile Android + icona e logo (vedi `docs/funzioni/F3.md`). I file `ui/adaptive/*` sono `n/a` (solo iPhone).
+- **Non verificato**: nulla compilato né visto a schermo. Rischi: API `symbolEffect`, `sensoryFeedback(condition:)`, `safeAreaPadding`, page-style `TabView` con `NavigationStack`, materiali sfocati
+  (`.ultraThinMaterial`) sopra lo sfondo ambiente; resa dei colori dinamici. Appena c'è la CI, guardare gli screenshot del simulatore.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — risposte dell'utente e CI
 - Registrate le risposte (sezione "Risposte dell'utente"); `project.yml` ora solo iPhone; scritta la bozza `.github/workflows/ios.yml` (macOS + xcodegen +

@@ -103,17 +103,17 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `MainActivity.kt` | 66 |  | — |
 | `Navigation.kt` | 195 |  | — |
 | `NavigationKeys.kt` | 20 |  | — |
-| `theme/Color.kt` | 69 |  | — |
-| `theme/Dimens.kt` | 31 |  | — |
-| `theme/Theme.kt` | 122 |  | — |
-| `theme/Type.kt` | 111 |  | — |
-| `ui/adaptive/FieldRow.kt` | 40 |  | — |
-| `ui/adaptive/FoldSplit.kt` | 125 |  | — |
-| `ui/adaptive/FoldSplitMath.kt` | 39 |  | — |
+| `theme/Color.kt` | 69 | `Theme/Palette.swift (Brand, Theme)` | scritto |
+| `theme/Dimens.kt` | 31 | `Theme/Palette.swift (Dimens)` | scritto |
+| `theme/Theme.kt` | 122 | `Theme/Palette.swift (Theme, Radius; chiaro/scuro)` | scritto |
+| `theme/Type.kt` | 111 | `Theme/Typography.swift` | scritto |
+| `ui/adaptive/FieldRow.kt` | 40 | `` | n/a — solo iPhone: niente layout a due colonne |
+| `ui/adaptive/FoldSplit.kt` | 125 | `` | n/a — solo iPhone: nessun layout per Fold/cerniera |
+| `ui/adaptive/FoldSplitMath.kt` | 39 | `` | n/a — solo iPhone: nessun layout per Fold/cerniera |
 | `ui/adaptive/FontScale.kt` | 18 |  | — |
-| `ui/adaptive/HingeAwareBounds.kt` | 38 |  | — |
-| `ui/adaptive/LayoutMode.kt` | 24 |  | — |
-| `ui/adaptive/ListDetailPane.kt` | 61 |  | — |
+| `ui/adaptive/HingeAwareBounds.kt` | 38 | `` | n/a — solo iPhone: nessuna cerniera; la fotocamera non ha posture |
+| `ui/adaptive/LayoutMode.kt` | 24 | `` | n/a — solo iPhone: un solo layout (compatto) |
+| `ui/adaptive/ListDetailPane.kt` | 61 | `` | n/a — solo iPhone: lista e dettaglio sono schermate impilate |
 | `ui/common/CompactTopBar.kt` | 74 |  | — |
 | `ui/intro/IntroLogic.kt` | 10 |  | — |
 | `ui/intro/IntroOverlay.kt` | 90 |  | — |
@@ -124,24 +124,24 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
 | `ui/main/LoadErrorScreen.kt` | 79 |  | — |
 | `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | parziale→F3 (manca onboarding vero) |
-| `ui/main/MainScreen.kt` | 419 |  | — |
+| `ui/main/MainScreen.kt` | 419 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | parziale→F3 (fatti pager e barra di vetro; mancano selettore casa e scorciatoie) |
 | `ui/main/MainScreenViewModel.kt` | 105 |  | — |
 | `ui/main/MainTabs.kt` | 26 | `Features/Main/MainTab.swift` | scritto+test |
 | `ui/main/OnboardingScreen.kt` | 212 |  | — |
 | `ui/profile/ProfileScreen.kt` | 138 |  | — |
-| `ui/style/AmbientBackground.kt` | 81 |  | — |
-| `ui/style/Buttons.kt` | 183 |  | — |
-| `ui/style/Glass.kt` | 109 |  | — |
-| `ui/style/Motion.kt` | 30 |  | — |
-| `ui/style/SelectField.kt` | 106 |  | — |
-| `ui/style/Surfaces.kt` | 147 |  | — |
+| `ui/style/AmbientBackground.kt` | 81 | `UI/Style/AmbientBackground.swift` | scritto |
+| `ui/style/Buttons.kt` | 183 | `UI/Style/Buttons.swift` | scritto |
+| `ui/style/Glass.kt` | 109 | `UI/Style/Glass.swift` | scritto |
+| `ui/style/Motion.kt` | 30 | `Theme/Motion.swift (reduce motion = Environment accessibilityReduceMotion)` | scritto |
+| `ui/style/SelectField.kt` | 106 | `UI/Style/Surfaces.swift (SelectField)` | scritto |
+| `ui/style/Surfaces.kt` | 147 | `UI/Style/Surfaces.swift (appCard, SectionLabel)` | scritto (i dialog sono gli alert/sheet di sistema) |
 | `ui/terms/HostTerms.kt` | 67 |  | — |
 | `ui/terms/HostTermsDialog.kt` | 72 |  | — |
 | `ui/tour/TourLogic.kt` | 52 |  | — |
 | `ui/tour/TourOverlay.kt` | 183 |  | — |
 | `ui/tour/TourState.kt` | 51 |  | — |
-| 🧪 `ui/adaptive/FoldSplitTest.kt` | 64 |  | — |
-| 🧪 `ui/adaptive/LayoutModeTest.kt` | 32 |  | — |
+| 🧪 `ui/adaptive/FoldSplitTest.kt` | 64 | `` | n/a — solo iPhone |
+| 🧪 `ui/adaptive/LayoutModeTest.kt` | 32 | `` | n/a — solo iPhone |
 | 🧪 `ui/intro/IntroLogicTest.kt` | 30 |  | — |
 | 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
 | 🧪 `ui/main/MainTabsTest.kt` | 80 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
