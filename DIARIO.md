@@ -42,7 +42,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 - Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario di **tutti** i 211 file Kotlin in `docs/INVENTARIO.md`
   (`python tools/gen_inventario.py --check`: righe ancora aperte 88 su 211).
-- **F1 (livello dati) e F2 (logica pura) scritte, MAI compilate.** Checklist funzioni in `docs/funzioni/F1.md` e `F2.md`.
+- **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18)** — prima si diceva "mai compilate". Checklist funzioni in `docs/funzioni/F1.md` e `F2.md`.
   F2 comprende: finanze e statistiche, categorie di spesa, spese fisse, import Booking (CSV + lettore `.xls` OLE2/BIFF8 scritto a mano),
   piano di importazione, parte pura dell'iCal, geometria, Nominatim, annuncio Airbnb, import servizi, foto, MRZ, link d'invito.
 - **F3 scritta** (`docs/funzioni/F3.md`; restano aperte solo 2 righe `parziale`, che finiscono in F9/F10): palette identica all'Android (chiaro/scuro), tipografia compatta, sfondo ambiente, vetro, pulsanti, card,
@@ -121,6 +121,7 @@ e correggere gli errori (vedi Prossimi passi).
 ## Registro (più recente in alto)
 
 ### 2026-10-18 — Claude Sonnet 5.5 — CI attivata e primi errori di compilazione
+- **RISULTATO (run 39130771414, 2026-10-18): il progetto COMPILA e i test passano — 156 test eseguiti, 0 falliti, 1 saltato** (il test sul file `.xls` reale, perché `BOOKING_XLS_FIXTURE` non c'è in CI). F1+F2+F3 sono quindi `compilato` + testate (logica); l'interfaccia non è ancora stata VISTA a schermo. Resta da fare: screenshot dal simulatore in CI per controllare lo stile.
 - Primo build in CI: XcodeGen e download dei pacchetti OK; primo errore reale del compilatore: `AuthService.deinit` toccava una proprietà isolata al main actor (corretto con `AuthListenerBox`). Si procede a cicli: push → `gh run watch` → `gh run view --log-failed` → correzioni.
 - L'utente ha concesso lo scope `workflow` a `gh`: la bozza `docs/ci/ios.yml` è stata copiata in `.github/workflows/ios.yml` (resta anche in `docs/ci/` come riferimento). Il push su `main` fa partire il primo build: leggerne il log (`gh run list`, `gh run view --log-failed`) e correggere gli errori di compilazione prima di scrivere altro codice.
 

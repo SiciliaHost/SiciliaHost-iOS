@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>246601493975-rvqjk8sbftn6s6f8sr901br1g0619p7b.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.246601493975-rvqjk8sbftn6s6f8sr901br1g0619p7b</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>246601493975-0t6vq46u54vm0jsa0o4gtam13594b7um.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAJvNkwsH_AvCC-nAI5N_BDm0jBkU0Bf_s</string>
+	<key>GCM_SENDER_ID</key>
+	<string>246601493975</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.siciliahost.manager</string>
+	<key>PROJECT_ID</key>
+	<string>siciliahostmanager</string>
+	<key>STORAGE_BUCKET</key>
+	<string>siciliahostmanager.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:246601493975:ios:caacdcd5857b61675b6f92</string>
+</dict>
+</plist>
