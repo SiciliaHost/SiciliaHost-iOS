@@ -91,7 +91,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **Baseline Android confermata**: `feat/fold-finanze-selezioni` (`379b5c5c`).
 - **Cloud Functions**: l'utente conferma che esistono (deploy non verificato da me; controllare con `firebase functions:list` al primo test reale).
 - **iPad: NO** → solo iPhone (`TARGETED_DEVICE_FAMILY: 1` in `project.yml`; nessun layout a due colonne/split da portare: gli ex layout "Fold/cerniera" di F3 sono `n/a`).
-- **L'utente non ha né Mac né iPhone.** Compilazione: CI macOS su GitHub Actions (`.github/workflows/ios.yml`, non provato, non ancora spinto).
+- **L'utente non ha né Mac né iPhone.** Compilazione: CI macOS su GitHub Actions (bozza in `docs/ci/ios.yml` da copiare in `.github/workflows/`, non provata).
   Provare l'app su un dispositivo vero richiede un iPhone (anche in prestito, via TestFlight) o un Mac in affitto con simulatore; senza, si verifica
   solo con i test e con screenshot dal simulatore in CI.
 - **Nome dell'app / Bundle ID**: in attesa di scelta (proposte nella chat del 2026-10-18).
@@ -109,8 +109,9 @@ e correggere gli errori (vedi Prossimi passi).
 ## Registro (più recente in alto)
 
 ### 2026-10-18 — Claude Sonnet 5.5 — pubblicazione GitHub + stile di marca (F3, parte 1)
-- Repo privata creata: `github.com/SiciliaHost/SiciliaHost-iOS`. **Il push è stato RIFIUTATO**: il token di `gh` non ha lo scope `workflow` e la cronologia contiene
-  `.github/workflows/ios.yml`. Per sbloccare: l'utente esegue `! gh auth refresh -h github.com -s workflow` (apre il browser), poi `git push -u origin main`.
+- Repo privata creata: `github.com/SiciliaHost/SiciliaHost-iOS`. Il push era rifiutato perché il token di `gh` non ha lo scope `workflow`: il file della CI è stato
+  spostato in `docs/ci/ios.yml` (anche nella cronologia) così il codice è su GitHub. **Per attivare la CI**: l'utente esegue `! gh auth refresh -h github.com -s workflow`,
+  poi si copia `docs/ci/ios.yml` in `.github/workflows/ios.yml` e si fa push.
 - Cronologia riscritta prima del push per togliere dati reali di un ospite copiati dai test Android (sostituiti con dati inventati).
 - Stile: porting di `theme/*` e `ui/style/*` + barra di navigazione a pillola + login nello stile Android + icona e logo (vedi `docs/funzioni/F3.md`). I file `ui/adaptive/*` sono `n/a` (solo iPhone).
 - **Non verificato**: nulla compilato né visto a schermo. Rischi: API `symbolEffect`, `sensoryFeedback(condition:)`, `safeAreaPadding`, page-style `TabView` con `NavigationStack`, materiali sfocati

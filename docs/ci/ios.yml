@@ -1,3 +1,4 @@
+# Da copiare in .github/workflows/ios.yml (serve il permesso `workflow` del token GitHub).
 # NON PROVATO: scritto da Windows, senza poterlo eseguire. Al primo giro su GitHub aspettarsi di dover correggere
 # qualcosa (versione di Xcode, nome del simulatore, errori di compilazione del codice Swift mai compilato).
 #
