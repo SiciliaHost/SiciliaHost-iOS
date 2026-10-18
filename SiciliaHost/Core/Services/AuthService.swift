@@ -1,3 +1,4 @@
+import AuthenticationServices
 import FirebaseAuth
 import FirebaseCore
 import Foundation
@@ -8,10 +9,11 @@ import UIKit
 /// Sessione di accesso. Firebase Auth salva la sessione nel Keychain: se c'è già un utente si entra direttamente
 /// nell'app (come fa l'Android all'avvio).
 ///
-/// **Solo Google.** Le firestore.rules, le storage.rules e le Cloud Functions ammettono come "host" solo chi ha
-/// effettuato l'accesso con Google (`sign_in_provider == 'google.com'`): un account email/password o Apple verrebbe
-/// rifiutato da tutto. Per questo qui non c'è l'accesso con email. Accedi con Apple è in attesa di una decisione:
-/// vedi DIARIO.md ("Accesso con Apple").
+/// **Google e Apple, niente email.** Le firestore.rules, le storage.rules e le Cloud Functions ammettono come "host" chi
+/// ha effettuato l'accesso con Google o con Apple (`sign_in_provider` = `google.com` / `apple.com`); un account
+/// email/password (quelli del sito) è escluso apposta. L'accesso con Apple è obbligatorio da App Store se si offre Google.
+/// **L'accesso con Apple funziona solo dopo il deploy delle regole e delle Functions che lo ammettono** (branch
+/// `feat/apple-signin-host` di Androidapp e del sito): vedi DIARIO.md.
 /// Tiene il riferimento all'ascoltatore di Firebase Auth e lo toglie quando `AuthService` sparisce (il `deinit` di una
 /// classe isolata al main actor non può toccare le sue proprietà isolate).
 private final class AuthListenerBox: @unchecked Sendable {
@@ -63,6 +65,26 @@ final class AuthService {
             return true
         } catch let error as NSError where error.domain == kGIDSignInErrorDomain && error.code == GIDSignInError.canceled.rawValue {
             return false
+        }
+    }
+
+    /// Completa "Accedi con Apple" con il risultato del pulsante di sistema. `rawNonce` è la stringa casuale il cui hash è
+    /// stato mandato ad Apple. Ritorna `false` se l'utente ha annullato.
+    @discardableResult
+    func signInWithApple(result: Result<ASAuthorization, Error>, rawNonce: String?) async throws -> Bool {
+        switch result {
+        case .failure(let error):
+            if (error as NSError).code == ASAuthorizationError.canceled.rawValue { return false }
+            throw error
+        case .success(let authorization):
+            guard let apple = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = apple.identityToken, let idToken = String(data: tokenData, encoding: .utf8),
+                  let rawNonce else {
+                throw SignInError(message: "Errore: token Apple non ricevuto")
+            }
+            let credential = OAuthProvider.appleCredential(withIDToken: idToken, rawNonce: rawNonce, fullName: apple.fullName)
+            try await Auth.auth().signIn(with: credential)
+            return true
         }
     }
 

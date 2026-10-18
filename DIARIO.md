@@ -58,7 +58,7 @@ e correggere gli errori (vedi Prossimi passi).
    `BOOKING_XLS_FIXTURE` nell'ambiente dello scheme, Test → Arguments. Senza, il test fa `XCTSkip` e sembra passato: controllare che non sia "skipped".
    Il file contiene dati personali di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
 1. **F4 — Home** (`ui/dashboard`: arrivi, da completare, check-in), poi F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case…). Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
-2. **Decisione aperta sull'accesso con Apple** (vedi sotto) prima di F11: senza, Apple potrebbe rifiutare l'app.
+2. **Deployare le regole/Functions con `apple.com`** (a cura dell'utente, vedi sopra) prima di provare l'accesso con Apple; poi F11 (eliminazione account, ecc.).
 
 ## Decisioni prese
 
@@ -84,7 +84,7 @@ e correggere gli errori (vedi Prossimi passi).
   scartata: elaborazione lato server (nuova Cloud Function nel repo del sito). Il CSV (stesse colonne) resta supportato.
   Limiti noti: primo foglio, niente formule, niente mini-stream (file < 4 KB), file reali > 4 KB validati solo in Python.
 - **User-Agent OSM per iOS**: `SiciliaHostManager/1.0 (iOS; +https://siciliahost.com; info@siciliahost.com)` (`osmUserAgent`).
-- **Accesso solo Google** (come l'Android): firestore.rules, storage.rules e `functions/src/auth/propertyAccess.ts` accettano come host solo `sign_in_provider == 'google.com'`; un account email/password o Apple verrebbe rifiutato da Firestore, Storage e Functions. Per questo l'iOS non ha il login con email.
+- **Accesso Google + Apple (niente email)**: firestore.rules, storage.rules e `functions/src/auth/propertyAccess.ts` accettano come host solo `sign_in_provider == 'google.com'`; un account email/password verrebbe rifiutato da Firestore, Storage e Functions (per questo l'iOS non ha il login con email); Apple è stato aggiunto sui branch `feat/apple-signin-host` (non deployati).
 - Navigazione: un solo `NavigationStack(path:)` con l'enum `Route` (`Features/Navigation/Router.swift`); la schermata principale è la radice, le altre si impilano; le sezioni sono un `TabView` in stile pagina con la barra di vetro sopra. Il tour usa le preferenze di layout (`.tourTarget`) per sapere dove sono gli elementi.
 - Bundle ID: `com.siciliahost.manager` (scelto dall'utente il 2026-10-18; nome app «SiciliaHost Manager»).
 
@@ -98,14 +98,15 @@ e correggere gli errori (vedi Prossimi passi).
   solo con i test e con screenshot dal simulatore in CI.
 - **Nome dell'app / Bundle ID**: in attesa di scelta (proposte nella chat del 2026-10-18).
 
-## Decisione aperta: accesso con Apple (blocca la pubblicazione, non lo sviluppo)
+## Accesso con Apple (deciso 2026-10-18: opzione A, backend pronto ma NON deployato)
 
-- **Il vincolo tecnico**: il backend condiviso con l'Android ammette solo l'accesso Google (vedi Decisioni). Apple, con la linea guida 4.8, chiede che un'app che offre un
-  accesso di terze parti (Google) offra anche un'alternativa equivalente "a tutela della privacy" (di norma Accedi con Apple).
-- **Opzioni**: (A) estendere le regole e le Functions per accettare anche `apple.com` come host: toccare `firestore.rules`, `storage.rules`, `rules-tests` (repo Androidapp) e
-  `functions/src/auth/propertyAccess.ts` (repo del sito), poi deploy in produzione: **cambia il backend condiviso con l'Android → serve il via esplicito dell'utente e l'ordine di rilascio del CLAUDE.md Android**;
-  (B) pubblicare solo con Google e giustificarlo in revisione (rischio di rifiuto); (C) un accesso con email/password proprio (stesso problema di backend di A).
-- **Raccomandazione**: A, con un account Apple che entra come host (stesse regole di Google). Un utente Apple con "nascondi la mia email" non avrebbe l'email del super-admin: va bene, il super-admin accede con Google.
+- Il backend condiviso ammetteva solo `google.com`. L'utente ha autorizzato la modifica delle regole: preparata su **branch `feat/apple-signin-host`** in `Androidapp` (commit `26195b2`: `firestore.rules`, `storage.rules`, `rules-tests`
+  con nuovi test, `CLAUDE.md`) e nel sito (commit `1acede3`: `functions/src/auth/propertyAccess.ts` + test). `isHost()` ora ammette `google.com` e `apple.com`; **il super-admin resta solo Google**; gli account `password` del sito restano esclusi
+  (NON è stata aggiunta l'email: riaprirebbe il buco chiuso con B1, perché ogni account del sito diventerebbe host). Test: 53 test delle regole passano in locale (emulatore), `propertyAccess.test.ts` 22 verdi.
+- **NON deployato né spinto.** Ordine di rilascio (CLAUDE.md Android): Functions (`firebase deploy --only functions --project siciliahostmanager` dal branch del sito che contiene tutto ciò che è già in produzione, poi `curl` su tutte le funzioni), poi
+  `firebase deploy --only firestore:rules,storage --project siciliahostmanager` dall'Androidapp. I due branch partono dai branch di lavoro attuali (Androidapp `feat/fold-finanze-selezioni`, sito `feat/condizioni-host`): portarli sul ramo da cui si fa il deploy.
+- iOS: `LoginView` ha "Accedi con Apple" (`SignInWithAppleButton` + nonce SHA-256, `AuthService.signInWithApple`) e l'entitlement `com.apple.developer.applesignin`. **Finché le regole non sono deployate, l'accesso con Apple funziona ma le richieste a Firestore vengono rifiutate.**
+- Da ricordare per F11: l'App Store (5.1.1(v)) chiede che un'app che permette di creare un account permetta anche di **eliminarlo** dall'app: da prevedere (Profilo → Elimina account, con Cloud Function che cancella i dati).
 
 ## Da fare dall'utente (solo lui può)
 
@@ -119,6 +120,10 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — accesso con Apple (regole, Functions, app)
+- Su richiesta esplicita dell'utente ("modifica tu le regole storage e firebase") preparate le modifiche: vedi la sezione "Accesso con Apple". Solo Google+Apple, NON email (motivo: B1). Nessun deploy, nessun push dei repo Androidapp/sito.
+- iOS: pulsante e flusso "Accedi con Apple" + test del nonce. CI di riferimento: run 39131106371 (156 test verdi) era prima di questa modifica.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — configurazione Firebase iOS
 - L'utente ha registrato l'app iOS in Firebase (`siciliahostmanager`, Bundle ID `com.siciliahost.manager`, app id `1:246601493975:ios:caacdcd5857b61675b6f92`) e messo `GoogleService-Info.plist` nella radice: spostato in `SiciliaHost/Resources/` (è tracciato in git come il `google-services.json` dell'Android: sono chiavi client, non segreti; privata la repo). `GOOGLE_REVERSED_CLIENT_ID` in `project.yml` impostato dal plist. Il frammento di codice che la console Firebase mostra (AppDelegate con `FirebaseApp.configure()`) NON serve: `SiciliaHostApp` configura Firebase da sé quando il plist c'è.

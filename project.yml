@@ -50,6 +50,7 @@ targets:
       path: Config/SiciliaHost.entitlements
       properties:
         com.apple.developer.associated-domains: ["applinks:siciliahost.com"]
+        com.apple.developer.applesignin: [Default]
     scheme:
       testTargets:
         - SiciliaHostTests

@@ -1,12 +1,16 @@
+import AuthenticationServices
 import SwiftUI
 
 /// Accesso (`LoginScreen.kt`). Il marchio è il pezzo forte: sta da solo su fondo verde, senza card intorno. Il fondo è il
 /// gradiente fisso del marchio, non una superficie del tema: resta lo stesso in chiaro e in scuro.
-/// Solo "Accedi con Google": è l'unico accesso che le regole del backend ammettono (vedi `AuthService`).
+/// "Accedi con Google" e "Accedi con Apple" (obbligatorio da App Store): sono gli unici accessi che le regole del backend
+/// ammettono (vedi `AuthService`); niente email e password.
 struct LoginView: View {
     let auth: AuthService
     @State private var isBusy = false
     @State private var errorMessage: String?
+    /// Stringa casuale il cui hash è stato mandato ad Apple nella richiesta in corso.
+    @State private var appleNonce: String?
 
     private let ink = Color(hex: Brand.ink)
     private let yellow = Color(hex: Brand.yellow)
@@ -44,6 +48,19 @@ struct LoginView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(AppPrimaryButtonStyle(container: .white, content: ink, cornerRadius: 10))
+
+                    SignInWithAppleButton(.signIn) { request in
+                        let nonce = AppleNonce.random()
+                        appleNonce = nonce
+                        request.requestedScopes = [.fullName, .email]
+                        request.nonce = AppleNonce.sha256(nonce)
+                    } onCompletion: { result in
+                        signInWithApple(result)
+                    }
+                    .signInWithAppleButtonStyle(.white)
+                    .frame(height: Dimens.controlHeight + 4)
+                    .clipShape(roundedShape(10))
+                    .padding(.top, 10)
                 }
             }
             .frame(maxWidth: 360)
@@ -58,6 +75,20 @@ struct LoginView: View {
         Task {
             do {
                 try await auth.signInWithGoogle() // annullato dall'utente: nessun messaggio
+            } catch {
+                errorMessage = "Errore: \(AuthService.describe(error))"
+            }
+            isBusy = false
+        }
+    }
+
+    private func signInWithApple(_ result: Result<ASAuthorization, Error>) {
+        isBusy = true
+        errorMessage = nil
+        let nonce = appleNonce
+        Task {
+            do {
+                try await auth.signInWithApple(result: result, rawNonce: nonce) // annullato dall'utente: nessun messaggio
             } catch {
                 errorMessage = "Errore: \(AuthService.describe(error))"
             }

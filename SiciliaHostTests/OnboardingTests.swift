@@ -107,4 +107,15 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(Brand.red, 0xB7332D)
         XCTAssertEqual(Brand.ink, 0x151515)
     }
+
+    // MARK: Accesso con Apple
+
+    func testAppleNonceIsRandomAndHashedAsSha256() {
+        let a = AppleNonce.random(), b = AppleNonce.random()
+        XCTAssertEqual(a.count, 32)
+        XCTAssertNotEqual(a, b)
+        XCTAssertEqual(AppleNonce.random(length: 10).count, 10)
+        // SHA-256 di "abc" (vettore di prova standard)
+        XCTAssertEqual(AppleNonce.sha256("abc"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+    }
 }
