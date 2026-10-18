@@ -111,7 +111,8 @@ e correggere gli errori (vedi Prossimi passi).
 ### 2026-10-18 — Claude Sonnet 5.5 — risposte dell'utente e CI
 - Registrate le risposte (sezione "Risposte dell'utente"); `project.yml` ora solo iPhone; scritta la bozza `.github/workflows/ios.yml` (macOS + xcodegen +
   `xcodebuild test` su simulatore, più un job Linux per gli script Python). **Non provata né spinta**: la repo non è su GitHub (corretto un `mkdir -p build` mancante nel passo di test).
-- Proposti nomi per l'app all'utente; in attesa della scelta prima di toccare `PRODUCT_BUNDLE_IDENTIFIER` e `CFBundleDisplayName`.
+- **Nome scelto dall'utente: «SiciliaHost Manager»**, Bundle ID `com.siciliahost.manager` (nome mostrato impostato in `project.yml`). L'utente ha autorizzato la pubblicazione su GitHub (repo privata).
+- Tolti dai test i dati reali di un ospite (nome, telefono, n. prenotazione) copiati dai test Android: sostituiti con dati inventati (Hans Muster, 5100000001, +491701234567) anche nella cronologia git, prima del push. **Non usare mai dati reali di ospiti in test, fixture o documenti.**
 
 ### 2026-10-18 — Claude Sonnet 5.5 — F2 (logica pura e utilità)
 - Riletti per intero i 37 file Android di F2 (21 sorgenti + 16 test) e la parte pura di `ICalSyncWorker`; checklist in `docs/funzioni/F2.md`.
