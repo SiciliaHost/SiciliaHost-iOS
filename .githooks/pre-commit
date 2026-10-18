@@ -1,0 +1,9 @@
+#!/bin/sh
+# Rifiuta i commit che non aggiornano DIARIO.md: il diario è la memoria condivisa tra gli agenti.
+# Scappatoia consapevole (commit davvero banali): SKIP_DIARIO=1 git commit ...
+[ -n "$SKIP_DIARIO" ] && exit 0
+if ! git diff --cached --name-only | grep -qx "DIARIO.md"; then
+  echo "ERRORE: DIARIO.md non è nel commit." >&2
+  echo "Aggiorna 'Stato attuale', 'Prossimi passi' e aggiungi una voce in cima al Registro, poi: git add DIARIO.md" >&2
+  exit 1
+fi

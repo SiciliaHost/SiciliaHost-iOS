@@ -1,0 +1,56 @@
+name: SiciliaHost
+options:
+  bundleIdPrefix: com.siciliahost
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: it
+  createIntermediateGroups: true
+
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 11.0.0
+
+targets:
+  SiciliaHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: SiciliaHost
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseFunctions
+      - package: Firebase
+        product: FirebaseStorage
+      - package: Firebase
+        product: FirebaseMessaging
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.siciliahost.manager # PROVVISORIO: vedi DIARIO.md
+        PRODUCT_NAME: SiciliaHost
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: SiciliaHost
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSCameraUsageDescription: La fotocamera serve a scansionare documenti e codici a barre.
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.business
+
+  SiciliaHostTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: SiciliaHostTests
+    dependencies:
+      - target: SiciliaHost
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.9"

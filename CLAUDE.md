@@ -1,0 +1,15 @@
+# CLAUDE.md
+
+App iOS nativa (SwiftUI) di SiciliaHost: riscrittura dell'app Android in `../Androidapp`.
+
+## OBBLIGATORIO a ogni sessione
+1. **Leggi `DIARIO.md` per primo**: stato, prossimi passi, decisioni, cosa non è verificato.
+2. **Aggiorna `DIARIO.md` prima di finire e prima di ogni commit** (Stato attuale, Prossimi passi, nuova voce in cima al Registro). L'hook `.githooks/pre-commit` rifiuta i commit senza diario. Dopo un `git clone` nuovo: `git config core.hooksPath .githooks`.
+3. Dì sempre onestamente cosa hai compilato/provato e cosa no. Da Windows non esiste Swift: il codice scritto lì è non compilato finché un Mac non lo costruisce.
+
+## Regole di progetto
+- Rispondi all'utente in italiano; interfaccia dell'app in italiano.
+- Backend = stesso Firebase `siciliahostmanager` dell'Android. Il contratto dati è in `../Androidapp/CLAUDE.md` ("Who owns what"): non cambiare nomi/forma dei campi, scrivi `properties` solo con merge e solo i campi dell'app.
+- Mappa di cosa è già portato e dove sta l'equivalente Android: `docs/MAPPA_PORTING.md` (tienila aggiornata).
+- Architettura: `docs/ARCHITETTURA.md`. Setup Mac: `docs/SETUP_MAC.md`.
+- Non avviare emulatori/dispositivi né fare deploy senza richiesta esplicita. Non fare push/pubblicare senza che l'utente lo chieda.

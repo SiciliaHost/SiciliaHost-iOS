@@ -1,0 +1,1 @@
+Metti qui GoogleService-Info.plist (vedi docs/SETUP_MAC.md).

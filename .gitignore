@@ -1,0 +1,15 @@
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+build/
+.build/
+.swiftpm/
+.DS_Store
+*.ipa
+*.dSYM.zip
+Pods/
+# Chiavi e segreti: mai in repo
+*.p8
+*.p12
+*.mobileprovision
