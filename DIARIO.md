@@ -86,9 +86,19 @@ e correggere gli errori (vedi Prossimi passi).
 - **User-Agent OSM per iOS**: `SiciliaHostManager/1.0 (iOS; +https://siciliahost.com; info@siciliahost.com)` (`osmUserAgent`).
 - Bundle ID **provvisorio**: `com.siciliahost.manager` (vedi "Da fare dall'utente").
 
+## Risposte dell'utente (2026-10-18)
+
+- **Baseline Android confermata**: `feat/fold-finanze-selezioni` (`379b5c5c`).
+- **Cloud Functions**: l'utente conferma che esistono (deploy non verificato da me; controllare con `firebase functions:list` al primo test reale).
+- **iPad: NO** → solo iPhone (`TARGETED_DEVICE_FAMILY: 1` in `project.yml`; nessun layout a due colonne/split da portare: gli ex layout "Fold/cerniera" di F3 sono `n/a`).
+- **L'utente non ha né Mac né iPhone.** Compilazione: CI macOS su GitHub Actions (`.github/workflows/ios.yml`, non provato, non ancora spinto).
+  Provare l'app su un dispositivo vero richiede un iPhone (anche in prestito, via TestFlight) o un Mac in affitto con simulatore; senza, si verifica
+  solo con i test e con screenshot dal simulatore in CI.
+- **Nome dell'app / Bundle ID**: in attesa di scelta (proposte nella chat del 2026-10-18).
+
 ## Da fare dall'utente (solo lui può)
 
-- Fornire/usare un **Mac con Xcode 16+** (o un servizio di build in cloud: Xcode Cloud, Codemagic, GitHub Actions macOS).
+- Una via per compilare: l'utente non ha un Mac → servizio in cloud (GitHub Actions macOS, Codemagic, Xcode Cloud). Serve creare la repo su GitHub (ok esplicito).
 - Iscrizione all'**Apple Developer Program** (99 $/anno), necessaria per dispositivo reale, TestFlight e App Store.
 - **Confermare il Bundle ID** (permanente una volta pubblicata l'app) e registrare l'app iOS nel progetto
   Firebase `siciliahostmanager`; scaricare `GoogleService-Info.plist`.
@@ -97,6 +107,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Rispondere a: Bundle ID definitivo; **iPad sì/no**; quale branch Android è la baseline; se le Cloud Functions usate sono deployate.
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — risposte dell'utente e CI
+- Registrate le risposte (sezione "Risposte dell'utente"); `project.yml` ora solo iPhone; scritta la bozza `.github/workflows/ios.yml` (macOS + xcodegen +
+  `xcodebuild test` su simulatore, più un job Linux per gli script Python). **Non provata né spinta**: la repo non è su GitHub.
+- Proposti nomi per l'app all'utente; in attesa della scelta prima di toccare `PRODUCT_BUNDLE_IDENTIFIER` e `CFBundleDisplayName`.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — F2 (logica pura e utilità)
 - Riletti per intero i 37 file Android di F2 (21 sorgenti + 16 test) e la parte pura di `ICalSyncWorker`; checklist in `docs/funzioni/F2.md`.
