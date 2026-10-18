@@ -4,14 +4,25 @@ import SwiftUI
 /// TODO F4: porting di `ui/dashboard` (prenotazioni di oggi, da completare, check-in).
 struct HomeView: View {
     let scope: AccessScope?
-    let onSignOut: () -> Void
+    let onProfile: () -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Dimens.sectionSpacing) {
-                BrandLogo(height: 72)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, Dimens.sectionSpacing)
+                ZStack {
+                    BrandLogo(height: 72)
+                    HStack {
+                        Spacer()
+                        Button(action: onProfile) {
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: 26))
+                        }
+                        .buttonStyle(.appIcon)
+                        .tourTarget(.profile)
+                        .accessibilityLabel("Profilo")
+                    }
+                }
+                .padding(.top, Dimens.itemSpacing)
 
                 VStack(alignment: .leading, spacing: Dimens.itemSpacing) {
                     SectionLabel(scope?.profileLabel ?? "")
@@ -34,10 +45,6 @@ struct HomeView: View {
                         .appCard()
                     }
                 }
-
-                Button("Esci", action: onSignOut)
-                    .buttonStyle(.appOutlined)
-                    .frame(maxWidth: .infinity)
             }
             .padding(Dimens.screenPadding)
         }

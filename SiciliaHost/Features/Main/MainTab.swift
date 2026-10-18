@@ -31,4 +31,9 @@ enum MainTabs {
         if scope.canSeeManagementTabs { tabs.append(.case_) }
         return tabs
     }
+
+    /// L'editor dei prezzi compare in Agenda se almeno una casa con prezzi accessibili ha l'annuncio approvato.
+    static func canEditPrices(_ scope: AccessScope?, approvedIds: Set<String>) -> Bool {
+        scope?.priceProperties.contains { approvedIds.contains($0.id) } == true
+    }
 }

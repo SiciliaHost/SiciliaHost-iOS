@@ -41,12 +41,12 @@ e correggere gli errori (vedi Prossimi passi).
 ## Stato attuale
 
 - Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario di **tutti** i 211 file Kotlin in `docs/INVENTARIO.md`
-  (`python tools/gen_inventario.py --check`: righe ancora aperte 131 su 211).
+  (`python tools/gen_inventario.py --check`: righe ancora aperte 88 su 211).
 - **F1 (livello dati) e F2 (logica pura) scritte, MAI compilate.** Checklist funzioni in `docs/funzioni/F1.md` e `F2.md`.
   F2 comprende: finanze e statistiche, categorie di spesa, spese fisse, import Booking (CSV + lettore `.xls` OLE2/BIFF8 scritto a mano),
   piano di importazione, parte pura dell'iCal, geometria, Nominatim, annuncio Airbnb, import servizi, foto, MRZ, link d'invito.
-- **F3 in corso — stile di marca scritto** (`docs/funzioni/F3.md`): palette identica all'Android (chiaro/scuro), tipografia compatta, sfondo ambiente, vetro, pulsanti, card,
-  barra di navigazione a pillola, login e icona/logo dell'app. Login email/password, gate + 5 sezioni (segnaposto tranne Home che elenca le case).
+- **F3 scritta** (`docs/funzioni/F3.md`; restano aperte solo 2 righe `parziale`, che finiscono in F9/F10): palette identica all'Android (chiaro/scuro), tipografia compatta, sfondo ambiente, vetro, pulsanti, card,
+  barra di navigazione a pillola, icona/logo, **login Google**, gate di accesso, onboarding, presentazione a 6 pagine, tour guidato, profilo, condizioni host, stack di navigazione con tutte le destinazioni (segnaposto per quelle di F8/F9), link d'invito. Le 5 sezioni sono segnaposto tranne Home (elenca le case + pulsante profilo).
 - Da fare: F3–F11 (vedi piano). Nessuna schermata vera ancora.
 
 ## Prossimi passi (in ordine)
@@ -57,8 +57,8 @@ e correggere gli errori (vedi Prossimi passi).
    (da verificare al primo build: `xcodebuild` inoltra al test solo le variabili col prefisso `TEST_RUNNER_`; in alternativa impostare
    `BOOKING_XLS_FIXTURE` nell'ambiente dello scheme, Test → Arguments. Senza, il test fa `XCTSkip` e sembra passato: controllare che non sia "skipped".
    Il file contiene dati personali di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
-1. **Completare F3** (24 file ancora aperti): login Apple/Google, MainScreen completo, onboarding, intro, tour, termini host, profilo, navigazione, deep link inviti, FontScale. Elenco in `docs/funzioni/F3.md`.
-2. Poi F4 (Home), F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case/sito), F10 (sfondo), F11 (rilascio).
+1. **F4 — Home** (`ui/dashboard`: arrivi, da completare, check-in), poi F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case…). Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
+2. **Decisione aperta sull'accesso con Apple** (vedi sotto) prima di F11: senza, Apple potrebbe rifiutare l'app.
 
 ## Decisioni prese
 
@@ -84,7 +84,9 @@ e correggere gli errori (vedi Prossimi passi).
   scartata: elaborazione lato server (nuova Cloud Function nel repo del sito). Il CSV (stesse colonne) resta supportato.
   Limiti noti: primo foglio, niente formule, niente mini-stream (file < 4 KB), file reali > 4 KB validati solo in Python.
 - **User-Agent OSM per iOS**: `SiciliaHostManager/1.0 (iOS; +https://siciliahost.com; info@siciliahost.com)` (`osmUserAgent`).
-- Bundle ID **provvisorio**: `com.siciliahost.manager` (vedi "Da fare dall'utente").
+- **Accesso solo Google** (come l'Android): firestore.rules, storage.rules e `functions/src/auth/propertyAccess.ts` accettano come host solo `sign_in_provider == 'google.com'`; un account email/password o Apple verrebbe rifiutato da Firestore, Storage e Functions. Per questo l'iOS non ha il login con email.
+- Navigazione: un solo `NavigationStack(path:)` con l'enum `Route` (`Features/Navigation/Router.swift`); la schermata principale è la radice, le altre si impilano; le sezioni sono un `TabView` in stile pagina con la barra di vetro sopra. Il tour usa le preferenze di layout (`.tourTarget`) per sapere dove sono gli elementi.
+- Bundle ID: `com.siciliahost.manager` (scelto dall'utente il 2026-10-18; nome app «SiciliaHost Manager»).
 
 ## Risposte dell'utente (2026-10-18)
 
@@ -96,6 +98,15 @@ e correggere gli errori (vedi Prossimi passi).
   solo con i test e con screenshot dal simulatore in CI.
 - **Nome dell'app / Bundle ID**: in attesa di scelta (proposte nella chat del 2026-10-18).
 
+## Decisione aperta: accesso con Apple (blocca la pubblicazione, non lo sviluppo)
+
+- **Il vincolo tecnico**: il backend condiviso con l'Android ammette solo l'accesso Google (vedi Decisioni). Apple, con la linea guida 4.8, chiede che un'app che offre un
+  accesso di terze parti (Google) offra anche un'alternativa equivalente "a tutela della privacy" (di norma Accedi con Apple).
+- **Opzioni**: (A) estendere le regole e le Functions per accettare anche `apple.com` come host: toccare `firestore.rules`, `storage.rules`, `rules-tests` (repo Androidapp) e
+  `functions/src/auth/propertyAccess.ts` (repo del sito), poi deploy in produzione: **cambia il backend condiviso con l'Android → serve il via esplicito dell'utente e l'ordine di rilascio del CLAUDE.md Android**;
+  (B) pubblicare solo con Google e giustificarlo in revisione (rischio di rifiuto); (C) un accesso con email/password proprio (stesso problema di backend di A).
+- **Raccomandazione**: A, con un account Apple che entra come host (stesse regole di Google). Un utente Apple con "nascondi la mia email" non avrebbe l'email del super-admin: va bene, il super-admin accede con Google.
+
 ## Da fare dall'utente (solo lui può)
 
 - Una via per compilare: l'utente non ha un Mac → servizio in cloud (GitHub Actions macOS, Codemagic, Xcode Cloud). Serve creare la repo su GitHub (ok esplicito).
@@ -104,9 +115,21 @@ e correggere gli errori (vedi Prossimi passi).
   Firebase `siciliahostmanager`; scaricare `GoogleService-Info.plist`.
 - Creare la chiave **APNs** e caricarla in Firebase (per le notifiche) e abilitare Sign in with Apple.
 - Decidere se pubblicare la repo su GitHub (finora esiste solo in locale). Se sì, una CI macOS (`.github/workflows/ios.yml`, da scrivere e non provata) darebbe il primo build senza un Mac.
-- Rispondere a: Bundle ID definitivo; **iPad sì/no**; quale branch Android è la baseline; se le Cloud Functions usate sono deployate.
+- Per l'accesso Google su iOS: registrare l'app iOS nel progetto Firebase `siciliahostmanager` (Bundle ID `com.siciliahost.manager`), scaricare `GoogleService-Info.plist` e copiare `REVERSED_CLIENT_ID` in `GOOGLE_REVERSED_CLIENT_ID` di `project.yml` (schema URL del ritorno dal browser).
+- Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — F3 parte 2 (accesso, onboarding, navigazione, tour)
+- Riletti `MainScreen`, `Navigation`, intro, onboarding, profilo, termini, tour, `MainScreenViewModel`, `LoginViewModel`, `MainActivity`.
+- Scritti: login Google (`AuthService.signInWithGoogle`, uscita dall'account Google), `RootView` con presentazione sopra a tutto e `onOpenURL` (ritorno Google + link d'invito → `PendingInvite`),
+  `MainViewModel` completo (trasferimenti in sospeso con timeout di 5 s, ricarica dopo invito), `OnboardingView`, `ProfileView`, `HostTerms` + foglio di accettazione, `IntroScreen/IntroOverlay`
+  (6 pagine, parallax con `scrollTransition`), `TourOverlay` (velo con buco, alone che pulsa, fumetto di vetro; posizioni via preferenze di layout), `Router` (`Route`, `AppRouter`, segnaposto),
+  `CompactTopBar`, limite del Dynamic Type. `project.yml`: pacchetto GoogleSignIn, schemi URL, entitlement dei link universali.
+- Test: `OnboardingTests` (presentazione, tour, `PendingInvite`, tipografia, colori di marca).
+- **Scoperto**: il backend ammette solo accessi Google → niente login email; Apple richiede una decisione (sezione sopra).
+- **Non verificato**: nulla compilato. Rischi: `scrollPosition(id:)` + `scrollTransition`, `anchorPreference`/`overlayPreferenceValue` attraverso un `TabView` in stile pagina, `info:`/`entitlements:` di XcodeGen con
+  `GENERATE_INFOPLIST_FILE`, Canvas con riempimento pari-dispari, `sensoryFeedback(condition:)`. `GoogleService-Info.plist` e `REVERSED_CLIENT_ID` mancano: l'accesso Google non funzionerà finché non ci sono.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — pubblicazione GitHub + stile di marca (F3, parte 1)
 - Repo privata creata: `github.com/SiciliaHost/SiciliaHost-iOS`. Il push era rifiutato perché il token di `gh` non ha lo scope `workflow`: il file della CI è stato

@@ -13,6 +13,7 @@ open SiciliaHost.xcodeproj
 1. **Firebase**: nella console del progetto `siciliahostmanager` aggiungi un'app iOS con il Bundle ID di
    `project.yml` (provvisorio `com.siciliahost.manager`: confermarlo prima di pubblicare), scarica
    `GoogleService-Info.plist` e mettilo in `SiciliaHost/Resources/`. Poi rilancia `xcodegen generate`.
+1b. **Accesso Google**: apri `GoogleService-Info.plist`, copia il valore `REVERSED_CLIENT_ID` in `GOOGLE_REVERSED_CLIENT_ID` (`project.yml`, impostazioni del target) e rilancia `xcodegen generate`.
 2. Imposta il Team di firma in Xcode (Signing & Capabilities).
 3. Compila (⌘B) e correggi gli errori: **il codice iniziale è stato scritto senza compilatore**. Annota nel DIARIO cosa hai corretto.
 4. Test: ⌘U (`SiciliaHostTests`) oppure

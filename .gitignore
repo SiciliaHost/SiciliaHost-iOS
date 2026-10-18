@@ -13,3 +13,7 @@ Pods/
 *.p8
 *.p12
 *.mobileprovision
+
+# Generati da XcodeGen (project.yml)
+Config/Info.plist
+Config/SiciliaHost.entitlements

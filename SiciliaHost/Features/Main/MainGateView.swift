@@ -1,10 +1,13 @@
 import FirebaseAuth
 import SwiftUI
 
-/// Ingresso dopo il login: caricamento, errore, "crea la tua prima casa" o l'app (porting di `MainGate.kt`).
+/// Ingresso dopo il login: caricamento, errore, "crea la tua prima casa" o l'app (porting di `MainGate.kt` e della
+/// navigazione di `Navigation.kt`). Finché l'utente non ha almeno una casa nessuna sezione viene composta, quindi nessuna
+/// schermata interroga Firestore.
 struct MainGateView: View {
     let onSignOut: () -> Void
     @State private var model: MainViewModel
+    @State private var router = AppRouter()
 
     init(user: User, onSignOut: @escaping () -> Void) {
         self.onSignOut = onSignOut
@@ -17,23 +20,76 @@ struct MainGateView: View {
             case .loading:
                 ProgressView().tint(Theme.primary)
             case .ready:
-                MainTabView(scope: model.scope, onSignOut: onSignOut)
+                NavigationStack(path: $router.path) {
+                    MainTabView(scope: model.scope, router: router, onSignOut: onSignOut)
+                        .toolbar(.hidden, for: .navigationBar)
+                        .navigationDestination(for: Route.self) { destination(for: $0) }
+                }
             case .noHouses:
-                // TODO: onboarding (creazione guidata della prima casa / codice invito), vedi OnboardingScreen.kt.
-                StateMessage(
-                    systemImage: "building.2", title: "Nessuna casa",
-                    message: "Crea la tua prima casa o usa un codice di invito."
-                ) {
-                    Button("Esci", action: onSignOut).buttonStyle(.appOutlined)
+                NavigationStack(path: $router.path) {
+                    OnboardingView(
+                        isBusy: model.isBusy, error: model.actionError,
+                        onCreateHouse: { router.push(.newCaseWizard(propertyId: nil, level: .app)) },
+                        onInviteCode: { PendingInvite.shared.set($0) },
+                        onDismissError: model.clearActionError,
+                        onLogout: onSignOut
+                    )
+                    .toolbar(.hidden, for: .navigationBar)
+                    .navigationDestination(for: Route.self) { destination(for: $0) }
                 }
             case .failed:
-                StateMessage(systemImage: "wifi.exclamationmark", title: "Impossibile caricare i dati", message: nil) {
+                StateMessage(
+                    systemImage: "lock.fill", title: "Caricamento non riuscito",
+                    message: "Non riesco a caricare le tue case. Controlla la connessione e riprova."
+                ) {
                     Button("Riprova") { Task { await model.load() } }.buttonStyle(.appPrimary)
-                    Button("Esci", action: onSignOut).buttonStyle(.appText(color: Theme.error))
+                    Button("Esci", action: onSignOut).buttonStyle(.appOutlined)
                 }
             }
         }
         .task { await model.load() }
+        // Tornando dalla creazione guidata la prima casa esiste già: si ricarica per lasciare l'onboarding.
+        .onChange(of: router.path) { old, new in
+            if model.access == .noHouses && new.count < old.count { Task { await model.load() } }
+        }
+        // Invito accettato: le case cambiano, si ricaricano senza riavviare l'app.
+        .onChange(of: PendingInvite.shared.accepted) { _, _ in Task { await model.reloadAfterInvite() } }
+    }
+
+    @ViewBuilder
+    private func destination(for route: Route) -> some View {
+        switch route {
+        case .profile:
+            ProfileView(
+                roleLabel: model.scope?.profileLabel ?? "",
+                showMembers: model.scope?.owned.isEmpty == false,
+                onBack: router.pop,
+                onMembers: { router.push(.members) },
+                onReplayTour: {
+                    OnboardingController.shared.tourForced = true
+                    OnboardingController.shared.tourRequested = true
+                    router.popToRoot()
+                },
+                onLogout: onSignOut
+            )
+        case .members:
+            PendingScreen(title: "Membri e inviti", androidSource: "ui/members, ui/invite", onBack: router.pop)
+        case .checkin:
+            PendingScreen(title: "Check-in", androidSource: "ui/checkin", onBack: router.pop)
+        case .mrzScan:
+            PendingScreen(title: "Scansione documento", androidSource: "ui/checkin (MrzScannerScreen)", onBack: router.pop)
+        case .guestForm:
+            PendingScreen(title: "Ospite", androidSource: "ui/checkin (GuestFormScreen)", onBack: router.pop)
+        case .checkinSend:
+            PendingScreen(title: "Invio ad Alloggiati Web", androidSource: "ui/checkin (CheckinSendScreen)", onBack: router.pop)
+        case .editReservation:
+            PendingScreen(title: "Prenotazione", androidSource: "ui/reservation", onBack: router.pop)
+        case .newCaseWizard:
+            PendingScreen(title: "Nuova casa", androidSource: "ui/wizard", onBack: {
+                router.pop()
+                // Prima casa fatta: parte il tour (solo se l'account non l'ha già visto). Qui si chiude senza completare.
+            })
+        }
     }
 }
 
@@ -46,15 +102,15 @@ struct StateMessage<Actions: View>: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: systemImage).font(.system(size: 30)).foregroundStyle(Theme.onSurfaceVariant)
+            Image(systemName: systemImage).font(.system(size: 30)).foregroundStyle(Theme.secondary)
             SectionLabel(title)
             if let message {
-                Text(message).appStyle(.bodyMedium).foregroundStyle(Theme.onSurface).multilineTextAlignment(.center)
+                Text(message).appStyle(.bodyMedium).foregroundStyle(Theme.onSurfaceVariant).multilineTextAlignment(.center)
             }
             VStack(spacing: 6, content: actions)
                 .padding(.top, 6)
         }
         .padding(Dimens.screenPadding * 2)
-        .frame(maxWidth: 360)
+        .frame(maxWidth: 400)
     }
 }

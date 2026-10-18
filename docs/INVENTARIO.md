@@ -35,7 +35,7 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `data/model/SeasonalRateEntry.kt` | 12 | `Core/Models/SimpleModels.swift` | scritto |
 | `data/model/ServiceCatalog.kt` | 121 | `Core/Models/ServiceCatalog.swift` | scritto |
 | `data/model/User.kt` | 10 | `Core/Models/OtherModels.swift` | scritto |
-| `data/repository/AuthRepository.kt` | 52 | `Core/Services/AuthService.swift` | parziale→F3 (email/registrazione/logout fatti; Google e Apple in F3) |
+| `data/repository/AuthRepository.kt` | 52 | `Core/Services/AuthService.swift` | scritto (Google + uscita dall'account Google; email/registrazione non servono) |
 | `data/repository/DatabaseRepository.kt` | 518 | `Core/Services/FirestoreService.swift` | scritto (completo) |
 | `data/repository/FanOut.kt` | 14 | `Core/Services/FanOut.swift` | scritto |
 | `data/repository/HostFunctionsRepository.kt` | 209 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift, CloudErrors.swift` | scritto |
@@ -100,9 +100,9 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `MainActivity.kt` | 66 |  | — |
-| `Navigation.kt` | 195 |  | — |
-| `NavigationKeys.kt` | 20 |  | — |
+| `MainActivity.kt` | 66 | `App/SiciliaHostApp.swift, App/RootView.swift` | parziale→F10 (link d'invito e login Google fatti; permesso notifiche push in F10) |
+| `Navigation.kt` | 195 | `Features/Navigation/Router.swift, Main/MainGateView.swift` | parziale→F9 (stack e destinazioni fatti; schermate di check-in/membri/wizard sono segnaposto) |
+| `NavigationKeys.kt` | 20 | `Features/Navigation/Router.swift (Route, WizardLevel)` | scritto |
 | `theme/Color.kt` | 69 | `Theme/Palette.swift (Brand, Theme)` | scritto |
 | `theme/Dimens.kt` | 31 | `Theme/Palette.swift (Dimens)` | scritto |
 | `theme/Theme.kt` | 122 | `Theme/Palette.swift (Theme, Radius; chiaro/scuro)` | scritto |
@@ -110,42 +110,42 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `ui/adaptive/FieldRow.kt` | 40 | `` | n/a — solo iPhone: niente layout a due colonne |
 | `ui/adaptive/FoldSplit.kt` | 125 | `` | n/a — solo iPhone: nessun layout per Fold/cerniera |
 | `ui/adaptive/FoldSplitMath.kt` | 39 | `` | n/a — solo iPhone: nessun layout per Fold/cerniera |
-| `ui/adaptive/FontScale.kt` | 18 |  | — |
+| `ui/adaptive/FontScale.kt` | 18 | `UI/Style/CompactTopBar.swift (cappedFontScale)` | scritto |
 | `ui/adaptive/HingeAwareBounds.kt` | 38 | `` | n/a — solo iPhone: nessuna cerniera; la fotocamera non ha posture |
 | `ui/adaptive/LayoutMode.kt` | 24 | `` | n/a — solo iPhone: un solo layout (compatto) |
 | `ui/adaptive/ListDetailPane.kt` | 61 | `` | n/a — solo iPhone: lista e dettaglio sono schermate impilate |
-| `ui/common/CompactTopBar.kt` | 74 |  | — |
-| `ui/intro/IntroLogic.kt` | 10 |  | — |
-| `ui/intro/IntroOverlay.kt` | 90 |  | — |
-| `ui/intro/IntroScreen.kt` | 252 |  | — |
-| `ui/intro/OnboardingController.kt` | 33 |  | — |
-| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | parziale→F3 (solo email; manca Google/Apple) |
-| `ui/login/LoginViewModel.kt` | 46 |  | — |
+| `ui/common/CompactTopBar.kt` | 74 | `UI/Style/CompactTopBar.swift` | scritto |
+| `ui/intro/IntroLogic.kt` | 10 | `Core/Logic/OnboardingLogic.swift` | scritto |
+| `ui/intro/IntroOverlay.kt` | 90 | `Features/Intro/IntroOverlay.swift` | scritto |
+| `ui/intro/IntroScreen.kt` | 252 | `Features/Intro/IntroScreen.swift` | scritto (senza lo spostamento del fondo con lo sfoglio) |
+| `ui/intro/OnboardingController.kt` | 33 | `Core/State/OnboardingState.swift` | scritto |
+| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | scritto (solo Google, come l'Android; vedi DIARIO: accesso con Apple) |
+| `ui/login/LoginViewModel.kt` | 46 | `Core/Services/AuthService.swift (signInWithGoogle)` | scritto |
 | `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
-| `ui/main/LoadErrorScreen.kt` | 79 |  | — |
-| `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | parziale→F3 (manca onboarding vero) |
-| `ui/main/MainScreen.kt` | 419 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | parziale→F3 (fatti pager e barra di vetro; mancano selettore casa e scorciatoie) |
-| `ui/main/MainScreenViewModel.kt` | 105 |  | — |
+| `ui/main/LoadErrorScreen.kt` | 79 | `Features/Main/MainGateView.swift` | scritto |
+| `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | scritto |
+| `ui/main/MainScreen.kt` | 419 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | scritto (pager, barra, profilo, tour); i contenuti delle sezioni sono F4–F9 |
+| `ui/main/MainScreenViewModel.kt` | 105 | `Features/Main/MainViewModel.swift` | scritto |
 | `ui/main/MainTabs.kt` | 26 | `Features/Main/MainTab.swift` | scritto+test |
-| `ui/main/OnboardingScreen.kt` | 212 |  | — |
-| `ui/profile/ProfileScreen.kt` | 138 |  | — |
+| `ui/main/OnboardingScreen.kt` | 212 | `Features/Main/OnboardingView.swift` | scritto |
+| `ui/profile/ProfileScreen.kt` | 138 | `Features/Profile/ProfileView.swift` | scritto (senza la riga diagnostica del Fold) |
 | `ui/style/AmbientBackground.kt` | 81 | `UI/Style/AmbientBackground.swift` | scritto |
 | `ui/style/Buttons.kt` | 183 | `UI/Style/Buttons.swift` | scritto |
 | `ui/style/Glass.kt` | 109 | `UI/Style/Glass.swift` | scritto |
 | `ui/style/Motion.kt` | 30 | `Theme/Motion.swift (reduce motion = Environment accessibilityReduceMotion)` | scritto |
 | `ui/style/SelectField.kt` | 106 | `UI/Style/Surfaces.swift (SelectField)` | scritto |
 | `ui/style/Surfaces.kt` | 147 | `UI/Style/Surfaces.swift (appCard, SectionLabel)` | scritto (i dialog sono gli alert/sheet di sistema) |
-| `ui/terms/HostTerms.kt` | 67 |  | — |
-| `ui/terms/HostTermsDialog.kt` | 72 |  | — |
-| `ui/tour/TourLogic.kt` | 52 |  | — |
-| `ui/tour/TourOverlay.kt` | 183 |  | — |
-| `ui/tour/TourState.kt` | 51 |  | — |
+| `ui/terms/HostTerms.kt` | 67 | `Features/Terms/HostTerms.swift` | scritto |
+| `ui/terms/HostTermsDialog.kt` | 72 | `Features/Terms/HostTerms.swift (HostTermsSheet)` | scritto |
+| `ui/tour/TourLogic.kt` | 52 | `Core/Logic/OnboardingLogic.swift` | scritto |
+| `ui/tour/TourOverlay.kt` | 183 | `Features/Tour/TourOverlay.swift` | scritto |
+| `ui/tour/TourState.kt` | 51 | `Core/State/OnboardingState.swift, Features/Tour/TourOverlay.swift (tourTarget)` | scritto |
 | 🧪 `ui/adaptive/FoldSplitTest.kt` | 64 | `` | n/a — solo iPhone |
 | 🧪 `ui/adaptive/LayoutModeTest.kt` | 32 | `` | n/a — solo iPhone |
-| 🧪 `ui/intro/IntroLogicTest.kt` | 30 |  | — |
+| 🧪 `ui/intro/IntroLogicTest.kt` | 30 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
 | 🧪 `ui/main/MainTabsTest.kt` | 80 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
-| 🧪 `ui/tour/TourLogicTest.kt` | 39 |  | — |
+| 🧪 `ui/tour/TourLogicTest.kt` | 39 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 
 ## F4 — Home
 
@@ -217,7 +217,7 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `ui/invite/InviteFormat.kt` | 13 |  | — |
 | `ui/invite/InviteScreen.kt` | 135 |  | — |
 | `ui/invite/InviteViewModel.kt` | 79 | `Core/Services/CloudFunctionsServices.swift (solo protocollo InviteAPI)` | parziale→F9 |
-| `ui/invite/PendingInvite.kt` | 33 |  | — |
+| `ui/invite/PendingInvite.kt` | 33 | `Core/State/OnboardingState.swift` | scritto |
 | `ui/members/InviteComposerDialog.kt` | 115 |  | — |
 | `ui/members/InviteForm.kt` | 64 |  | — |
 | `ui/members/MembersLogic.kt` | 38 |  | — |
@@ -249,7 +249,7 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | 🧪 `ui/cases/SiteTrackTest.kt` | 41 |  | — |
 | 🧪 `ui/invite/InviteFormatTest.kt` | 33 |  | — |
 | 🧪 `ui/invite/InviteViewModelTest.kt` | 134 |  | — |
-| 🧪 `ui/invite/PendingInviteTest.kt` | 24 |  | — |
+| 🧪 `ui/invite/PendingInviteTest.kt` | 24 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/members/InviteFormTest.kt` | 104 |  | — |
 | 🧪 `ui/members/MembersLogicTest.kt` | 71 |  | — |
 | 🧪 `ui/property/CredentialsLogicTest.kt` | 33 |  | — |
