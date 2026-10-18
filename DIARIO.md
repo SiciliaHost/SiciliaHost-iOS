@@ -115,10 +115,14 @@ e correggere gli errori (vedi Prossimi passi).
   Firebase `siciliahostmanager`; scaricare `GoogleService-Info.plist`.
 - Creare la chiave **APNs** e caricarla in Firebase (per le notifiche) e abilitare Sign in with Apple.
 - Decidere se pubblicare la repo su GitHub (finora esiste solo in locale). Se sì, una CI macOS (`.github/workflows/ios.yml`, da scrivere e non provata) darebbe il primo build senza un Mac.
-- Per l'accesso Google su iOS: registrare l'app iOS nel progetto Firebase `siciliahostmanager` (Bundle ID `com.siciliahost.manager`), scaricare `GoogleService-Info.plist` e copiare `REVERSED_CLIENT_ID` in `GOOGLE_REVERSED_CLIENT_ID` di `project.yml` (schema URL del ritorno dal browser).
+- ~~Registrare l'app iOS in Firebase e `GoogleService-Info.plist`~~ — FATTO (2026-10-18). Resta la chiave APNs per le notifiche (F10).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — configurazione Firebase iOS
+- L'utente ha registrato l'app iOS in Firebase (`siciliahostmanager`, Bundle ID `com.siciliahost.manager`, app id `1:246601493975:ios:caacdcd5857b61675b6f92`) e messo `GoogleService-Info.plist` nella radice: spostato in `SiciliaHost/Resources/` (è tracciato in git come il `google-services.json` dell'Android: sono chiavi client, non segreti; privata la repo). `GOOGLE_REVERSED_CLIENT_ID` in `project.yml` impostato dal plist. Il frammento di codice che la console Firebase mostra (AppDelegate con `FirebaseApp.configure()`) NON serve: `SiciliaHostApp` configura Firebase da sé quando il plist c'è.
+- Mancano ancora: abilitare il provider Google per l'app iOS (già attivo per il progetto), l'`apple-app-site-association` sul sito, la chiave APNs (notifiche, F10).
 
 ### 2026-10-18 — Claude Sonnet 5.5 — CI attivata e primi errori di compilazione
 - **RISULTATO (run 39130771414, 2026-10-18): il progetto COMPILA e i test passano — 156 test eseguiti, 0 falliti, 1 saltato** (il test sul file `.xls` reale, perché `BOOKING_XLS_FIXTURE` non c'è in CI). F1+F2+F3 sono quindi `compilato` + testate (logica); l'interfaccia non è ancora stata VISTA a schermo. Resta da fare: screenshot dal simulatore in CI per controllare lo stile.

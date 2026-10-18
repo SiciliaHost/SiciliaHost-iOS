@@ -60,7 +60,7 @@ targets:
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.9"
-        GOOGLE_REVERSED_CLIENT_ID: com.googleusercontent.apps.SOSTITUISCI-CON-REVERSED_CLIENT_ID
+        GOOGLE_REVERSED_CLIENT_ID: com.googleusercontent.apps.246601493975-rvqjk8sbftn6s6f8sr901br1g0619p7b # da GoogleService-Info.plist
         GENERATE_INFOPLIST_FILE: YES
         TARGETED_DEVICE_FAMILY: "1" # solo iPhone (iPad escluso per scelta)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
