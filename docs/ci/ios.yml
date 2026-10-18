@@ -49,6 +49,7 @@ jobs:
       - name: Compila e prova
         run: |
           set -o pipefail
+          mkdir -p build
           xcodebuild test \
             -project SiciliaHost.xcodeproj \
             -scheme SiciliaHost \

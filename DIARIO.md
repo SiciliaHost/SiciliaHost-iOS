@@ -110,7 +110,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 ### 2026-10-18 — Claude Sonnet 5.5 — risposte dell'utente e CI
 - Registrate le risposte (sezione "Risposte dell'utente"); `project.yml` ora solo iPhone; scritta la bozza `.github/workflows/ios.yml` (macOS + xcodegen +
-  `xcodebuild test` su simulatore, più un job Linux per gli script Python). **Non provata né spinta**: la repo non è su GitHub.
+  `xcodebuild test` su simulatore, più un job Linux per gli script Python). **Non provata né spinta**: la repo non è su GitHub (corretto un `mkdir -p build` mancante nel passo di test).
 - Proposti nomi per l'app all'utente; in attesa della scelta prima di toccare `PRODUCT_BUNDLE_IDENTIFIER` e `CFBundleDisplayName`.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — F2 (logica pura e utilità)
