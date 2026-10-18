@@ -32,8 +32,11 @@ final class AuthService {
         try await Auth.auth().createUser(withEmail: email, password: password)
     }
 
+    /// Esce e svuota la sessione di accesso condivisa (un altro account non deve ereditare le case del precedente).
+    /// TODO F3: uscire anche dall'account Google ricordato dal dispositivo, quando ci sarà il login Google.
     func signOut() throws {
         try Auth.auth().signOut()
+        Task { await AccessSession.shared.invalidate() }
     }
 
     /// Messaggio in italiano per gli errori di Firebase Auth più comuni.

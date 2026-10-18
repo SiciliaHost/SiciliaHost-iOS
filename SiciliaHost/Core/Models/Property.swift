@@ -65,7 +65,6 @@ struct Property: Identifiable, Codable, Equatable, Sendable {
     /// `alloggiatiConfigured` né credenziali. I campi nulli restano nella mappa (come `NSNull`):
     /// svuotare un campo nel form lo cancella.
     var appFields: [String: Any] {
-        func orNull(_ value: Any?) -> Any { value ?? NSNull() }
         return [
             "id": id,
             "name": name,

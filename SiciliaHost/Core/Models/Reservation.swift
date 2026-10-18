@@ -12,7 +12,9 @@ struct Reservation: Identifiable, Codable, Equatable, Sendable {
     var grossAmount: Double?
     var netAmountOwner: Double?
     var netAmountAdmin: Double?
-    var iCalUid: String?
+    /// Nel documento Firestore il campo si chiama `icalUid` (la mappatura di Firestore su Android abbassa le
+    /// maiuscole iniziali di `iCalUid`; il sito legge `icalUid`). NON rinominarlo in `iCalUid`.
+    var icalUid: String?
     var adults = 0
     var children = 0
     var needsReview = false
@@ -38,7 +40,7 @@ extension Reservation {
         grossAmount = c.optional(.grossAmount)
         netAmountOwner = c.optional(.netAmountOwner)
         netAmountAdmin = c.optional(.netAmountAdmin)
-        iCalUid = c.optional(.iCalUid)
+        icalUid = c.optional(.icalUid)
         adults = c.value(.adults, 0)
         children = c.value(.children, 0)
         needsReview = c.value(.needsReview, false)

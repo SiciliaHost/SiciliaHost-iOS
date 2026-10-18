@@ -10,6 +10,6 @@ App iOS nativa (SwiftUI) di SiciliaHost: riscrittura dell'app Android in `../And
 ## Regole di progetto
 - Rispondi all'utente in italiano; interfaccia dell'app in italiano.
 - Backend = stesso Firebase `siciliahostmanager` dell'Android. Il contratto dati è in `../Androidapp/CLAUDE.md` ("Who owns what"): non cambiare nomi/forma dei campi, scrivi `properties` solo con merge e solo i campi dell'app.
-- Mappa di cosa è già portato e dove sta l'equivalente Android: `docs/MAPPA_PORTING.md` (tienila aggiornata).
+- Piano a fasi: `docs/PIANO.md`. Stato di ogni file Android (211, nessuno escluso): `docs/INVENTARIO.md` — aggiornalo a ogni file portato (colonne iOS e Stato). Corrispondenza librerie: `docs/MAPPA_PORTING.md`.
 - Architettura: `docs/ARCHITETTURA.md`. Setup Mac: `docs/SETUP_MAC.md`.
 - Non avviare emulatori/dispositivi né fare deploy senza richiesta esplicita. Non fare push/pubblicare senza che l'utente lo chieda.

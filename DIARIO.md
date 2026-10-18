@@ -32,27 +32,21 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Stato attuale
 
-- Repo creata, scheletro SwiftUI scritto, **mai compilato** (nessun Mac/Xcode a disposizione).
-- Presenti: modelli Firestore (Property, Reservation, Expense, RecurringExpense, InventoryItem,
-  GuestRecord, Contact, User), `AccessScope` (porting 1:1 dei permessi), servizio Auth (email/password),
-  servizio Firestore (proprietà, prenotazioni, spese, scorte, ospiti), `MainGate` + `TabView` con le
-  5 schede come segnaposto, schermata di login, test unitari per permessi e schede visibili.
-- NON presenti: tutte le schermate vere, login Google/Apple, notifiche push, scanner MRZ/barcode,
-  mappe, import Excel Booking, sincronizzazione iCal, Cloud Functions client, tema/stile "vetro".
+- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario di **tutti** i 211 file Kotlin in `docs/INVENTARIO.md`.
+- **F1 (livello dati) scritta, MAI compilata**: tutti i modelli, `FirestoreService` completo, servizi callable
+  (host/inviti/membri/Alloggiati, annunci, prezzi, contenuti sito), Lookup Alloggiati, `AccessSession`, FanOut,
+  parser delle risposte e messaggi d'errore, con i test portati da Android. Resta fuori solo il login Google/Apple (F3).
+- Presenti dall'avvio: login email/password, gate + `TabView` con 5 schede (segnaposto tranne Home che elenca le case).
+- Da fare: F2–F11 (vedi piano). Nessuna schermata vera ancora.
 
 ## Prossimi passi (in ordine)
 
-1. **[Mac] Primo build**: `brew install xcodegen && xcodegen generate`, aprire `SiciliaHost.xcodeproj`,
-   mettere `GoogleService-Info.plist` in `SiciliaHost/Resources/`, compilare, correggere gli errori
-   di sintassi/API, far girare `SiciliaHostTests`. Annotare nel registro tutto ciò che si è dovuto correggere.
-2. Login: aggiungere **Accedi con Apple** (obbligatorio da App Store se c'è il login Google) e Google Sign-In.
-3. **Home** (prenotazioni di oggi / da completare / check-in) — sorgente: `Androidapp/.../ui/dashboard`.
-4. **Agenda/Calendario** + modifica prenotazione — `ui/calendar`, `ui/reservation`.
-5. **Scorte** (inventario + scanner codici a barre con VisionKit `DataScannerViewController`) — `ui/inventory`.
-6. **Finanze** — `ui/finance` (+ `data/utils/BookingStats`, `RecurringExpenses`).
-7. **Check-in Alloggiati** (scanner MRZ con Vision/AVFoundation, callable `submitAlloggiati`) — `ui/checkin`, `data/mrz`, `data/alloggiati`.
-8. **Case** (scheda casa, contenuti sito via callable `upsertProperty`, posizione/mappa MapKit, inviti, membri) — `ui/cases`, `ui/site`, `ui/members`, `ui/invite`.
-9. Notifiche push (APNs + FCM), sincronizzazione iCal, import Excel Booking, tema, icona, TestFlight.
+0. **[Mac, appena disponibile — binario G]** `brew install xcodegen && xcodegen generate`, `GoogleService-Info.plist` in
+   `SiciliaHost/Resources/`, compilare, correggere gli errori, far girare i test. Annotare nel registro cosa si è corretto.
+   Più si scrive senza compilare più errori si accumulano: farlo dopo F2 al più tardi.
+1. **F2 — Logica pura e utilità** (`data/utils`, `data/mrz`, `data/invite` + test omonimi). Vedi `docs/PIANO.md`.
+   Decisione da prendere lì: libreria per leggere gli Excel di Booking (xls/xlsx) o elaborazione lato server.
+2. F3 login Google/Apple + shell + stile, poi F4…F11 come da piano.
 
 ## Decisioni prese
 
@@ -65,6 +59,13 @@ e correggere gli errori (vedi Prossimi passi).
   `setData(..., merge: true)` e solo i campi dell'app (`Property.appFields`); i campi del sito solo via callable `upsertProperty`.
   Le date di `Reservation` sono epoch millisecondi (`Int64`), non `Timestamp`.
 - Super-admin = email verificata `aleloverde@gmail.com` (come in `firestore.rules`).
+- **Il campo Firestore delle prenotazioni si chiama `icalUid`** (non `iCalUid`): la mappatura di Firestore su
+  Android abbassa le maiuscole iniziali e il sito legge `icalUid`. In Swift la proprietà è `icalUid`. Controllare
+  casi simili (nomi con due maiuscole iniziali o prefisso `is`) prima di aggiungere campi: i booleani `isManagedOnCommission`
+  e `isDepleted` hanno il nome reale con `is`.
+- **Scritture esplicite con `NSNull`** (`Core/Models/FirestoreData.swift`): niente `Codable` per scrivere, perché omette i
+  `nil` e nei merge non cancellerebbe il campo (l'Android scrive null). Letture: `Codable` tollerante (`Decoding.swift`).
+- Il profilo utente si scrive con esattamente `id`, `email`, `fcmToken` (le regole accettano solo quelli).
 - Bundle ID **provvisorio**: `com.siciliahost.manager` (vedi "Da fare dall'utente").
 
 ## Da fare dall'utente (solo lui può)
@@ -77,6 +78,21 @@ e correggere gli errori (vedi Prossimi passi).
 - Decidere se pubblicare la repo su GitHub (finora esiste solo in locale).
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — piano completo + F1 (livello dati)
+- Creati `docs/PIANO.md` (11 fasi) e `docs/INVENTARIO.md` (211 file Kotlin = 154 sorgenti + 57 test, ciascuno con la sua
+  fase; lo script `tools/gen_inventario.py` fallisce se un file non ha fase e non sovrascrive l'inventario esistente).
+- Eseguita F1: riletti per intero i file Android del livello dati e portati: modelli (`SimpleModels`, `ListingStatus`,
+  `PropertySiteContent`, `ServiceCatalog` con le 62 chiavi), `FirestoreService` completo (tutta `DatabaseRepository`,
+  compresa la sincronizzazione iCal a lotti), servizi callable, `LookupService` (cache 30 giorni), `AccessSession`, `fanOut`,
+  parser + messaggi d'errore. Test portati: `CallableParsersTests`, `ModelsTests`.
+- Trovato e corretto un difetto del mio scheletro: il campo era `iCalUid`, ma su Firestore è `icalUid` (vedi Decisioni).
+- Pezzi di file di fasi successive già portati perché servivano ai modelli: `isOnSiteTrack`/`canEditCalendarPrices`/`approvedIds`
+  (da `SiteTrack.kt`), `HostRow` (da `CaseLogic.kt`), protocollo `InviteAPI` (da `InviteViewModel.kt`); l'inventario li marca "parziale".
+- **Non verificato**: nulla è compilato né eseguito (niente Swift su Windows). Punti a rischio al primo build: concorrenza
+  Swift (`Sendable` di `FirestoreService`/`fanOut`), API Firestore/Functions/Storage async (`putDataAsync`, `setData(_:merge:)`),
+  inferenza dei letterali nei test dei parser.
+- Fermo qui: prossima è F2.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — avvio del progetto
 - Analizzata l'app Android (154 file Kotlin, ~21.000 righe; 94 file di UI), letti modelli, `AccessScope`,

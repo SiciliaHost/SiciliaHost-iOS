@@ -1,0 +1,280 @@
+# Inventario Android → iOS (generato)
+
+Ogni file Kotlin dell'app Android (sorgenti e test) con la fase che lo porta. **Nessun file è fuori dal piano**: lo script di generazione fallisce se un file non ha fase. Aggiorna le colonne *iOS* e *Stato* man mano che porti; la fase F11 chiude solo se non resta nessuna riga con stato `—` (le uniche eccezioni ammesse sono `n/a` con motivo scritto qui).
+
+Stati: `—` da fare · `scritto` scritto ma mai compilato · `compilato` · `provato` (simulatore/dispositivo) · `n/a` non serve su iOS (motivo in nota).
+
+Totale: 211 file Kotlin (154 sorgenti, 57 test).
+
+## F1 — Livello dati completo
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `data/access/AccessScope.kt` | 86 | `Core/Access/AccessScope.swift` | scritto+test |
+| `data/access/AccessSession.kt` | 39 | `Core/Access/AccessSession.swift` | scritto |
+| `data/alloggiati/AlloggiatiModels.kt` | 15 | `Core/Models/SimpleModels.swift` | scritto |
+| `data/alloggiati/LookupRepository.kt` | 54 | `Core/Services/LookupService.swift` | scritto |
+| `data/model/AlloggiatiCredentials.kt` | 11 | `Core/Models/SimpleModels.swift` | scritto |
+| `data/model/Contact.kt` | 10 | `Core/Models/SimpleModels.swift` | scritto |
+| `data/model/Expense.kt` | 13 | `Core/Models/OtherModels.swift` | scritto |
+| `data/model/GuestRecord.kt` | 22 | `Core/Models/OtherModels.swift` | scritto |
+| `data/model/InventoryItem.kt` | 17 | `Core/Models/OtherModels.swift` | scritto |
+| `data/model/InviteGrant.kt` | 4 | `Core/Models/SimpleModels.swift` | scritto |
+| `data/model/ListingStatus.kt` | 20 | `Core/Models/ListingStatus.swift` | scritto |
+| `data/model/PromoEntry.kt` | 15 | `Core/Models/SimpleModels.swift` | scritto |
+| `data/model/Property.kt` | 76 | `Core/Models/Property.swift` | scritto |
+| `data/model/PropertyPermission.kt` | 15 | `Core/Models/Property.swift` | scritto |
+| `data/model/PropertyRole.kt` | 11 | `Core/Models/Property.swift` | scritto |
+| `data/model/PropertySiteContent.kt` | 118 | `Core/Models/PropertySiteContent.swift` | scritto |
+| `data/model/RecurringExpense.kt` | 16 | `Core/Models/OtherModels.swift` | scritto |
+| `data/model/Reservation.kt` | 23 | `Core/Models/Reservation.swift` | scritto |
+| `data/model/SeasonalRateEntry.kt` | 12 | `Core/Models/SimpleModels.swift` | scritto |
+| `data/model/ServiceCatalog.kt` | 121 | `Core/Models/ServiceCatalog.swift` | scritto |
+| `data/model/User.kt` | 10 | `Core/Models/OtherModels.swift` | scritto |
+| `data/repository/AuthRepository.kt` | 52 | `Core/Services/AuthService.swift` | parziale: email/registrazione/logout fatti; Google e Apple in F3 |
+| `data/repository/DatabaseRepository.kt` | 518 | `Core/Services/FirestoreService.swift` | scritto (completo) |
+| `data/repository/FanOut.kt` | 14 | `Core/Services/FanOut.swift` | scritto |
+| `data/repository/HostFunctionsRepository.kt` | 209 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift, CloudErrors.swift` | scritto |
+| `data/repository/ListingRepository.kt` | 63 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift` | scritto |
+| `data/repository/PriceRepository.kt` | 108 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift` | scritto |
+| `data/repository/SiteContentRepository.kt` | 64 | `Core/Services/SiteContentService.swift, CloudErrors.swift` | scritto |
+| 🧪 `data/access/AccessScopeListingTest.kt` | 50 | `SiciliaHostTests/ModelsTests.swift` | scritto |
+| 🧪 `data/access/AccessScopeTest.kt` | 146 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
+| 🧪 `data/access/SuperAdminTest.kt` | 17 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
+| 🧪 `data/model/ListingStatusTest.kt` | 20 | `SiciliaHostTests/ModelsTests.swift` | scritto |
+| 🧪 `data/model/PropertyTest.kt` | 67 | `SiciliaHostTests/ModelsTests.swift` | scritto |
+| 🧪 `data/model/ServiceCatalogTest.kt` | 49 | `SiciliaHostTests/ModelsTests.swift` | scritto |
+| 🧪 `data/repository/FanOutTest.kt` | 36 | `SiciliaHostTests/ModelsTests.swift` | scritto |
+| 🧪 `data/repository/HostFunctionsParsersTest.kt` | 223 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
+| 🧪 `data/repository/ListingRepositoryParseTest.kt` | 30 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
+| 🧪 `data/repository/ParseSeasonalRatesTest.kt` | 39 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
+| 🧪 `data/repository/PriceRepositoryParseTest.kt` | 31 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
+
+## F2 — Logica pura e utilità
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `data/invite/InviteLink.kt` | 29 |  | — |
+| `data/mrz/MrzData.kt` | 14 |  | — |
+| `data/mrz/MrzParser.kt` | 108 |  | — |
+| `data/utils/AirbnbListingScraper.kt` | 80 |  | — |
+| `data/utils/BookingExcelParser.kt` | 268 |  | — |
+| `data/utils/BookingImportPlan.kt` | 55 |  | — |
+| `data/utils/BookingStats.kt` | 195 |  | — |
+| `data/utils/DateRangeUtils.kt` | 6 |  | — |
+| `data/utils/ExpenseCategory.kt` | 46 |  | — |
+| `data/utils/FinanceInsights.kt` | 156 |  | — |
+| `data/utils/FinancePeriod.kt` | 37 |  | — |
+| `data/utils/FinanceStats.kt` | 132 |  | — |
+| `data/utils/FinancialCalculator.kt` | 39 |  | — |
+| `data/utils/GeoMath.kt` | 81 |  | — |
+| `data/utils/NominatimClient.kt` | 77 |  | — |
+| `data/utils/OrphanExpenses.kt` | 12 |  | — |
+| `data/utils/OsmUserAgent.kt` | 12 |  | — |
+| `data/utils/PhotoEncoder.kt` | 73 |  | — |
+| `data/utils/PhotoLogic.kt` | 41 |  | — |
+| `data/utils/RecurringExpenses.kt` | 75 |  | — |
+| `data/utils/ServiceImport.kt` | 84 |  | — |
+| 🧪 `data/invite/InviteLinkTest.kt` | 51 |  | — |
+| 🧪 `data/mrz/MrzParserTest.kt` | 112 |  | — |
+| 🧪 `data/utils/AirbnbListingScraperTest.kt` | 46 |  | — |
+| 🧪 `data/utils/BookingExcelParserTest.kt` | 221 |  | — |
+| 🧪 `data/utils/BookingImportPlanTest.kt` | 54 |  | — |
+| 🧪 `data/utils/BookingStatsTest.kt` | 141 |  | — |
+| 🧪 `data/utils/DateRangeUtilsTest.kt` | 31 |  | — |
+| 🧪 `data/utils/FinanceStatsTest.kt` | 96 |  | — |
+| 🧪 `data/utils/FinancialCalculatorTest.kt` | 94 |  | — |
+| 🧪 `data/utils/GeoMathTest.kt` | 154 |  | — |
+| 🧪 `data/utils/NominatimClientTest.kt` | 74 |  | — |
+| 🧪 `data/utils/OrphanExpensesTest.kt` | 28 |  | — |
+| 🧪 `data/utils/OsmUserAgentTest.kt` | 34 |  | — |
+| 🧪 `data/utils/PhotoLogicTest.kt` | 58 |  | — |
+| 🧪 `data/utils/RecurringExpensesTest.kt` | 62 |  | — |
+| 🧪 `data/utils/ServiceImportTest.kt` | 95 |  | — |
+
+## F3 — Accesso, shell, stile e navigazione
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `MainActivity.kt` | 66 |  | — |
+| `Navigation.kt` | 195 |  | — |
+| `NavigationKeys.kt` | 20 |  | — |
+| `theme/Color.kt` | 69 |  | — |
+| `theme/Dimens.kt` | 31 |  | — |
+| `theme/Theme.kt` | 122 |  | — |
+| `theme/Type.kt` | 111 |  | — |
+| `ui/adaptive/FieldRow.kt` | 40 |  | — |
+| `ui/adaptive/FoldSplit.kt` | 125 |  | — |
+| `ui/adaptive/FoldSplitMath.kt` | 39 |  | — |
+| `ui/adaptive/FontScale.kt` | 18 |  | — |
+| `ui/adaptive/HingeAwareBounds.kt` | 38 |  | — |
+| `ui/adaptive/LayoutMode.kt` | 24 |  | — |
+| `ui/adaptive/ListDetailPane.kt` | 61 |  | — |
+| `ui/common/CompactTopBar.kt` | 74 |  | — |
+| `ui/intro/IntroLogic.kt` | 10 |  | — |
+| `ui/intro/IntroOverlay.kt` | 90 |  | — |
+| `ui/intro/IntroScreen.kt` | 252 |  | — |
+| `ui/intro/OnboardingController.kt` | 33 |  | — |
+| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | parziale (solo email) |
+| `ui/login/LoginViewModel.kt` | 46 |  | — |
+| `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
+| `ui/main/LoadErrorScreen.kt` | 79 |  | — |
+| `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | parziale |
+| `ui/main/MainScreen.kt` | 419 |  | — |
+| `ui/main/MainScreenViewModel.kt` | 105 |  | — |
+| `ui/main/MainTabs.kt` | 26 | `Features/Main/MainTab.swift` | scritto+test |
+| `ui/main/OnboardingScreen.kt` | 212 |  | — |
+| `ui/profile/ProfileScreen.kt` | 138 |  | — |
+| `ui/style/AmbientBackground.kt` | 81 |  | — |
+| `ui/style/Buttons.kt` | 183 |  | — |
+| `ui/style/Glass.kt` | 109 |  | — |
+| `ui/style/Motion.kt` | 30 |  | — |
+| `ui/style/SelectField.kt` | 106 |  | — |
+| `ui/style/Surfaces.kt` | 147 |  | — |
+| `ui/terms/HostTerms.kt` | 67 |  | — |
+| `ui/terms/HostTermsDialog.kt` | 72 |  | — |
+| `ui/tour/TourLogic.kt` | 52 |  | — |
+| `ui/tour/TourOverlay.kt` | 183 |  | — |
+| `ui/tour/TourState.kt` | 51 |  | — |
+| 🧪 `ui/adaptive/FoldSplitTest.kt` | 64 |  | — |
+| 🧪 `ui/adaptive/LayoutModeTest.kt` | 32 |  | — |
+| 🧪 `ui/intro/IntroLogicTest.kt` | 30 |  | — |
+| 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
+| 🧪 `ui/main/MainTabsTest.kt` | 80 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
+| 🧪 `ui/tour/TourLogicTest.kt` | 39 |  | — |
+
+## F4 — Home
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/dashboard/DashboardScreen.kt` | 412 |  | — |
+
+## F5 — Agenda, prenotazioni e prezzi
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/calendar/CalendarScreen.kt` | 391 |  | — |
+| `ui/calendar/GuestPricing.kt` | 69 |  | — |
+| `ui/calendar/PriceEditorScreen.kt` | 470 |  | — |
+| `ui/calendar/PriceEditorViewModel.kt` | 351 |  | — |
+| `ui/calendar/PriceSelection.kt` | 105 |  | — |
+| `ui/reservation/ReservationEditScreen.kt` | 312 |  | — |
+| 🧪 `ui/calendar/CalendarGridTest.kt` | 35 |  | — |
+| 🧪 `ui/calendar/GuestPricingTest.kt` | 85 |  | — |
+| 🧪 `ui/calendar/PriceSelectionTest.kt` | 126 |  | — |
+
+## F6 — Scorte
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/inventory/InventoryItemDetailDialog.kt` | 224 |  | — |
+| `ui/inventory/InventoryScreen.kt` | 1503 |  | — |
+| `ui/inventory/StockStatus.kt` | 16 |  | — |
+| 🧪 `ui/inventory/NormalizeBarcodeTest.kt` | 35 |  | — |
+| 🧪 `ui/inventory/StockStatusTest.kt` | 44 |  | — |
+
+## F7 — Finanze
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/finance/FinanceCharts.kt` | 216 |  | — |
+| `ui/finance/FinanceDetailScreens.kt` | 255 |  | — |
+| `ui/finance/FinanceListKeys.kt` | 21 |  | — |
+| `ui/finance/FinanceParts.kt` | 195 |  | — |
+| `ui/finance/FinanceScreen.kt` | 896 |  | — |
+| `ui/finance/FinanceView.kt` | 69 |  | — |
+| 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 |  | — |
+
+## F8 — Check-in Alloggiati
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/checkin/CheckinScreen.kt` | 208 |  | — |
+| `ui/checkin/CheckinSendScreen.kt` | 216 |  | — |
+| `ui/checkin/CheckinViewModel.kt` | 158 |  | — |
+| `ui/checkin/GuestFormScreen.kt` | 359 |  | — |
+| `ui/checkin/MrzScannerScreen.kt` | 280 |  | — |
+
+## F9 — Case, sito, posizione, membri e inviti
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/cases/AppFieldsDraft.kt` | 128 |  | — |
+| `ui/cases/CaseDetailScreen.kt` | 342 |  | — |
+| `ui/cases/CaseLogic.kt` | 93 | `Core/Models/SimpleModels.swift (solo HostRow)` | parziale |
+| `ui/cases/CaseSaveLogic.kt` | 26 |  | — |
+| `ui/cases/CaseSections.kt` | 590 |  | — |
+| `ui/cases/CasesScreen.kt` | 359 |  | — |
+| `ui/cases/CasesViewModel.kt` | 259 |  | — |
+| `ui/cases/HostsScreen.kt` | 142 |  | — |
+| `ui/cases/ListingStatusUi.kt` | 41 |  | — |
+| `ui/cases/PublishOnSiteCard.kt` | 31 |  | — |
+| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift (isOnSiteTrack, canEditCalendarPrices, approvedIds)` | parziale |
+| `ui/invite/InviteFormat.kt` | 13 |  | — |
+| `ui/invite/InviteScreen.kt` | 135 |  | — |
+| `ui/invite/InviteViewModel.kt` | 79 | `Core/Services/CloudFunctionsServices.swift (solo protocollo InviteAPI)` | parziale |
+| `ui/invite/PendingInvite.kt` | 33 |  | — |
+| `ui/members/InviteComposerDialog.kt` | 115 |  | — |
+| `ui/members/InviteForm.kt` | 64 |  | — |
+| `ui/members/MembersLogic.kt` | 38 |  | — |
+| `ui/members/MembersScreen.kt` | 279 |  | — |
+| `ui/members/MembersViewModel.kt` | 205 |  | — |
+| `ui/property/CredentialsLogic.kt` | 12 |  | — |
+| `ui/property/PropertyManagementViewModel.kt` | 321 |  | — |
+| `ui/site/SiteContentViewModel.kt` | 174 |  | — |
+| `ui/site/SiteDraft.kt` | 265 |  | — |
+| `ui/site/SiteDraftSaver.kt` | 85 |  | — |
+| `ui/site/SiteFormParts.kt` | 66 |  | — |
+| `ui/site/SitePhotosSection.kt` | 116 |  | — |
+| `ui/site/SiteTranslationsSection.kt` | 103 |  | — |
+| `ui/site/content/PageContentDraft.kt` | 373 |  | — |
+| `ui/site/content/PageContentEditor.kt` | 262 |  | — |
+| `ui/site/content/ServicesDraft.kt` | 170 |  | — |
+| `ui/site/content/ServicesEditor.kt` | 332 |  | — |
+| `ui/site/position/MapMarkerIcons.kt` | 37 |  | — |
+| `ui/site/position/PositionMap.kt` | 266 |  | — |
+| `ui/site/position/PositionPickerDialog.kt` | 382 |  | — |
+| `ui/site/position/PositionSection.kt` | 130 |  | — |
+| `ui/site/position/PositionState.kt` | 94 |  | — |
+| `ui/wizard/AppLevelSteps.kt` | 113 |  | — |
+| `ui/wizard/NewCaseWizardScreen.kt` | 489 |  | — |
+| `ui/wizard/WizardLogic.kt` | 68 |  | — |
+| 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 |  | — |
+| 🧪 `ui/cases/CaseLogicTest.kt` | 91 |  | — |
+| 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 |  | — |
+| 🧪 `ui/cases/SiteTrackTest.kt` | 41 |  | — |
+| 🧪 `ui/invite/InviteFormatTest.kt` | 33 |  | — |
+| 🧪 `ui/invite/InviteViewModelTest.kt` | 134 |  | — |
+| 🧪 `ui/invite/PendingInviteTest.kt` | 24 |  | — |
+| 🧪 `ui/members/InviteFormTest.kt` | 104 |  | — |
+| 🧪 `ui/members/MembersLogicTest.kt` | 71 |  | — |
+| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 |  | — |
+| 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 |  | — |
+| 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 |  | — |
+| 🧪 `ui/site/SiteDraftTest.kt` | 389 |  | — |
+| 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 |  | — |
+| 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 |  | — |
+| 🧪 `ui/site/position/PositionStateTest.kt` | 200 |  | — |
+| 🧪 `ui/wizard/WizardLogicTest.kt` | 79 |  | — |
+
+## F10 — Sfondo, notifiche e sincronizzazioni
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `services/LocalNotifier.kt` | 45 |  | — |
+| `services/MyFirebaseMessagingService.kt` | 38 |  | — |
+| `sync/BookingExcelReminderWorker.kt` | 49 |  | — |
+| `sync/ICalSyncWorker.kt` | 251 |  | — |
+| 🧪 `sync/ICalSyncWorkerTest.kt` | 171 |  | — |
+
+## Risorse e manifest
+
+| Fase | Voce | Cosa | Stato |
+|---|---|---|---|
+| F11 | `drawable/logo_transparent.png, ic_launcher_*, mipmap-*` | Icona app (AppIcon) e logo | — |
+| F11 | `drawable/ic_map_pin.xml, ic_map_eye.xml, ic_map_area_handle_bg.xml` | Marcatori mappa (usati da F9) | — |
+| F11 | `values/strings.xml, themes.xml` | Testi e tema: Localizable / asset catalog | — |
+| F11 | `xml/file_provider_paths.xml` | Condivisione file (ricevuta Alloggiati, ecc.): ShareLink / UIActivityViewController | — |
+| F11 | `xml/backup_rules.xml, data_extraction_rules.xml` | Niente da portare (backup iOS gestito dal sistema) | n/a |
+| F10 | `POST_NOTIFICATIONS, FirebaseMessagingService` | Notifiche push (APNs + FCM) | — |
+| F8 | `CAMERA` | NSCameraUsageDescription (già in project.yml) | scritto |

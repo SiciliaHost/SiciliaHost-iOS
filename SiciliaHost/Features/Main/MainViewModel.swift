@@ -25,18 +25,14 @@ final class MainViewModel {
 
     var access: AccessState { accessState(loading: isLoading, failed: hasFailed, scope: scope) }
 
-    /// Carica profilo e case dell'utente. Il super-admin vede tutte le case.
+    /// Carica profilo e case dell'utente (il super-admin vede tutte le case). Ricarica sempre dal server.
     func load() async {
         isLoading = true
         hasFailed = false
         do {
             let email = user.email ?? ""
             _ = try await db.getOrCreateUserProfile(uid: user.uid, email: email)
-            let superAdmin = isSuperAdminAccount(email: user.email, emailVerified: user.isEmailVerified)
-            let properties = superAdmin
-                ? try await db.getAllProperties()
-                : try await db.getMyProperties(uid: user.uid)
-            scope = AccessScope(uid: user.uid, isSuperAdmin: superAdmin, properties: properties)
+            scope = try await AccessSession.shared.scope(forceRefresh: true, db: db)
         } catch {
             hasFailed = true
         }
