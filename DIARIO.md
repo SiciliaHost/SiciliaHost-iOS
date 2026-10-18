@@ -121,6 +121,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-10-18 — Claude Sonnet 5.5 — prima revisione visiva (screenshot del run 39132251981)
+- Visti: accesso, presentazione, home, tour, galleria (palette, tipografia, pulsanti, card). **Fedeli al marchio e all'Android**: gradiente verde del login con logo e pulsanti bianchi, sfondo ambiente a macchie, card con filo di luce, barra a pillola di vetro con indicatore verde, presentazione con disco di vetro e tessere, tour con buco e alone.
+- Difetto trovato: in scuro la scritta nera del logo sparisce → aggiunta la variante `LogoDark` (scritta chiara, cactus uguale) scelta da `BrandLogo` in base al tema (vale anche per il login, che è sempre scuro: lì la scritta ora è chiara, a differenza dell'Android).
+- Ancora da guardare: onboarding, profilo, errore, condizioni, versioni scure di intro/tour.
+
 ### 2026-10-18 — Claude Sonnet 5.5 — screenshot dell'interfaccia in CI
 - `SiciliaHost/App/UIPreview.swift`: anteprime con dati inventati (solo build di debug, argomento di avvio `-UIPreview <login|intro|onboarding|home|tour|profile|failed|terms|gallery>`). `tools/ci_screenshots.sh` le fotografa nel simulatore in chiaro e in scuro; il workflow le carica come artefatto `ios-screenshots` (`gh run download <id> -n ios-screenshots -D <cartella>`).
 - Obiettivo: controllare il rispetto del marchio e dell'Android senza un dispositivo. Aggiornare l'elenco `SCREENS` dello script quando si aggiungono schermate.

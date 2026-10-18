@@ -91,12 +91,14 @@ struct SelectField<Option: Hashable>: View {
     }
 }
 
-/// Il marchio (cactus + scritta) dalle risorse dell'app, ritagliato ai margini.
+/// Il marchio (cactus + scritta) dalle risorse dell'app, ritagliato ai margini. Su fondo scuro la scritta nera sparirebbe:
+/// si usa la variante con la scritta chiara (cactus identico).
 struct BrandLogo: View {
     var height: CGFloat = 150
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        Image("Logo")
+        Image(scheme == .dark ? "LogoDark" : "Logo")
             .resizable()
             .scaledToFit()
             .frame(height: height)
