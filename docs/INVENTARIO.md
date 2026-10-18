@@ -1,10 +1,14 @@
-# Inventario Android → iOS (generato)
+# Inventario Android → iOS
+
+**Spec di riferimento (baseline Android):** repo `Androidapp`, branch `feat/fold-finanze-selezioni`, commit
+`379b5c5c51bf55e4f79bb4eb433cd3ba029bbd7e` (2026-10-18). Se l'Android cambia, aggiornare questa riga e rilanciare il controllo.
+Controllo di completezza (da un clone con `../Androidapp` accanto): `python tools/gen_inventario.py --check` (aggiungi `--strict` nell'audit finale di F11).
 
 Ogni file Kotlin dell'app Android (sorgenti e test) con la fase che lo porta. **Nessun file è fuori dal piano**: lo script di generazione fallisce se un file non ha fase. Aggiorna le colonne *iOS* e *Stato* man mano che porti; la fase F11 chiude solo se non resta nessuna riga con stato `—` (le uniche eccezioni ammesse sono `n/a` con motivo scritto qui).
 
 Stati: `—` da fare · `scritto` scritto ma mai compilato · `compilato` · `provato` (simulatore/dispositivo) · `n/a` non serve su iOS (motivo in nota).
 
-Totale: 211 file Kotlin (154 sorgenti, 57 test).
+Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 
 ## F1 — Livello dati completo
 
@@ -31,7 +35,7 @@ Totale: 211 file Kotlin (154 sorgenti, 57 test).
 | `data/model/SeasonalRateEntry.kt` | 12 | `Core/Models/SimpleModels.swift` | scritto |
 | `data/model/ServiceCatalog.kt` | 121 | `Core/Models/ServiceCatalog.swift` | scritto |
 | `data/model/User.kt` | 10 | `Core/Models/OtherModels.swift` | scritto |
-| `data/repository/AuthRepository.kt` | 52 | `Core/Services/AuthService.swift` | parziale: email/registrazione/logout fatti; Google e Apple in F3 |
+| `data/repository/AuthRepository.kt` | 52 | `Core/Services/AuthService.swift` | parziale→F3 (email/registrazione/logout fatti; Google e Apple in F3) |
 | `data/repository/DatabaseRepository.kt` | 518 | `Core/Services/FirestoreService.swift` | scritto (completo) |
 | `data/repository/FanOut.kt` | 14 | `Core/Services/FanOut.swift` | scritto |
 | `data/repository/HostFunctionsRepository.kt` | 209 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift, CloudErrors.swift` | scritto |
@@ -115,11 +119,11 @@ Totale: 211 file Kotlin (154 sorgenti, 57 test).
 | `ui/intro/IntroOverlay.kt` | 90 |  | — |
 | `ui/intro/IntroScreen.kt` | 252 |  | — |
 | `ui/intro/OnboardingController.kt` | 33 |  | — |
-| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | parziale (solo email) |
+| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | parziale→F3 (solo email; manca Google/Apple) |
 | `ui/login/LoginViewModel.kt` | 46 |  | — |
 | `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
 | `ui/main/LoadErrorScreen.kt` | 79 |  | — |
-| `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | parziale |
+| `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | parziale→F3 (manca onboarding vero) |
 | `ui/main/MainScreen.kt` | 419 |  | — |
 | `ui/main/MainScreenViewModel.kt` | 105 |  | — |
 | `ui/main/MainTabs.kt` | 26 | `Features/Main/MainTab.swift` | scritto+test |
@@ -201,7 +205,7 @@ Totale: 211 file Kotlin (154 sorgenti, 57 test).
 |---|---|---|---|
 | `ui/cases/AppFieldsDraft.kt` | 128 |  | — |
 | `ui/cases/CaseDetailScreen.kt` | 342 |  | — |
-| `ui/cases/CaseLogic.kt` | 93 | `Core/Models/SimpleModels.swift (solo HostRow)` | parziale |
+| `ui/cases/CaseLogic.kt` | 93 | `Core/Models/SimpleModels.swift (solo HostRow)` | parziale→F9 |
 | `ui/cases/CaseSaveLogic.kt` | 26 |  | — |
 | `ui/cases/CaseSections.kt` | 590 |  | — |
 | `ui/cases/CasesScreen.kt` | 359 |  | — |
@@ -209,10 +213,10 @@ Totale: 211 file Kotlin (154 sorgenti, 57 test).
 | `ui/cases/HostsScreen.kt` | 142 |  | — |
 | `ui/cases/ListingStatusUi.kt` | 41 |  | — |
 | `ui/cases/PublishOnSiteCard.kt` | 31 |  | — |
-| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift (isOnSiteTrack, canEditCalendarPrices, approvedIds)` | parziale |
+| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift (isOnSiteTrack, canEditCalendarPrices, approvedIds)` | parziale→F9 |
 | `ui/invite/InviteFormat.kt` | 13 |  | — |
 | `ui/invite/InviteScreen.kt` | 135 |  | — |
-| `ui/invite/InviteViewModel.kt` | 79 | `Core/Services/CloudFunctionsServices.swift (solo protocollo InviteAPI)` | parziale |
+| `ui/invite/InviteViewModel.kt` | 79 | `Core/Services/CloudFunctionsServices.swift (solo protocollo InviteAPI)` | parziale→F9 |
 | `ui/invite/PendingInvite.kt` | 33 |  | — |
 | `ui/members/InviteComposerDialog.kt` | 115 |  | — |
 | `ui/members/InviteForm.kt` | 64 |  | — |

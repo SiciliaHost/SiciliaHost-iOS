@@ -1,13 +1,25 @@
-"""Genera docs/INVENTARIO.md: ogni file Kotlin (main + test) dell'app Android assegnato a una fase.
-Fallisce se un file non ha una fase, così nessuna funzione resta fuori dal piano."""
-import os, re, sys
-THIS = os.path.dirname(os.path.abspath(__file__))
+#!/usr/bin/env python3
+"""Inventario Android -> iOS (docs/INVENTARIO.md).
 
-ROOT = r"C:\Users\Aless\desktop\progetti\siciliahost\Androidapp\app\src"
-OUT = r"C:\Users\Aless\desktop\progetti\siciliahost\SiciliaHost-iOS\docs\INVENTARIO.md"
-BASE = "java/com/example/casevacanzeapp/"
+  python tools/gen_inventario.py --check [--android ../Androidapp]
+      Verifica (da usare a ogni fine fase e nell'audit finale di F11):
+        * ogni file .kt dell'app Android (sorgenti e test) compare nell'inventario;
+        * elenca le righe ancora `—` o `parziale` (la fase F11 chiude solo se non ne resta nessuna).
+      Esce con codice 1 se manca un file; 2 se restano righe aperte (con --strict).
 
-# (prefisso relativo al package, fase). Il primo che combacia vince: mettere i più specifici prima.
+  python tools/gen_inventario.py --generate [--android ../Androidapp] [--force]
+      Ricostruisce l'inventario da zero (CANCELLA stati e percorsi iOS: senza --force rifiuta se esiste già).
+      Fallisce se un file Android non ha una fase assegnata nelle RULES.
+"""
+import os
+import re
+import sys
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(REPO, "docs", "INVENTARIO.md")
+PKG = ["java", "com", "example", "casevacanzeapp"]
+
+# (prefisso relativo al package, fase). Il primo che combacia vince.
 RULES = [
     ("data/model/", "F1"), ("data/repository/", "F1"), ("data/access/", "F1"), ("data/alloggiati/", "F1"),
     ("data/invite/", "F2"), ("data/mrz/", "F2"), ("data/utils/", "F2"),
@@ -25,38 +37,6 @@ RULES = [
     ("ui/invite/", "F9"), ("ui/property/", "F9"),
 ]
 
-def phase_of(rel):
-    for prefix, phase in RULES:
-        if rel.startswith(prefix):
-            return phase
-    return None
-
-# File già portati (anche solo "scritto", mai compilato). Chiave: percorso relativo main.
-DONE = {
-    "data/model/Property.kt": ("Core/Models/Property.swift", "scritto"),
-    "data/model/PropertyRole.kt": ("Core/Models/Property.swift", "scritto"),
-    "data/model/PropertyPermission.kt": ("Core/Models/Property.swift", "scritto"),
-    "data/model/Reservation.kt": ("Core/Models/Reservation.swift", "scritto"),
-    "data/model/Expense.kt": ("Core/Models/OtherModels.swift", "scritto"),
-    "data/model/RecurringExpense.kt": ("Core/Models/OtherModels.swift", "scritto"),
-    "data/model/InventoryItem.kt": ("Core/Models/OtherModels.swift", "scritto"),
-    "data/model/GuestRecord.kt": ("Core/Models/OtherModels.swift", "scritto"),
-    "data/model/User.kt": ("Core/Models/OtherModels.swift", "scritto"),
-    "data/access/AccessScope.kt": ("Core/Access/AccessScope.swift", "scritto+test"),
-    "ui/main/AccessState.kt": ("Features/Main/MainViewModel.swift", "scritto+test"),
-    "ui/main/MainTabs.kt": ("Features/Main/MainTab.swift", "scritto+test"),
-    "ui/main/MainGate.kt": ("Features/Main/MainGateView.swift", "parziale"),
-    "ui/login/LoginScreen.kt": ("Features/Login/LoginView.swift", "parziale (solo email)"),
-    "data/repository/AuthRepository.kt": ("Core/Services/AuthService.swift", "parziale (solo email)"),
-    "data/repository/DatabaseRepository.kt": ("Core/Services/FirestoreService.swift", "parziale (letture)"),
-}
-DONE_TESTS = {
-    "data/access/AccessScopeTest.kt": ("SiciliaHostTests/AccessScopeTests.swift", "scritto"),
-    "data/access/SuperAdminTest.kt": ("SiciliaHostTests/AccessScopeTests.swift", "scritto"),
-    "ui/main/AccessStateTest.kt": ("SiciliaHostTests/AccessScopeTests.swift", "scritto"),
-    "ui/main/MainTabsTest.kt": ("SiciliaHostTests/AccessScopeTests.swift", "scritto"),
-}
-
 PHASE_TITLES = {
     "F1": "Livello dati completo", "F2": "Logica pura e utilità", "F3": "Accesso, shell, stile e navigazione",
     "F4": "Home", "F5": "Agenda, prenotazioni e prezzi", "F6": "Scorte", "F7": "Finanze", "F8": "Check-in Alloggiati",
@@ -64,57 +44,103 @@ PHASE_TITLES = {
     "F11": "Rifinitura e rilascio",
 }
 
-if os.path.exists(OUT) and "--force" not in sys.argv:
-    print("INVENTARIO.md esiste già: rigenerarlo cancella gli stati. Usa --force solo per ricostruirlo da zero."); sys.exit(2)
-rows, missing = [], []
-for kind, sub in (("main", "main"), ("test", "test")):
-    base = os.path.join(ROOT, sub, *BASE.rstrip("/").split("/"))
-    for dp, _, files in os.walk(base):
-        for f in files:
-            if not f.endswith(".kt"):
-                continue
-            full = os.path.join(dp, f)
-            rel = os.path.relpath(full, base).replace(os.sep, "/")
-            phase = phase_of(rel)
-            if phase is None:
-                missing.append((kind, rel)); continue
-            lines = sum(1 for _ in open(full, encoding="utf-8", errors="ignore"))
-            table = DONE if kind == "main" else DONE_TESTS
-            target, status = table.get(rel, ("", "—"))
-            rows.append((phase, kind, rel, lines, target, status))
+ROW = re.compile(r"^\| (🧪 )?`([^`]+)` \| (\d+) \|[^|]*\|\s*([^|]*?)\s*\|$")
 
-if missing:
-    print("FILE SENZA FASE:", missing); sys.exit(1)
 
-# Risorse e voci non-Kotlin
-EXTRA = [
-    ("F11", "res", "drawable/logo_transparent.png, ic_launcher_*, mipmap-*", "Icona app (AppIcon) e logo", "—"),
-    ("F11", "res", "drawable/ic_map_pin.xml, ic_map_eye.xml, ic_map_area_handle_bg.xml", "Marcatori mappa (usati da F9)", "—"),
-    ("F11", "res", "values/strings.xml, themes.xml", "Testi e tema: Localizable / asset catalog", "—"),
-    ("F11", "res", "xml/file_provider_paths.xml", "Condivisione file (ricevuta Alloggiati, ecc.): ShareLink / UIActivityViewController", "—"),
-    ("F11", "res", "xml/backup_rules.xml, data_extraction_rules.xml", "Niente da portare (backup iOS gestito dal sistema)", "n/a"),
-    ("F10", "manifest", "POST_NOTIFICATIONS, FirebaseMessagingService", "Notifiche push (APNs + FCM)", "—"),
-    ("F8", "manifest", "CAMERA", "NSCameraUsageDescription (già in project.yml)", "scritto"),
-]
+def arg(name, default=None):
+    if name in sys.argv:
+        i = sys.argv.index(name)
+        return sys.argv[i + 1] if i + 1 < len(sys.argv) else default
+    return default
 
-rows.sort(key=lambda r: (int(r[0][1:]), r[1] != "main", r[2]))
-with open(OUT, "w", encoding="utf-8", newline="\n") as o:
-    o.write("# Inventario Android → iOS (generato)\n\n")
-    o.write("Ogni file Kotlin dell'app Android (sorgenti e test) con la fase che lo porta. **Nessun file è fuori dal piano**: ")
-    o.write("lo script di generazione fallisce se un file non ha fase. Aggiorna le colonne *iOS* e *Stato* man mano che porti; ")
-    o.write("la fase F11 chiude solo se non resta nessuna riga con stato `—` (le uniche eccezioni ammesse sono `n/a` con motivo scritto qui).\n\n")
-    o.write("Stati: `—` da fare · `scritto` scritto ma mai compilato · `compilato` · `provato` (simulatore/dispositivo) · `n/a` non serve su iOS (motivo in nota).\n\n")
-    o.write(f"Totale: {len(rows)} file Kotlin ({sum(1 for r in rows if r[1]=='main')} sorgenti, {sum(1 for r in rows if r[1]=='test')} test).\n")
-    cur = None
-    for phase, kind, rel, lines, target, status in rows:
-        if phase != cur:
-            cur = phase
-            o.write(f"\n## {phase} — {PHASE_TITLES[phase]}\n\n| Android | Righe | iOS | Stato |\n|---|---|---|---|\n")
-        tag = "" if kind == "main" else "🧪 "
-        o.write(f"| {tag}`{rel}` | {lines} | {target and '`'+target+'`'} | {status} |\n")
-    o.write("\n## Risorse e manifest\n\n| Fase | Voce | Cosa | Stato |\n|---|---|---|---|\n")
-    for phase, kind, name, what, status in EXTRA:
-        o.write(f"| {phase} | `{name}` | {what} | {status} |\n")
-print(len(rows), "file assegnati")
-from collections import Counter
-print(sorted(Counter(r[0] for r in rows).items(), key=lambda x: int(x[0][1:])))
+
+def android_files(android_root):
+    """Ritorna [(kind, rel, righe)] per tutti i .kt di main e test."""
+    found = []
+    for kind in ("main", "test"):
+        base = os.path.join(android_root, "app", "src", kind, *PKG)
+        if not os.path.isdir(base):
+            sys.exit(f"Cartella Android non trovata: {base} (usa --android <percorso della repo Androidapp>)")
+        for dp, _, files in os.walk(base):
+            for f in files:
+                if f.endswith(".kt"):
+                    full = os.path.join(dp, f)
+                    rel = os.path.relpath(full, base).replace(os.sep, "/")
+                    with open(full, encoding="utf-8", errors="ignore") as fh:
+                        found.append((kind, rel, sum(1 for _ in fh)))
+    return found
+
+
+def phase_of(rel):
+    for prefix, phase in RULES:
+        if rel.startswith(prefix):
+            return phase
+    return None
+
+
+def check(android_root):
+    files = android_files(android_root)
+    rows, open_rows = {}, []
+    with open(OUT, encoding="utf-8") as fh:
+        for ln in fh:
+            m = ROW.match(ln.rstrip("\n"))
+            if m:
+                key = (("test" if m.group(1) else "main"), m.group(2))
+                rows[key] = m.group(4)
+                if m.group(4) == "—" or m.group(4).startswith("parziale"):
+                    open_rows.append((key, m.group(4)))
+    missing = [(k, r) for k, r, _ in files if (k, r) not in rows]
+    stale = [k for k in rows if k not in {(a, b) for a, b, _ in files}]
+    print(f"File Android: {len(files)} · righe nell'inventario: {len(rows)}")
+    if missing:
+        print("\nFILE ANDROID NON IN INVENTARIO (aggiungili a mano nella fase giusta):")
+        for k, r in missing:
+            print(f"  [{k}] {r}  -> fase {phase_of(r) or '??'}")
+    if stale:
+        print("\nRighe dell'inventario senza file Android corrispondente (file rimosso/rinominato?):")
+        for k in stale:
+            print(f"  {k}")
+    print(f"\nRighe ancora aperte (— o parziale): {len(open_rows)}")
+    by_phase = {}
+    for (kind, rel), st in open_rows:
+        by_phase.setdefault(phase_of(rel) or "??", []).append((rel, st))
+    for phase in sorted(by_phase, key=lambda p: int(p[1:]) if p[1:].isdigit() else 99):
+        print(f"  {phase}: {len(by_phase[phase])}")
+    if missing:
+        sys.exit(1)
+    if open_rows and "--strict" in sys.argv:
+        sys.exit(2)
+
+
+def generate(android_root):
+    if os.path.exists(OUT) and "--force" not in sys.argv:
+        sys.exit("INVENTARIO.md esiste già: rigenerarlo cancella gli stati. Usa --force solo per ricostruirlo da zero.")
+    rows, unassigned = [], []
+    for kind, rel, lines in android_files(android_root):
+        phase = phase_of(rel)
+        if phase is None:
+            unassigned.append((kind, rel))
+        else:
+            rows.append((phase, kind, rel, lines))
+    if unassigned:
+        sys.exit(f"FILE SENZA FASE: {unassigned}")
+    rows.sort(key=lambda r: (int(r[0][1:]), r[1] != "main", r[2]))
+    with open(OUT, "w", encoding="utf-8", newline="\n") as o:
+        o.write("# Inventario Android → iOS\n\n")
+        cur = None
+        for phase, kind, rel, lines in rows:
+            if phase != cur:
+                cur = phase
+                o.write(f"\n## {phase} — {PHASE_TITLES[phase]}\n\n| Android | Righe | iOS | Stato |\n|---|---|---|---|\n")
+            o.write(f"| {'' if kind == 'main' else '🧪 '}`{rel}` | {lines} |  | — |\n")
+    print(len(rows), "file assegnati")
+
+
+if __name__ == "__main__":
+    root = os.path.abspath(arg("--android", os.path.join(REPO, "..", "Androidapp")))
+    if "--check" in sys.argv:
+        check(root)
+    elif "--generate" in sys.argv:
+        generate(root)
+    else:
+        print(__doc__)

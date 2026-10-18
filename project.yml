@@ -28,6 +28,9 @@ targets:
         product: FirebaseStorage
       - package: Firebase
         product: FirebaseMessaging
+    scheme:
+      testTargets:
+        - SiciliaHostTests
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.siciliahost.manager # PROVVISORIO: vedi DIARIO.md

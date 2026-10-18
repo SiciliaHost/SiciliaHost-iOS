@@ -6,6 +6,8 @@ una fase. Una fase si chiude solo quando le sue righe non hanno più stato `—`
 in tutto l'inventario non resti nessun `—` (solo `n/a` motivati). Se l'Android guadagna file nuovi mentre
 si lavora, aggiungerli a mano all'inventario (lo script `tools/gen_inventario.py` rifiuta di sovrascriverlo).
 
+**Baseline:** le specifiche sono l'app Android al commit indicato in `docs/INVENTARIO.md`. Ogni fase produce `docs/funzioni/F<n>.md` (checklist funzioni per file, come `F1.md`) prima di scrivere codice.
+
 **Regole valide in ogni fase**
 1. All'inizio della fase rileggi **ogni file Android elencato** e scrivi nel DIARIO l'elenco delle funzioni
    che contiene (comportamenti, casi limite, messaggi di errore): è l'elenco da spuntare, non i soli titoli sotto.
@@ -13,9 +15,9 @@ si lavora, aggiungerli a mano all'inventario (lo script `tools/gen_inventario.py
 3. Aggiorna `INVENTARIO.md` e `MAPPA_PORTING.md` e il DIARIO a fine lavoro. Mai dichiarare "fatto" ciò che non è stato compilato: stato `scritto` finché un Mac non lo costruisce.
 4. Contratto dati col sito/Android: `../Androidapp/CLAUDE.md`. Non cambiare nomi o forma dei campi.
 
-**Binario parallelo G — Compilazione (bloccato dall'utente):** appena c'è un Mac/CI, ogni fase già "scritta" va compilata, i test eseguiti,
+**Binario parallelo G — Compilazione (richiede un Mac o una CI macOS; non è detto che serva l'utente):** appena c'è un Mac/CI, ogni fase già "scritta" va compilata, i test eseguiti,
 gli errori corretti. Finché G non parte il rischio si accumula: più si scrive senza compilare, più errori si ritrovano insieme.
-Consiglio: far partire G dopo F1–F2.
+Consiglio: far partire G dopo F1–F2. Alternativa da verificare PRIMA di affermarla: il toolchain Swift per Windows (swift.org / winget) potrebbe compilare ed eseguire gli XCTest dei file senza Firebase (modelli, AccessScope, CallableParsers, ListingStatus, ServiceCatalog, FanOut, LookupService, tutta F2) in un piccolo pacchetto SwiftPM; `accessState` e `describeHostError(code:message:)` oggi stanno in file che importano Firebase e andrebbero separati. Il bridging NSNumber/Bool differisce fuori da Apple: prenderebbe errori di sintassi/tipi, non di bridging. Non installare nulla senza chiedere all'utente.
 
 | Fase | Contenuto | File |
 |---|---|---|
@@ -50,7 +52,7 @@ Tutto `data/utils`, `data/mrz`, `data/invite`, con i test omonimi.
 - `MrzParser` + `MrzData` (documenti d'identità), `InviteLink` (formato codice/link invito).
 
 ## F3 — Accesso, shell, stile e navigazione
-- **Login**: Accedi con **Apple** (obbligatorio), **Google**, email/password, errori in italiano, ripristino sessione all'avvio.
+- **Login**: Accedi con **Apple** (obbligatorio), **Google** (+ uscita dall'account Google ricordato, `logout(context)` dell'Android; completa `AuthRepository`), email/password, errori in italiano, ripristino sessione all'avvio.
 - **Shell**: `MainScreen` (barra schede, selettore casa, scorciatoie, pulsante profilo), `MainScreenViewModel`, `LoadErrorScreen`, `OnboardingScreen` (nessuna casa: crea casa o codice invito).
 - **Presentazione e guida**: `Intro` (presentazione animata, `IntroLogic`, overlay), `Tour` guidato (`TourLogic/State/Overlay`, bersagli per scheda), `OnboardingController` (flag salvati sull'account), **Termini per gli host** (`HostTerms`, versione accettata, dialog).
 - **Profilo** (`ProfileScreen`): dati account, ruolo, esci, rivedi intro/tour.
@@ -67,7 +69,7 @@ Arrivi (oggi/prossimi) con scheda e anteprima dettaglio, prenotazioni **da compl
 - **Editor prezzi** (`PriceEditor*`, `PriceSelection`, `GuestPricing`): tariffe stagionali per giorno/intervallo, selezione multipla, sovrapprezzi per numero ospiti, promozioni automatiche (crea/elenca/elimina), rispetto del permesso `PRICES` e dell'annuncio approvato.
 
 ## F6 — Scorte (`InventoryScreen`, 1.500 righe)
-Elenco per casa/categoria, stato scorta (`StockStatus`: ok/basso/esaurito), aggiunta/modifica/elimina articolo, dettaglio (`InventoryItemDetailDialog`), foto prodotto (fotocamera/libreria → Storage), **scanner codici a barre** in tre modalità (singolo, a lotto, manuale; `normalizeBarcode`), riconoscimento nome prodotto con cache (`products_cache`) e ricerca online, riepilogo lotto, soglia scorta minima, segna esaurito.
+Elenco per casa/categoria, stato scorta (`StockStatus`: ok/basso/esaurito), aggiunta/modifica/elimina articolo, dettaglio (`InventoryItemDetailDialog`), foto prodotto (fotocamera/libreria → **comprimere/ridimensionare in JPEG ~q0.7 prima** di `uploadProductImage`, che riceve `Data`; → Storage), **scanner codici a barre** in tre modalità (singolo, a lotto, manuale; `normalizeBarcode`), riconoscimento nome prodotto con cache (`products_cache`) e ricerca online, riepilogo lotto, soglia scorta minima, segna esaurito.
 
 ## F7 — Finanze
 Bilancio (ricavi, spese, saldo, lordo, netto proprietario), per casa, per mese, per piattaforma, grafici (`FinanceCharts` → Swift Charts), periodi (`FinancePeriod`), statistiche Booking (`BookingStats`: canali, occupazione, paesi, anticipo, dispositivi), suggerimenti (`FinanceInsights`), spese (aggiungi/modifica/elimina, categorie, legate a prenotazione), spese ricorrenti, prenotazioni con importo da completare, spese orfane, interruttore "in commissione" (solo admin), **import Excel Booking** con piano di importazione e conteggi, schermate di dettaglio, `FinanceView`, chiavi liste stabili (`FinanceListKeys`, la causa del crash visto su Android).

@@ -16,6 +16,14 @@
 
 ---
 
+## Baseline Android (spec di riferimento)
+
+Repo `../Androidapp`, branch **`feat/fold-finanze-selezioni`**, commit `379b5c5c51bf55e4f79bb4eb433cd3ba029bbd7e` (2026-10-18).
+È una cima di una pila di branch non ancora mergiati (vedi memoria del progetto: prezzi-ospiti-promozioni, stile-vetro, ecc.).
+**Domanda aperta per l'utente:** quale branch Android è la fonte di verità? Se la pila viene scartata, l'iOS avrebbe funzioni che nessuno usa.
+Callable usate da iOS: tutte presenti nel codice del sito (branch `feat/condizioni-host`, `957b0a8`); **deploy non verificato**
+(dettaglio in `docs/funzioni/F1.md`). `python tools/gen_inventario.py --check` confronta l'inventario con la repo Android.
+
 ## Il progetto in breve
 
 Riscrittura **nativa iOS (SwiftUI)** dell'app Android `CaseVacanzeApp` (back office per gestori di
@@ -78,6 +86,12 @@ e correggere gli errori (vedi Prossimi passi).
 - Decidere se pubblicare la repo su GitHub (finora esiste solo in locale).
 
 ## Registro (più recente in alto)
+
+### 2026-10-18 — Claude Sonnet 5.5 — piano completo + F1 (livello dati) [revisione dopo il controllo del consulente]
+- Aggiunti: baseline Android (branch+commit), `tools/gen_inventario.py --check` (percorsi relativi, rileva file Android mancanti e righe aperte),
+  righe `parziale→F<n>` con la fase che le chiude, `docs/funzioni/F1.md` (checklist funzioni), `.gitattributes` (LF forzato: l'hook
+  `pre-commit` si romperebbe con CRLF su Windows), scheme di test in `project.yml`.
+- Da verificare (non fatto): se il toolchain Swift per Windows si installa e compila gli XCTest dei file senza Firebase (vedi `PIANO.md`).
 
 ### 2026-10-18 — Claude Sonnet 5.5 — piano completo + F1 (livello dati)
 - Creati `docs/PIANO.md` (11 fasi) e `docs/INVENTARIO.md` (211 file Kotlin = 154 sorgenti + 57 test, ciascuno con la sua

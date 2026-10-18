@@ -1,0 +1,6 @@
+* text=auto eol=lf
+.githooks/* text eol=lf
+*.sh text eol=lf
+*.swift text eol=lf
+*.md text eol=lf
+project.yml text eol=lf
