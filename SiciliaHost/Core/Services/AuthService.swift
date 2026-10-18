@@ -12,21 +12,27 @@ import UIKit
 /// effettuato l'accesso con Google (`sign_in_provider == 'google.com'`): un account email/password o Apple verrebbe
 /// rifiutato da tutto. Per questo qui non c'è l'accesso con email. Accedi con Apple è in attesa di una decisione:
 /// vedi DIARIO.md ("Accesso con Apple").
+/// Tiene il riferimento all'ascoltatore di Firebase Auth e lo toglie quando `AuthService` sparisce (il `deinit` di una
+/// classe isolata al main actor non può toccare le sue proprietà isolate).
+private final class AuthListenerBox: @unchecked Sendable {
+    var handle: AuthStateDidChangeListenerHandle?
+
+    deinit {
+        if let handle { Auth.auth().removeStateDidChangeListener(handle) }
+    }
+}
+
 @MainActor
 @Observable
 final class AuthService {
     private(set) var currentUser: User?
-    private var handle: AuthStateDidChangeListenerHandle?
+    @ObservationIgnored private let listener = AuthListenerBox()
 
     init() {
         currentUser = Auth.auth().currentUser
-        handle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        listener.handle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in self?.currentUser = user }
         }
-    }
-
-    deinit {
-        if let handle { Auth.auth().removeStateDidChangeListener(handle) }
     }
 
     var isSignedIn: Bool { currentUser != nil }
