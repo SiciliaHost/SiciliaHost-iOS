@@ -7,7 +7,7 @@ struct MainTabView: View {
     let router: AppRouter
     let onSignOut: () -> Void
 
-    @State private var selected: MainTab = .home
+    @State private var selected: MainTab
     @State private var tour = TourState()
     /// L'app è ferma sulla sezione giusta (lo scorrimento tra sezioni è finito): serve al tour per posizionarsi.
     @State private var settled = true
@@ -17,6 +17,13 @@ struct MainTabView: View {
     private let db = FirestoreService()
     private let siteContent = SiteContentService()
     private var onboarding: OnboardingController { .shared }
+
+    init(scope: AccessScope?, router: AppRouter, onSignOut: @escaping () -> Void, initialTab: MainTab = .home) {
+        self.scope = scope
+        self.router = router
+        self.onSignOut = onSignOut
+        _selected = State(initialValue: initialTab)
+    }
 
     var body: some View {
         let tabs = MainTabs.visible(for: scope)

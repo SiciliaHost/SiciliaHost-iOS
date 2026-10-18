@@ -59,6 +59,22 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | tee build/xcodebuild.log
 
+      # Fotografie dell'interfaccia (anteprime con dati inventati) in chiaro e in scuro: la sola occasione di VEDERE l'app.
+      - name: Screenshot delle anteprime
+        if: success()
+        run: |
+          APP=$(find build/DerivedData/Build/Products -maxdepth 2 -name 'SiciliaHost.app' | head -1)
+          echo "App: $APP"
+          bash tools/ci_screenshots.sh "$APP" "${{ steps.sim.outputs.udid }}" build/screenshots
+
+      - name: Salva gli screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots
+          path: build/screenshots
+          if-no-files-found: ignore
+
       - name: Salva log e risultati
         if: always()
         uses: actions/upload-artifact@v4

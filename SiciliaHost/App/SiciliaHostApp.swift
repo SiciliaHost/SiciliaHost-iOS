@@ -12,7 +12,9 @@ struct SiciliaHostApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if Self.firebaseConfigured {
+            if Self.firebaseConfigured, let screen = UIPreview.requestedScreen {
+                UIPreviewRoot(screen: screen) // solo build di debug, con `-UIPreview <schermata>`
+            } else if Self.firebaseConfigured {
                 RootView()
             } else {
                 MissingConfigView()

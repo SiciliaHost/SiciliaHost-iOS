@@ -121,6 +121,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-10-18 — Claude Sonnet 5.5 — screenshot dell'interfaccia in CI
+- `SiciliaHost/App/UIPreview.swift`: anteprime con dati inventati (solo build di debug, argomento di avvio `-UIPreview <login|intro|onboarding|home|tour|profile|failed|terms|gallery>`). `tools/ci_screenshots.sh` le fotografa nel simulatore in chiaro e in scuro; il workflow le carica come artefatto `ios-screenshots` (`gh run download <id> -n ios-screenshots -D <cartella>`).
+- Obiettivo: controllare il rispetto del marchio e dell'Android senza un dispositivo. Aggiornare l'elenco `SCREENS` dello script quando si aggiungono schermate.
+
 ### 2026-10-18 — Claude Sonnet 5.5 — accesso con Apple (regole, Functions, app)
 - Su richiesta esplicita dell'utente ("modifica tu le regole storage e firebase") preparate le modifiche: vedi la sezione "Accesso con Apple". Solo Google+Apple, NON email (motivo: B1). Nessun deploy, nessun push dei repo Androidapp/sito.
 - iOS: pulsante e flusso "Accedi con Apple" + test del nonce. CI di riferimento: run 39131106371 (156 test verdi) era prima di questa modifica.
