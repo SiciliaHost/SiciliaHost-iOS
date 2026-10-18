@@ -52,8 +52,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 0. **[Mac, appena disponibile — binario G]** `brew install xcodegen && xcodegen generate`, `GoogleService-Info.plist` in
    `SiciliaHost/Resources/`, compilare, correggere gli errori, far girare i test. Provare anche il file reale:
-   `BOOKING_XLS_FIXTURE="…/Androidapp/Arrivo con recapiti_ 2026-01-01 - 2026-07-30.xls"` (il file contiene dati personali
-   di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
+   `TEST_RUNNER_BOOKING_XLS_FIXTURE="…/Androidapp/Arrivo con recapiti_ 2026-01-01 - 2026-07-30.xls" xcodebuild test …`
+   (da verificare al primo build: `xcodebuild` inoltra al test solo le variabili col prefisso `TEST_RUNNER_`; in alternativa impostare
+   `BOOKING_XLS_FIXTURE` nell'ambiente dello scheme, Test → Arguments. Senza, il test fa `XCTSkip` e sembra passato: controllare che non sia "skipped".
+   Il file contiene dati personali di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
 1. **F3 — Accesso, shell, stile, navigazione** (46 file: login Apple/Google, MainScreen, onboarding, intro, tour, termini host,
    profilo, tema, layout adattivo). Prima scrivere `docs/funzioni/F3.md` rileggendo i 46 file Android.
 2. Poi F4 (Home), F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case/sito), F10 (sfondo), F11 (rilascio).
@@ -91,7 +93,8 @@ e correggere gli errori (vedi Prossimi passi).
 - **Confermare il Bundle ID** (permanente una volta pubblicata l'app) e registrare l'app iOS nel progetto
   Firebase `siciliahostmanager`; scaricare `GoogleService-Info.plist`.
 - Creare la chiave **APNs** e caricarla in Firebase (per le notifiche) e abilitare Sign in with Apple.
-- Decidere se pubblicare la repo su GitHub (finora esiste solo in locale).
+- Decidere se pubblicare la repo su GitHub (finora esiste solo in locale). Se sì, una CI macOS (`.github/workflows/ios.yml`, da scrivere e non provata) darebbe il primo build senza un Mac.
+- Rispondere a: Bundle ID definitivo; **iPad sì/no**; quale branch Android è la baseline; se le Cloud Functions usate sono deployate.
 
 ## Registro (più recente in alto)
 
@@ -101,13 +104,14 @@ e correggere gli errori (vedi Prossimi passi).
   `BookingStats`, `FinanceInsights`, `BookingImport` (piano + parser CSV/righe), `XlsReader`, `ICalSync`, `GeoMath`, `ServiceImport`,
   `ListingImport` (Airbnb + Nominatim + User-Agent OSM), `Photos`, `IdentityParsers` (MRZ + link d'invito).
 - Test: `FinanceTests`, `BookingTests`, `LogicTests`, `XlsReaderTests` (file `.xls` sintetico costruito nel test: OLE2 + SST con CONTINUE + NUMBER/RK).
-  Il costruttore sintetico e l'algoritmo di lettura sono stati verificati in Python (`xls_proto.py` nello scratchpad della sessione) sui 3 export reali
+  Il costruttore sintetico e l'algoritmo di lettura sono stati verificati in Python (`tools/xls_proto.py` e `tools/xls_builder_check.py`: `python tools/xls_proto.py "../Androidapp/Arrivo con recapiti_ 2026-01-01 - 2026-07-30.xls"`) sui 3 export reali
   di Booking presenti nella repo Android: 30/40/44 righe, 0 cancellate, paese `de`, motivo `Svago`, dispositivo `Computer`, commissione 174,24 — come il test Android.
 - Differenze volute rispetto all'Android: `PhotoEncoder` riceve `Data` (ImageIO) e non un Uri; date inesistenti nel CSV (31/02) scartate; `safeErrorReason` ha anche la
   versione a due stringhe (`typeName`, `message`) per i test; l'ordine di parità dei suggerimenti sulle spese segue l'ordine delle categorie.
 - **Non verificato**: nulla compilato né eseguito in Swift. Rischi al primo build: tuple con etichette nei test, `guard var (a, b) = …`, `String(decoding:as: UTF16.self)`
   (ho aggiunto `utf16LE`), concorrenza (`Sendable`), `UTType` in `Photos.swift`. Percorso mini-stream dell'`.xls` non coperto da test.
-- Fermo qui: prossima è F3.
+- Salvati in `tools/` i due script Python di verifica e corretta l'intestazione di `docs/funzioni/F2.md`.
+- Fermo qui: prossima è F3, **ma serve prima una via per compilare** e quattro risposte dell'utente (Bundle ID, iPad, baseline Android, deploy delle Functions): vedi Da fare dall'utente.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — piano completo + F1 (livello dati) [revisione dopo il controllo del consulente]
 - Aggiunti: baseline Android (branch+commit), `tools/gen_inventario.py --check` (percorsi relativi, rileva file Android mancanti e righe aperte),
