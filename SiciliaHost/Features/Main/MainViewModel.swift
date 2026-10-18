@@ -88,4 +88,6 @@ final class MainViewModel {
     }
 
     func clearActionError() { actionError = nil }
+
+    func showActionError(_ message: String) { actionError = message }
 }

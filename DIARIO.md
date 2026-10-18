@@ -127,6 +127,7 @@ e correggere gli errori (vedi Prossimi passi).
   (6 pagine, parallax con `scrollTransition`), `TourOverlay` (velo con buco, alone che pulsa, fumetto di vetro; posizioni via preferenze di layout), `Router` (`Route`, `AppRouter`, segnaposto),
   `CompactTopBar`, limite del Dynamic Type. `project.yml`: pacchetto GoogleSignIn, schemi URL, entitlement dei link universali.
 - Test: `OnboardingTests` (presentazione, tour, `PendingInvite`, tipografia, colori di marca).
+- Vicolo cieco noto: "Ho un codice invito" salva il codice in `PendingInvite` ma la schermata di accettazione è F9; nel frattempo l'onboarding mostra un messaggio (`MainGateView`).
 - **Scoperto**: il backend ammette solo accessi Google → niente login email; Apple richiede una decisione (sezione sopra).
 - **Non verificato**: nulla compilato. Rischi: `scrollPosition(id:)` + `scrollTransition`, `anchorPreference`/`overlayPreferenceValue` attraverso un `TabView` in stile pagina, `info:`/`entitlements:` di XcodeGen con
   `GENERATE_INFOPLIST_FILE`, Canvas con riempimento pari-dispari, `sensoryFeedback(condition:)`. `GoogleService-Info.plist` e `REVERSED_CLIENT_ID` mancano: l'accesso Google non funzionerà finché non ci sono.

@@ -30,7 +30,12 @@ struct MainGateView: View {
                     OnboardingView(
                         isBusy: model.isBusy, error: model.actionError,
                         onCreateHouse: { router.push(.newCaseWizard(propertyId: nil, level: .app)) },
-                        onInviteCode: { PendingInvite.shared.set($0) },
+                        // TODO F9: la schermata di accettazione dell'invito (`InviteScreen`) non c'è ancora: il codice resta in memoria ma
+                        // nessuno lo usa. Finché manca, lo si dice invece di non fare niente.
+                        onInviteCode: {
+                            PendingInvite.shared.set($0)
+                            model.showActionError("L'accettazione degli inviti arriverà in una versione successiva dell'app.")
+                        },
                         onDismissError: model.clearActionError,
                         onLogout: onSignOut
                     )
