@@ -120,6 +120,9 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-10-18 — Claude Sonnet 5.5 — CI attivata
+- L'utente ha concesso lo scope `workflow` a `gh`: la bozza `docs/ci/ios.yml` è stata copiata in `.github/workflows/ios.yml` (resta anche in `docs/ci/` come riferimento). Il push su `main` fa partire il primo build: leggerne il log (`gh run list`, `gh run view --log-failed`) e correggere gli errori di compilazione prima di scrivere altro codice.
+
 ### 2026-10-18 — Claude Sonnet 5.5 — F3 parte 2 (accesso, onboarding, navigazione, tour)
 - Riletti `MainScreen`, `Navigation`, intro, onboarding, profilo, termini, tour, `MainScreenViewModel`, `LoginViewModel`, `MainActivity`.
 - Scritti: login Google (`AuthService.signInWithGoogle`, uscita dall'account Google), `RootView` con presentazione sopra a tutto e `onOpenURL` (ritorno Google + link d'invito → `PendingInvite`),

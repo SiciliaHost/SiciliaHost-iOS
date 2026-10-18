@@ -1,0 +1,76 @@
+# Da copiare in .github/workflows/ios.yml (serve il permesso `workflow` del token GitHub).
+# NON PROVATO: scritto da Windows, senza poterlo eseguire. Al primo giro su GitHub aspettarsi di dover correggere
+# qualcosa (versione di Xcode, nome del simulatore, errori di compilazione del codice Swift mai compilato).
+#
+# Costo: i runner macOS contano 10 minuti per ogni minuto reale sul piano gratuito per repo private (verificare le
+# condizioni attuali di GitHub). Per questo parte solo a mano o su push a `main`, e annulla le esecuzioni superate.
+name: iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["SiciliaHost/**", "SiciliaHostTests/**", "project.yml", ".github/workflows/ios.yml"]
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Strumenti
+        run: |
+          brew install xcodegen
+          xcodebuild -version
+          swift --version
+
+      - name: Genera il progetto Xcode
+        run: xcodegen generate
+
+      - name: Cache dei pacchetti Swift (Firebase)
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: spm-${{ hashFiles('project.yml') }}
+
+      - name: Scegli un simulatore iPhone
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available | grep -m1 "iPhone" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')
+          echo "Simulatore: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      # Compila e prova senza GoogleService-Info.plist: a runtime l'app mostrerebbe la schermata "Configurazione
+      # Firebase mancante", ma i test unitari non avviano Firebase.
+      - name: Compila e prova
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild test \
+            -project SiciliaHost.xcodeproj \
+            -scheme SiciliaHost \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -resultBundlePath build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build/xcodebuild.log
+
+      - name: Salva log e risultati
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: |
+            build/xcodebuild.log
+            build/TestResults.xcresult
+
+  python-tools:
+    # Controlli economici (Linux): il costruttore dei file .xls sintetici è coerente con il lettore di riferimento.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/xls_builder_check.py
