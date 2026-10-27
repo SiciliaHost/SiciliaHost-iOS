@@ -21,7 +21,7 @@
 Repo `../Androidapp`, branch **`feat/fold-finanze-selezioni`**, commit `379b5c5c51bf55e4f79bb4eb433cd3ba029bbd7e` (2026-10-18).
 È una cima di una pila di branch non ancora mergiati (vedi memoria del progetto: prezzi-ospiti-promozioni, stile-vetro, ecc.).
 **Domanda aperta per l'utente:** quale branch Android è la fonte di verità? Se la pila viene scartata, l'iOS avrebbe funzioni che nessuno usa.
-Callable usate da iOS: tutte presenti nel codice del sito (branch `feat/condizioni-host`, `957b0a8`); **deploy non verificato**
+Callable usate da iOS: quelle del pannello host sono DEPLOYATE (2026-10-27, vedi voce del Registro); le sole non rilasciate sono `startSitePublication`, `siteTrack`, l'obbligo di `termsVersion` in `submitListing` e l'accesso Apple, che vivono nel branch `feat/apple-signin-host` del sito (contiene i commit dell'ex `feat/condizioni-host`, `957b0a8`, cancellato il 2026-10-27); **deploy di questi non verificato**
 (dettaglio in `docs/funzioni/F1.md`). `python tools/gen_inventario.py --check` confronta l'inventario con la repo Android.
 
 ## Il progetto in breve
@@ -120,6 +120,13 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-10-27 — Claude Sonnet 5.5 — (sessione sito/backend, nessun codice iOS toccato) backend rilasciato e branch ripuliti
+- Pannello host del sito (fasi 1f, 2, 3, 4) completato e RILASCIATO: Functions deployate su `siciliahostmanager` (9 esistenti modificate + 25 nuove: prenotazioni/iCal/Excel Booking, finanze, scorte, check-in) e sito spinto su `origin/master` (`a37d6ef`). Le callable nuove usano gli stessi documenti dell'app Android (`reservations`, `expenses`, `inventory`, `guest_records`): l'iOS può riusarle così come sono.
+- **Regola che cambia anche per iOS:** una casa è sul sito (e prenotabile) solo se `publishedOnSite == true` E stato approvato (assente o `approved`). `createDirectBooking` ora rifiuta con not-found una casa non pubblica. `upsertProperty` valida più campi (foto solo file della casa, `cancellationPolicy`, `requiresManualConfirmation`, wifi/referente/consigli/traduzioni): l'iOS deve rispettare gli stessi limiti.
+- Le callable di scorte e check-in hanno `maxInstances: 10`; una scheda ospite con `sendError` = «Esito incerto…» lo conserva se modificata dal sito (l'app Android invece lo azzera con `set`: da non replicare in iOS).
+- Il branch Android baseline resta `feat/fold-finanze-selezioni` (con `feat/apple-signin-host` e `feat/import-foto-airbnb`); cancellati i branch già contenuti in altri. Non verificato: nulla di iOS compilato o provato in questa sessione.
+- Fermo qui: nessun lavoro iOS oggi; Prossimi passi invariati.
 
 ### 2026-10-18 — Claude Sonnet 5.5 — prima revisione visiva (screenshot del run 39132251981)
 - Visti: accesso, presentazione, home, tour, galleria (palette, tipografia, pulsanti, card). **Fedeli al marchio e all'Android**: gradiente verde del login con logo e pulsanti bianchi, sfondo ambiente a macchie, card con filo di luce, barra a pillola di vetro con indicatore verde, presentazione con disco di vetro e tessere, tour con buco e alone.
