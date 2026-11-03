@@ -254,8 +254,8 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/site/position/PositionPickerDialog.kt` | 382 | `Features/Cases/PositionViews.swift` | compilato |
 | `ui/site/position/PositionSection.kt` | 130 | `Features/Cases/PositionViews.swift` | compilato |
 | `ui/site/position/PositionState.kt` | 94 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
-| `ui/wizard/AppLevelSteps.kt` | 113 | `Features/Wizard/NewCaseWizardView.swift` | scritto |
-| `ui/wizard/NewCaseWizardScreen.kt` | 489 | `Features/Wizard/NewCaseWizardView.swift` | scritto |
+| `ui/wizard/AppLevelSteps.kt` | 113 | `Features/Wizard/NewCaseWizardView.swift` | compilato |
+| `ui/wizard/NewCaseWizardScreen.kt` | 489 | `Features/Wizard/NewCaseWizardView.swift` | compilato |
 | `ui/wizard/WizardLogic.kt` | 68 | `Core/Logic/CaseLogic.swift` | compilato+test |
 | 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/cases/CaseLogicTest.kt` | 91 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
@@ -275,24 +275,24 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/site/position/PositionStateTest.kt` | 200 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/wizard/WizardLogicTest.kt` | 79 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | `ui/cases/DeleteCase.kt` | 103 | `Core/Logic/CaseLogic.swift` (logica) + `Features/Cases/CaseDetailView.swift` (`DeleteCaseSheet`) | compilato |
-| `ui/wizard/importing/ImportStep.kt` | 258 | `Features/Wizard/NewCaseWizardView.swift` (`ImportStepView`, `ReviewBanner`, `ImportedPhotosView`) | scritto |
-| `ui/wizard/importing/ImportApply.kt` | 110 | `Core/Logic/ListingImportFlow.swift` | scritto+test |
-| `ui/wizard/importing/ImportViewModel.kt` | 175 | `Features/Wizard/ImportModel.swift` | scritto |
-| `ui/wizard/importing/OwnershipDeclaration.kt` | 9 | `Core/Logic/ListingImportFlow.swift` | scritto+test |
-| `ui/wizard/importing/ImportRepository.kt` | 75 | `Features/Wizard/ImportModel.swift` (`ImportService`) + `Core/Logic/ListingImportFlow.swift` (errori, `PhotoProgress`) | scritto+test |
-| `ui/wizard/importing/ListingImport.kt` | 105 | `Core/Logic/ListingImportFlow.swift` | scritto+test |
-| `ui/wizard/importing/ImportUrls.kt` | 41 | `Core/Logic/ListingImportFlow.swift` | scritto+test |
-| `ui/wizard/importing/ImportReview.kt` | 52 | `Core/Logic/ListingImportFlow.swift` | scritto+test |
-| `ui/wizard/importing/ListingFetcher.kt` | 186 | `Features/Wizard/ImportModel.swift` (download: URLSession, WKWebView) + `Core/Logic/ListingImportFlow.swift` (parte pura) | scritto+test |
+| `ui/wizard/importing/ImportStep.kt` | 258 | `Features/Wizard/NewCaseWizardView.swift` (`ImportStepView`, `ReviewBanner`, `ImportedPhotosView`) | compilato |
+| `ui/wizard/importing/ImportApply.kt` | 110 | `Core/Logic/ListingImportFlow.swift` | compilato+test |
+| `ui/wizard/importing/ImportViewModel.kt` | 175 | `Features/Wizard/ImportModel.swift` | compilato |
+| `ui/wizard/importing/OwnershipDeclaration.kt` | 9 | `Core/Logic/ListingImportFlow.swift` | compilato+test |
+| `ui/wizard/importing/ImportRepository.kt` | 75 | `Features/Wizard/ImportModel.swift` (`ImportService`) + `Core/Logic/ListingImportFlow.swift` (errori, `PhotoProgress`) | compilato+test |
+| `ui/wizard/importing/ListingImport.kt` | 105 | `Core/Logic/ListingImportFlow.swift` | compilato+test |
+| `ui/wizard/importing/ImportUrls.kt` | 41 | `Core/Logic/ListingImportFlow.swift` | compilato+test |
+| `ui/wizard/importing/ImportReview.kt` | 52 | `Core/Logic/ListingImportFlow.swift` | compilato+test |
+| `ui/wizard/importing/ListingFetcher.kt` | 186 | `Features/Wizard/ImportModel.swift` (download: URLSession, WKWebView) + `Core/Logic/ListingImportFlow.swift` (parte pura) | compilato+test |
 | 🧪 `ui/cases/DeleteCaseTest.kt` | 43 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
-| 🧪 `ui/wizard/importing/ListingFetcherTest.kt` | 91 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/ImportReviewTest.kt` | 30 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/ImportUrlsTest.kt` | 39 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/ImportApplyTest.kt` | 143 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/PhotoProgressTest.kt` | 45 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/OwnershipDeclarationTest.kt` | 20 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/ListingImportTest.kt` | 107 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
-| 🧪 `ui/wizard/importing/ImportRepositoryTest.kt` | 28 | `SiciliaHostTests/ListingImportTests.swift` | scritto |
+| 🧪 `ui/wizard/importing/ListingFetcherTest.kt` | 91 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/ImportReviewTest.kt` | 30 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/ImportUrlsTest.kt` | 39 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/ImportApplyTest.kt` | 143 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/PhotoProgressTest.kt` | 45 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/OwnershipDeclarationTest.kt` | 20 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/ListingImportTest.kt` | 107 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/importing/ImportRepositoryTest.kt` | 28 | `SiciliaHostTests/ListingImportTests.swift` | compilato, verde |
 
 ## F10 — Sfondo, notifiche e sincronizzazioni
 
