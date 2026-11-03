@@ -198,3 +198,57 @@ struct PriceService {
         try await callCloud(functions, name, payload)
     }
 }
+
+// MARK: Messaggi degli ospiti
+
+/// Callable della messaggistica interna (sito, `functions/src/messaging/messagingApi.ts`), sempre come host
+/// (`role = "host"`): il server controlla a ogni chiamata che l'utente gestisca la casa della conversazione.
+/// Le collezioni `conversations` e `hostContactDetails` sono chiuse ai client: niente listener, la chat si rilegge.
+struct MessagingService {
+    private let functions = Functions.functions()
+
+    func status() async throws -> MessagingStatus {
+        parseMessagingStatus(try await call("getMessagingStatus", [:]))
+    }
+
+    func list() async throws -> [Conversation] {
+        parseConversations(try await call("listConversations", ["role": "host"]))
+    }
+
+    /// `after` = istante dell'ultimo messaggio già mostrato: tornano solo i nuovi.
+    func open(_ conversationId: String, after: Int64? = nil) async throws -> (conversation: Conversation, messages: [ChatMessage]) {
+        var payload: [String: Any?] = ["role": "host", "conversationId": conversationId]
+        if let after { payload["after"] = after }
+        guard let detail = parseConversationDetail(try await call("getConversation", payload)) else {
+            throw ServiceError(message: "Risposta non valida dal server")
+        }
+        return detail
+    }
+
+    func send(_ conversationId: String, text: String) async throws -> ChatMessage {
+        let data = try await call("sendMessage", ["role": "host", "conversationId": conversationId, "text": text])
+        guard let message = parseChatMessage((data as? [String: Any])?["message"]) else {
+            throw ServiceError(message: "Risposta non valida dal server")
+        }
+        return message
+    }
+
+    func contactDetails() async throws -> HostContactDetails? {
+        parseContactDetails((try await call("getMyContactDetails", [:]) as? [String: Any])?["details"])
+    }
+
+    /// Numeri vuoti = nessun recapito. Il server rifiuta un numero non valido (`invalid-argument`).
+    func setContactDetails(_ details: HostContactDetails) async throws -> HostContactDetails? {
+        // nil → NSNull: un Optional vuoto dentro un dizionario annidato non lo converte l'SDK.
+        let payload: [String: Any] = [
+            "phone": details.phone.map { $0 as Any } ?? NSNull(),
+            "whatsapp": details.whatsapp.map { $0 as Any } ?? NSNull(),
+        ]
+        let data = try await call("setMyContactDetails", ["details": payload])
+        return parseContactDetails((data as? [String: Any])?["details"])
+    }
+
+    private func call(_ name: String, _ payload: [String: Any?]) async throws -> Any? {
+        try await callCloud(functions, name, payload)
+    }
+}

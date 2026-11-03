@@ -16,7 +16,14 @@ struct MainTabView: View {
     /// Il tab Case conserva elenco e filtro quando si cambia sezione (il ViewModel dell'Android vive quanto l'Activity).
     @State private var cases = CasesModel()
 
+    /// Messaggi: il server abilita la scheda (best effort, come `refreshMessaging` dell'Android) e il modello vive quanto lo shell.
+    @State private var messagingEnabled = false
+    @State private var messages = MessagesModel()
+    /// Chat aperta: niente barra flottante (la tastiera e il campo di risposta hanno la precedenza).
+    @State private var chatOpen = false
+
     private let db = FirestoreService()
+    private let messagingService = MessagingService()
     private let siteContent = SiteContentService()
     private var onboarding: OnboardingController { .shared }
 
@@ -28,21 +35,24 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        let tabs = MainTabs.visible(for: scope)
+        let tabs = MainTabs.visible(for: scope, messagingEnabled: messagingEnabled)
         ZStack(alignment: .bottom) {
             TabView(selection: $selected) {
                 ForEach(tabs) { tab in
                     content(for: tab)
                         // La barra flottante non deve coprire la fine delle liste.
-                        .safeAreaPadding(.bottom, Dimens.bottomBarInset)
+                        .safeAreaPadding(.bottom, hidesBar(for: tab) ? 0 : Dimens.bottomBarInset)
                         .tag(tab)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 
-            SiciliaNavBar(tabs: tabs, selected: $selected)
-                .tourTarget(.navBar)
-                .padding(.bottom, 8)
+            if !hidesBar(for: selected) {
+                SiciliaNavBar(tabs: tabs, selected: $selected)
+                    .tourTarget(.navBar)
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
         .overlayPreferenceValue(TourBoundsKey.self) { anchors in
             if tour.isActive {
@@ -71,6 +81,10 @@ struct MainTabView: View {
             withAnimation(.emphasized) { selected = tab }
         }
         .task(id: scope) { await loadApprovedListings() }
+        .task(id: scope) { await refreshMessaging() }
+        // Tornando dalla scheda Messaggi lo stato si rilegge (nuovi ospiti, case aggiunte).
+        .onChange(of: selected) { old, _ in if old == .messaggi { Task { await refreshMessaging() } } }
+        .animation(.easeInOut(duration: 0.2), value: chatOpen)
         // Tour guidato: dopo la prima casa, o da Profilo → "Rivedi il tour".
         .onChange(of: onboarding.tourRequested, initial: true) { _, requested in
             guard requested, let scope else { return }
@@ -96,6 +110,8 @@ struct MainTabView: View {
                 onEditPrices: { router.push(.priceEditor) }
             )
         case .scorte: InventoryView(scope: scope)
+        case .messaggi:
+            MessagesView(model: messages, isActive: selected == .messaggi, onChatOpen: { chatOpen = $0 })
         case .finanze: FinanceView(scope: scope)
         case .case_:
             CasesView(
@@ -105,6 +121,15 @@ struct MainTabView: View {
                 onOpenSiteWizard: { router.push(.newCaseWizard(propertyId: $0, level: .site)) }
             )
         }
+    }
+
+    private func hidesBar(for tab: MainTab) -> Bool { tab == .messaggi && chatOpen }
+
+    /// Senza risposta (Functions non rilasciate, offline) la scheda resta nascosta; senza case caricate non compare.
+    private func refreshMessaging() async {
+        guard scope != nil else { messagingEnabled = false; return }
+        let status = try? await messagingService.status()
+        if let status { messagingEnabled = status.hostEnabled }
     }
 
     private func loadApprovedListings() async {

@@ -53,9 +53,9 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `data/repository/ListingRepositoryParseTest.kt` | 30 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
 | 🧪 `data/repository/ParseSeasonalRatesTest.kt` | 39 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
 | 🧪 `data/repository/PriceRepositoryParseTest.kt` | 31 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
-| `data/model/Messaging.kt` | 51 |  | — |
-| `data/repository/MessagingRepository.kt` | 144 |  | — |
-| 🧪 `data/repository/MessagingRepositoryTest.kt` | 88 |  | — |
+| `data/model/Messaging.kt` | 51 | `Core/Models/Messaging.swift` | scritto |
+| `data/repository/MessagingRepository.kt` | 144 | `Core/Services/CloudFunctionsServices.swift (MessagingService), CallableParsers.swift, Core/Logic/MessagesFormat.swift (mergeMessages, isValidPhone)` | scritto |
+| 🧪 `data/repository/MessagingRepositoryTest.kt` | 88 | `SiciliaHostTests/MessagingTests.swift` | scritto |
 
 ## F2 — Logica pura e utilità
 
@@ -127,9 +127,9 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
 | `ui/main/LoadErrorScreen.kt` | 79 | `Features/Main/MainGateView.swift` | scritto |
 | `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | scritto |
-| `ui/main/MainScreen.kt` | 427 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | parziale→F12 (scheda Messaggi del 2026-11-03 da aggiungere) |
-| `ui/main/MainScreenViewModel.kt` | 135 | `Features/Main/MainViewModel.swift` | parziale→F12 (`refreshMessaging`) |
-| `ui/main/MainTabs.kt` | 30 | `Features/Main/MainTab.swift` | parziale→F12 (`MainTab.Messaggi`, `messagingEnabled`) |
+| `ui/main/MainScreen.kt` | 427 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | scritto (scheda Messaggi in `MainTabView`) |
+| `ui/main/MainScreenViewModel.kt` | 135 | `Features/Main/MainViewModel.swift` | parziale (`refreshMessaging` è in `MainTabView`, senza badge: l'Android non lo mostra) |
+| `ui/main/MainTabs.kt` | 30 | `Features/Main/MainTab.swift` | scritto (`MainTab.messaggi`, `messagingEnabled`) |
 | `ui/main/OnboardingScreen.kt` | 212 | `Features/Main/OnboardingView.swift` | scritto |
 | `ui/profile/ProfileScreen.kt` | 138 | `Features/Profile/ProfileView.swift` | scritto (senza la riga diagnostica del Fold) |
 | `ui/style/AmbientBackground.kt` | 81 | `UI/Style/AmbientBackground.swift` | scritto |
@@ -147,7 +147,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/adaptive/LayoutModeTest.kt` | 32 | `` | n/a — solo iPhone |
 | 🧪 `ui/intro/IntroLogicTest.kt` | 30 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
-| 🧪 `ui/main/MainTabsTest.kt` | 90 | `SiciliaHostTests/AccessScopeTests.swift` | parziale→F12 (casi Messaggi) |
+| 🧪 `ui/main/MainTabsTest.kt` | 90 | `SiciliaHostTests/AccessScopeTests.swift` | scritto (caso Messaggi in `MessagingTests`) |
 | 🧪 `ui/tour/TourLogicTest.kt` | 39 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | `ui/profile/PrivacyContent.kt` | 52 |  | — |
 | `ui/profile/ProfileViewModel.kt` | 59 |  | — |
@@ -309,10 +309,10 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/messages/MessagesScreen.kt` | 391 |  | — |
-| `ui/messages/MessagesViewModel.kt` | 204 |  | — |
-| `ui/messages/MessagesFormat.kt` | 81 |  | — |
-| 🧪 `ui/messages/MessagesFormatTest.kt` | 35 |  | — |
+| `ui/messages/MessagesScreen.kt` | 391 | `Features/Messages/MessagesView.swift` | scritto |
+| `ui/messages/MessagesViewModel.kt` | 204 | `Features/Messages/MessagesModel.swift` | scritto |
+| `ui/messages/MessagesFormat.kt` | 81 | `Core/Logic/MessagesFormat.swift` | scritto |
+| 🧪 `ui/messages/MessagesFormatTest.kt` | 35 | `SiciliaHostTests/MessagingTests.swift` | scritto |
 
 ## Risorse e manifest
 

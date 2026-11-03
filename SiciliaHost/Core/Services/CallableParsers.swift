@@ -157,3 +157,63 @@ func parseSurcharges(_ data: Any?) -> [Int: Double] {
     }
     return result
 }
+
+// MARK: Messaggistica ospite ↔ host (`MessagingRepository.kt`)
+
+private func stayRequest(_ data: Any?) -> StayRequest? {
+    guard let map = dict(data) else { return nil }
+    return StayRequest(checkIn: map["checkIn"] as? String, checkOut: map["checkOut"] as? String, guests: int(map["guests"]))
+}
+
+private func bookingSummary(_ data: Any?) -> BookingSummary? {
+    guard let map = dict(data), let id = map["id"] as? String, let status = map["status"] as? String,
+          let checkIn = map["checkIn"] as? String, let checkOut = map["checkOut"] as? String else { return nil }
+    return BookingSummary(
+        id: id, status: status, checkIn: checkIn, checkOut: checkOut, guests: int(map["guests"]),
+        totalPrice: double(map["totalPrice"]), depositAmount: double(map["depositAmount"])
+    )
+}
+
+func parseConversation(_ data: Any?) -> Conversation? {
+    guard let map = dict(data), let id = map["id"] as? String, let propertyId = map["propertyId"] as? String else { return nil }
+    let last: LastMessage? = dict(map["lastMessage"]).flatMap { m in
+        guard let text = m["text"] as? String else { return nil }
+        return LastMessage(text: text, from: m["from"] as? String ?? "", at: int64(m["at"]) ?? 0)
+    }
+    return Conversation(
+        id: id,
+        propertyId: propertyId,
+        propertyName: dict(map["propertyTitle"])?["it"] as? String ?? "",
+        guestName: map["guestName"] as? String ?? "",
+        guestEmail: map["guestEmail"] as? String,
+        request: stayRequest(map["request"]) ?? StayRequest(),
+        booking: bookingSummary(map["booking"]),
+        lastMessage: last,
+        unread: map["unread"] as? Bool == true,
+        updatedAt: int64(map["updatedAt"]) ?? 0
+    )
+}
+
+func parseConversations(_ data: Any?) -> [Conversation] {
+    ((dict(data)?["conversations"] as? [Any]) ?? []).compactMap(parseConversation)
+}
+
+func parseChatMessage(_ data: Any?) -> ChatMessage? {
+    guard let map = dict(data), let id = map["id"] as? String, let from = map["from"] as? String, let at = int64(map["at"]) else { return nil }
+    return ChatMessage(id: id, from: from, text: map["text"] as? String ?? "", at: at, context: stayRequest(map["context"]))
+}
+
+func parseConversationDetail(_ data: Any?) -> (conversation: Conversation, messages: [ChatMessage])? {
+    guard let map = dict(data), let conversation = parseConversation(map["conversation"]) else { return nil }
+    return (conversation, ((map["messages"] as? [Any]) ?? []).compactMap(parseChatMessage))
+}
+
+func parseMessagingStatus(_ data: Any?) -> MessagingStatus {
+    guard let host = dict(dict(data)?["host"]) else { return MessagingStatus() }
+    return MessagingStatus(hostEnabled: host["enabled"] as? Bool == true, hostUnread: int(host["unread"]) ?? 0)
+}
+
+func parseContactDetails(_ data: Any?) -> HostContactDetails? {
+    guard let map = dict(data) else { return nil }
+    return HostContactDetails(phone: map["phone"] as? String, whatsapp: map["whatsapp"] as? String)
+}
