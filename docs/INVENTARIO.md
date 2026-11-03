@@ -1,14 +1,14 @@
 # Inventario Android → iOS
 
-**Spec di riferimento (baseline Android):** repo `Androidapp`, branch `app-main-2026-09-28`, commit
-`d16231750c4db3d4478aa46c353a550c3075750d` (2026-11-02; prima: `feat/fold-finanze-selezioni` `379b5c5`, 2026-10-18). Se l'Android cambia, aggiornare questa riga e rilanciare il controllo.
+**Spec di riferimento (baseline Android):** repo `Androidapp`, branch `main`, commit
+`a43eb44eff144dc3c247a56f3e8e05c69132a02e` (2026-11-03; prima: `app-main-2026-09-28` `d162317`, e ancora prima `feat/fold-finanze-selezioni` `379b5c5`). Se l'Android cambia, aggiornare questa riga e rilanciare il controllo.
 Controllo di completezza (da un clone con `../Androidapp` accanto): `python tools/gen_inventario.py --check` (aggiungi `--strict` nell'audit finale di F11).
 
 Ogni file Kotlin dell'app Android (sorgenti e test) con la fase che lo porta. **Nessun file è fuori dal piano**: lo script di generazione fallisce se un file non ha fase. Aggiorna le colonne *iOS* e *Stato* man mano che porti; la fase F11 chiude solo se non resta nessuna riga con stato `—` (le uniche eccezioni ammesse sono `n/a` con motivo scritto qui).
 
 Stati: `—` da fare · `scritto` scritto ma mai compilato · `compilato` · `provato` (simulatore/dispositivo) · `n/a` non serve su iOS (motivo in nota).
 
-Totale (alla baseline): 242 file Kotlin (alla vecchia baseline erano 211: 154 sorgenti, 57 test).
+Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 ## F1 — Livello dati completo
 
@@ -53,6 +53,9 @@ Totale (alla baseline): 242 file Kotlin (alla vecchia baseline erano 211: 154 so
 | 🧪 `data/repository/ListingRepositoryParseTest.kt` | 30 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
 | 🧪 `data/repository/ParseSeasonalRatesTest.kt` | 39 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
 | 🧪 `data/repository/PriceRepositoryParseTest.kt` | 31 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
+| `data/model/Messaging.kt` | 51 |  | — |
+| `data/repository/MessagingRepository.kt` | 144 |  | — |
+| 🧪 `data/repository/MessagingRepositoryTest.kt` | 88 |  | — |
 
 ## F2 — Logica pura e utilità
 
@@ -124,9 +127,9 @@ Totale (alla baseline): 242 file Kotlin (alla vecchia baseline erano 211: 154 so
 | `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
 | `ui/main/LoadErrorScreen.kt` | 79 | `Features/Main/MainGateView.swift` | scritto |
 | `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | scritto |
-| `ui/main/MainScreen.kt` | 419 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | scritto (pager, barra, profilo, tour); i contenuti delle sezioni sono F4–F9 |
-| `ui/main/MainScreenViewModel.kt` | 105 | `Features/Main/MainViewModel.swift` | scritto |
-| `ui/main/MainTabs.kt` | 26 | `Features/Main/MainTab.swift` | scritto+test |
+| `ui/main/MainScreen.kt` | 427 | `Features/Main/MainTabView.swift, SiciliaNavBar.swift` | parziale→F12 (scheda Messaggi del 2026-11-03 da aggiungere) |
+| `ui/main/MainScreenViewModel.kt` | 135 | `Features/Main/MainViewModel.swift` | parziale→F12 (`refreshMessaging`) |
+| `ui/main/MainTabs.kt` | 30 | `Features/Main/MainTab.swift` | parziale→F12 (`MainTab.Messaggi`, `messagingEnabled`) |
 | `ui/main/OnboardingScreen.kt` | 212 | `Features/Main/OnboardingView.swift` | scritto |
 | `ui/profile/ProfileScreen.kt` | 138 | `Features/Profile/ProfileView.swift` | scritto (senza la riga diagnostica del Fold) |
 | `ui/style/AmbientBackground.kt` | 81 | `UI/Style/AmbientBackground.swift` | scritto |
@@ -144,7 +147,7 @@ Totale (alla baseline): 242 file Kotlin (alla vecchia baseline erano 211: 154 so
 | 🧪 `ui/adaptive/LayoutModeTest.kt` | 32 | `` | n/a — solo iPhone |
 | 🧪 `ui/intro/IntroLogicTest.kt` | 30 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
-| 🧪 `ui/main/MainTabsTest.kt` | 80 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
+| 🧪 `ui/main/MainTabsTest.kt` | 90 | `SiciliaHostTests/AccessScopeTests.swift` | parziale→F12 (casi Messaggi) |
 | 🧪 `ui/tour/TourLogicTest.kt` | 39 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | `ui/profile/PrivacyContent.kt` | 52 |  | — |
 | `ui/profile/ProfileViewModel.kt` | 59 |  | — |
@@ -301,6 +304,15 @@ Totale (alla baseline): 242 file Kotlin (alla vecchia baseline erano 211: 154 so
 | `sync/ICalSyncWorker.kt` | 251 | `Core/Logic/ICalSync.swift (parte pura: parseEvents, buildSyncPlan, safeErrorReason)` | parziale→F10 (download, scrittura, pianificazione) |
 | 🧪 `sync/ICalSyncWorkerTest.kt` | 171 | `SiciliaHostTests/LogicTests.swift` | scritto |
 | `services/NotificationChannels.kt` | 29 |  | — |
+
+## F12 — Messaggi degli ospiti
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `ui/messages/MessagesScreen.kt` | 391 |  | — |
+| `ui/messages/MessagesViewModel.kt` | 204 |  | — |
+| `ui/messages/MessagesFormat.kt` | 81 |  | — |
+| 🧪 `ui/messages/MessagesFormatTest.kt` | 35 |  | — |
 
 ## Risorse e manifest
 

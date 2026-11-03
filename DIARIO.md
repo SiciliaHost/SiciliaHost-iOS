@@ -18,9 +18,10 @@
 
 ## Baseline Android (spec di riferimento)
 
-Repo `../Androidapp` (GitHub `SiciliaHost/Androidapp`), branch **`app-main-2026-09-28`**, commit `d16231750c4db3d4478aa46c353a550c3075750d` (2026-11-02).
-**Confermato dall'utente il 2026-11-03.** Sostituisce la vecchia baseline `feat/fold-finanze-selezioni` (`379b5c5`, 2026-10-18), che su GitHub non esiste:
-il nuovo branch la contiene più 31 file (già in inventario). Per aggiornare: `git -C ../Androidapp fetch origin app-main-2026-09-28` e `python tools/gen_inventario.py --check`.
+Repo `../Androidapp` (GitHub `SiciliaHost/Androidapp`), branch **`main`**, commit `a43eb44eff144dc3c247a56f3e8e05c69132a02e` (2026-11-03).
+**Indicato dall'utente il 2026-11-03** ("ho aggiornato l'app android"). Rispetto al riferimento precedente (`app-main-2026-09-28`, `d162317`, confermato poco prima)
+aggiunge solo la scheda **Messaggi** (7 file nuovi → F1 e la nuova fase **F12**; `MainTabs`/`MainScreen`/`MainScreenViewModel` cambiati → righe F3 `parziale→F12`).
+I file di F4/F5 sono invariati. Ancora prima: `feat/fold-finanze-selezioni` (`379b5c5`, mai su GitHub). Per aggiornare: `git -C ../Androidapp fetch origin main` e `python tools/gen_inventario.py --check`.
 Callable usate da iOS: quelle del pannello host sono DEPLOYATE (2026-10-27, vedi voce del Registro); le sole non rilasciate sono `startSitePublication`, `siteTrack`, l'obbligo di `termsVersion` in `submitListing` e l'accesso Apple, che vivono nel branch `feat/apple-signin-host` del sito (contiene i commit dell'ex `feat/condizioni-host`, `957b0a8`, cancellato il 2026-10-27); **deploy di questi non verificato**
 (dettaglio in `docs/funzioni/F1.md`). `python tools/gen_inventario.py --check` confronta l'inventario con la repo Android.
 
@@ -40,8 +41,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Stato attuale
 
-- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario in `docs/INVENTARIO.md`, ora con **tutti i 242 file Kotlin** del branch Android
-  `app-main-2026-09-28` (i 31 file nati dopo la baseline aggiunti il 2026-11-03 nelle fasi F3/F9/F10; `python tools/gen_inventario.py --check`: righe aperte 109).
+- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario in `docs/INVENTARIO.md`, ora con **tutti i 249 file Kotlin** di `main` (`a43eb44`): 31 file aggiunti il 2026-11-03 (F3/F9/F10) e 7 della scheda Messaggi (F1/F12); righe aperte 120.
 - **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
 - **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): SCRITTE il 2026-11-03** (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`).
   Esito della compilazione in CI: vedi la voce del Registro del 2026-11-03.
@@ -52,7 +52,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 0. Se la CI della sessione 2026-11-03 non era verde: correggere gli errori di F4/F5 (`gh run view --log-failed` o i log del workflow) prima di scrivere altro.
    Guardare gli screenshot nuovi `arrivals` e `agenda` (artefatto `ios-screenshots`).
-1. **F8 — Check-in Alloggiati** (le righe della Home ci portano già), poi F6 (Scorte), F7 (Finanze), F9 (Case…), più le righe F3 nuove del Profilo.
+1. **F8 — Check-in Alloggiati** (le righe della Home ci portano già), poi F6 (Scorte), F7 (Finanze), F9 (Case…), F12 (Messaggi), più le righe F3 nuove del Profilo.
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
 3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
@@ -87,7 +87,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Risposte dell'utente (2026-10-18)
 
-- **Baseline Android confermata**: `feat/fold-finanze-selezioni` (`379b5c5c`) — superata il 2026-11-03 da `app-main-2026-09-28` (vedi in alto).
+- **Baseline Android confermata**: `feat/fold-finanze-selezioni` (`379b5c5c`) — superata il 2026-11-03 da `app-main-2026-09-28` e poi da `main` `a43eb44` (vedi in alto).
 - **Cloud Functions**: l'utente conferma che esistono (deploy non verificato da me; controllare con `firebase functions:list` al primo test reale).
 - **iPad: NO** → solo iPhone (`TARGETED_DEVICE_FAMILY: 1` in `project.yml`; nessun layout a due colonne/split da portare: gli ex layout "Fold/cerniera" di F3 sono `n/a`).
 - **L'utente non ha né Mac né iPhone.** Compilazione: CI macOS su GitHub Actions (bozza in `docs/ci/ios.yml` da copiare in `.github/workflows/`, non provata).
@@ -117,6 +117,10 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-03 — Claude (sessione cloud) — nuovo riferimento Android: `main` `a43eb44`
+- L'utente ha aggiornato l'app Android: il riferimento passa a `main` (scheda Messaggi). Inventario (249 file), `tools/gen_inventario.py` (regola `ui/messages/` → F12)
+  e `docs/PIANO.md` (fase F12) aggiornati. Nessun codice iOS cambiato per questo.
 
 ### 2026-11-03 — Claude (sessione cloud, Linux senza Swift) — F4 Home e F5 Agenda/prenotazione/prezzi
 - **Fonte Android**: la repo `SiciliaHost/Androidapp` su GitHub non ha il branch baseline `feat/fold-finanze-selezioni`; ha `app-main-2026-09-28`

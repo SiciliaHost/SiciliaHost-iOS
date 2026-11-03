@@ -32,6 +32,7 @@ Consiglio: far partire G dopo F1–F2. Alternativa da verificare PRIMA di afferm
 | **F9** | Case, sito, posizione, membri, inviti | 57 |
 | **F10** | Sfondo, notifiche, sincronizzazioni | 5 |
 | **F11** | Rifinitura e rilascio | risorse |
+| **F12** | Messaggi degli ospiti (aggiunta Android 2026-11-03) | 4 + 3 F1 |
 
 ## F1 — Livello dati completo
 Tutto ciò che parla con Firebase, senza interfaccia.
@@ -91,3 +92,9 @@ Notifiche push (APNs + FCM, registrazione token, `MyFirebaseMessagingService`, n
 
 ## F11 — Rifinitura e rilascio
 Icona e logo, testi/localizzazione, accessibilità (VoiceOver, Dynamic Type), modalità scura, iPad (se deciso), prestazioni, privacy (App Privacy, etichette dati, motivi di uso fotocamera/notifiche), schede App Store, TestFlight, revisione Apple. **Audit finale dell'inventario**: nessuna riga `—`, tutti i test portati e verdi, confronto funzionale schermata per schermata con l'app Android su dispositivo.
+
+## F12 — Messaggi degli ospiti (aggiunta 2026-11-03)
+Scheda **Messaggi** (`ui/messages/*`, dati in `data/model/Messaging.kt` e `data/repository/MessagingRepository.kt`, F1): conversazioni degli ospiti del sito
+sulle case che l'utente gestisce. La scheda compare solo se `getMessagingStatus().host.enabled`. Tutto via callable del sito (`listConversations`, `getConversation`,
+`sendMessage` con `role = "host"`, `get/setMyContactDetails`); nessun listener: chat aperta riletta ogni 8 s (solo i nuovi, `after`), elenco ogni ~30 s, solo in primo piano.
+Intestazione del soggiorno (`StayHeader`), «Recapiti» dell'host (telefono, WhatsApp). Test: `MessagingRepositoryTest`, `MessagesFormatTest`, casi nuovi di `MainTabsTest`.

@@ -35,13 +35,14 @@ RULES = [
     ("ui/checkin/", "F8"),
     ("ui/cases/", "F9"), ("ui/site/", "F9"), ("ui/wizard/", "F9"), ("ui/members/", "F9"),
     ("ui/invite/", "F9"), ("ui/property/", "F9"),
+    ("ui/messages/", "F12"),
 ]
 
 PHASE_TITLES = {
     "F1": "Livello dati completo", "F2": "Logica pura e utilità", "F3": "Accesso, shell, stile e navigazione",
     "F4": "Home", "F5": "Agenda, prenotazioni e prezzi", "F6": "Scorte", "F7": "Finanze", "F8": "Check-in Alloggiati",
     "F9": "Case, sito, posizione, membri e inviti", "F10": "Sfondo, notifiche e sincronizzazioni",
-    "F11": "Rifinitura e rilascio",
+    "F11": "Rifinitura e rilascio", "F12": "Messaggi degli ospiti",
 }
 
 ROW = re.compile(r"^\| (🧪 )?`([^`]+)` \| (\d+) \|[^|]*\|\s*([^|]*?)\s*\|$")
