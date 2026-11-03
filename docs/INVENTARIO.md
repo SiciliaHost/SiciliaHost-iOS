@@ -218,15 +218,15 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
 | `ui/cases/AppFieldsDraft.kt` | 128 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
-| `ui/cases/CaseDetailScreen.kt` | 342 |  | — |
+| `ui/cases/CaseDetailScreen.kt` | 342 | `Features/Cases/CaseDetailView.swift` | scritto |
 | `ui/cases/CaseLogic.kt` | 93 | `Core/Logic/CaseLogic.swift` | compilato+test |
 | `ui/cases/CaseSaveLogic.kt` | 26 | `Core/Logic/CaseLogic.swift` | compilato+test |
-| `ui/cases/CaseSections.kt` | 590 |  | — |
-| `ui/cases/CasesScreen.kt` | 359 |  | — |
-| `ui/cases/CasesViewModel.kt` | 259 |  | — |
-| `ui/cases/HostsScreen.kt` | 142 |  | — |
-| `ui/cases/ListingStatusUi.kt` | 41 |  | — |
-| `ui/cases/PublishOnSiteCard.kt` | 31 |  | — |
+| `ui/cases/CaseSections.kt` | 590 | `Features/Cases/CaseSections.swift` | scritto |
+| `ui/cases/CasesScreen.kt` | 359 | `Features/Cases/CasesView.swift` | scritto |
+| `ui/cases/CasesViewModel.kt` | 259 | `Features/Cases/CasesModel.swift` | scritto |
+| `ui/cases/HostsScreen.kt` | 142 | `Features/Cases/CasesView.swift` (`HostsView`) | scritto |
+| `ui/cases/ListingStatusUi.kt` | 41 | `Features/Cases/CasesView.swift` (`ListingStatusPill`) | scritto |
+| `ui/cases/PublishOnSiteCard.kt` | 31 | `Features/Cases/CaseDetailView.swift` | scritto |
 | `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift` | compilato+test |
 | `ui/invite/InviteFormat.kt` | 13 | `Core/Logic/MembersLogic.swift` (`InviteText`) | compilato+test |
 | `ui/invite/InviteScreen.kt` | 135 | `Features/Invite/InviteView.swift` | compilato |
@@ -238,21 +238,21 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/members/MembersScreen.kt` | 279 | `Features/Members/MembersView.swift` | compilato |
 | `ui/members/MembersViewModel.kt` | 205 | `Features/Members/MembersView.swift` (`MembersModel`) | compilato |
 | `ui/property/CredentialsLogic.kt` | 12 | `Core/Logic/CaseLogic.swift` (`CaseSaveLogic.credentialsToSave`) | compilato+test |
-| `ui/property/PropertyManagementViewModel.kt` | 321 |  | — |
-| `ui/site/SiteContentViewModel.kt` | 174 |  | — |
+| `ui/property/PropertyManagementViewModel.kt` | 321 | `Features/Cases/CasesModel.swift` (credenziali, import Excel); sync iCal → F10 | parziale→F10 |
+| `ui/site/SiteContentViewModel.kt` | 174 | `Features/Cases/CasesModel.swift` (`SiteContentModel`) | scritto |
 | `ui/site/SiteDraft.kt` | 265 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
 | `ui/site/SiteDraftSaver.kt` | 85 | n/a: bozze `Codable` in `@State` (niente Bundle Android) | n/a |
-| `ui/site/SiteFormParts.kt` | 66 |  | — |
-| `ui/site/SitePhotosSection.kt` | 116 |  | — |
-| `ui/site/SiteTranslationsSection.kt` | 103 |  | — |
-| `ui/site/content/PageContentDraft.kt` | 373 | `Core/Logic/PageContentDraftLogic.swift` | scritto+test |
-| `ui/site/content/PageContentEditor.kt` | 262 |  | — |
-| `ui/site/content/ServicesDraft.kt` | 170 | `Core/Logic/ServicesDraftLogic.swift` | scritto+test |
-| `ui/site/content/ServicesEditor.kt` | 332 |  | — |
-| `ui/site/position/MapMarkerIcons.kt` | 37 |  | — |
-| `ui/site/position/PositionMap.kt` | 266 |  | — |
-| `ui/site/position/PositionPickerDialog.kt` | 382 |  | — |
-| `ui/site/position/PositionSection.kt` | 130 |  | — |
+| `ui/site/SiteFormParts.kt` | 66 | `Features/Cases/CaseSections.swift` (`SiteTextField`, `SubsectionTitle`) | scritto |
+| `ui/site/SitePhotosSection.kt` | 116 | `Features/Cases/CaseSections.swift` | scritto |
+| `ui/site/SiteTranslationsSection.kt` | 103 | `Features/Cases/CaseSections.swift` | scritto |
+| `ui/site/content/PageContentDraft.kt` | 373 | `Core/Logic/PageContentDraftLogic.swift` | compilato+test |
+| `ui/site/content/PageContentEditor.kt` | 262 | `Features/Cases/ContentEditors.swift` | scritto |
+| `ui/site/content/ServicesDraft.kt` | 170 | `Core/Logic/ServicesDraftLogic.swift` | compilato+test |
+| `ui/site/content/ServicesEditor.kt` | 332 | `Features/Cases/ContentEditors.swift` | scritto |
+| `ui/site/position/MapMarkerIcons.kt` | 37 | `Features/Cases/PositionViews.swift` (simboli SF) | scritto |
+| `ui/site/position/PositionMap.kt` | 266 | `Features/Cases/PositionViews.swift` (MapKit) | scritto |
+| `ui/site/position/PositionPickerDialog.kt` | 382 | `Features/Cases/PositionViews.swift` | scritto |
+| `ui/site/position/PositionSection.kt` | 130 | `Features/Cases/PositionViews.swift` | scritto |
 | `ui/site/position/PositionState.kt` | 94 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
 | `ui/wizard/AppLevelSteps.kt` | 113 |  | — |
 | `ui/wizard/NewCaseWizardScreen.kt` | 489 |  | — |
@@ -260,21 +260,21 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/cases/CaseLogicTest.kt` | 91 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
-| 🧪 `ui/cases/SiteTrackTest.kt` | 41 |  | — |
+| 🧪 `ui/cases/SiteTrackTest.kt` | 41 | `SiciliaHostTests/CaseLogicTests.swift` (`SiteTrackTests`) | scritto |
 | 🧪 `ui/invite/InviteFormatTest.kt` | 33 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/invite/InviteViewModelTest.kt` | 134 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/invite/PendingInviteTest.kt` | 24 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/members/InviteFormTest.kt` | 104 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/members/MembersLogicTest.kt` | 71 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/property/CredentialsLogicTest.kt` | 33 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
-| 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 |  | — |
+| 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 | `SiciliaHostTests/CaseLogicTests.swift` (`SiteTrackTests`) | scritto |
 | 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 | `SiciliaHostTests/CaseLogicTests.swift` (andata e ritorno `Codable`) | compilato, verde |
 | 🧪 `ui/site/SiteDraftTest.kt` | 389 | `SiciliaHostTests/SiteDraftTests.swift` | compilato, verde |
-| 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | scritto |
-| 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | scritto |
+| 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | compilato, verde |
+| 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | compilato, verde |
 | 🧪 `ui/site/position/PositionStateTest.kt` | 200 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/wizard/WizardLogicTest.kt` | 79 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
-| `ui/cases/DeleteCase.kt` | 103 | `Core/Logic/CaseLogic.swift` (logica; il dialog va in F9c) | parziale→F9 |
+| `ui/cases/DeleteCase.kt` | 103 | `Core/Logic/CaseLogic.swift` (logica) + `Features/Cases/CaseDetailView.swift` (`DeleteCaseSheet`) | scritto |
 | `ui/wizard/importing/ImportStep.kt` | 258 |  | — |
 | `ui/wizard/importing/ImportApply.kt` | 110 |  | — |
 | `ui/wizard/importing/ImportViewModel.kt` | 175 |  | — |

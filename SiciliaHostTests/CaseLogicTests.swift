@@ -301,3 +301,50 @@ final class CaseLogicTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode(AppFieldsDraft.self, from: JSONEncoder().encode(a)), a)
     }
 }
+
+/// `SiteTrackTest.kt` e `PropertyManagementViewModelTest.kt`.
+final class SiteTrackTests: XCTestCase {
+    func testANewHouseIsAppOnly() {
+        XCTAssertFalse(isOnSiteTrack(siteTrack: nil, listingStatus: nil, publishedOnSite: nil))
+        XCTAssertFalse(isOnSiteTrack(siteTrack: false, listingStatus: "draft", publishedOnSite: false))
+    }
+
+    func testAnyTraceOfTheSiteMakesItOnSiteTrack() {
+        XCTAssertTrue(isOnSiteTrack(siteTrack: true, listingStatus: nil, publishedOnSite: nil))
+        for s in ["pending", "approved", "rejected"] {
+            XCTAssertTrue(isOnSiteTrack(siteTrack: nil, listingStatus: s, publishedOnSite: nil))
+        }
+        XCTAssertTrue(isOnSiteTrack(siteTrack: nil, listingStatus: nil, publishedOnSite: true))
+    }
+
+    func testExistingSiteContentCountsEvenWithoutAMarker() {
+        XCTAssertTrue(isOnSiteTrack(siteTrack: nil, listingStatus: "draft", publishedOnSite: false, hasSiteContent: true))
+        XCTAssertFalse(isOnSiteTrack(siteTrack: nil, listingStatus: "draft", publishedOnSite: false, hasSiteContent: false))
+    }
+
+    func testOnlyApprovedHousesCanEditCalendarPrices() {
+        XCTAssertTrue(canEditCalendarPrices(.approved))
+        for s in [ListingStatus.draft, .pending, .rejected] { XCTAssertFalse(canEditCalendarPrices(s)) }
+    }
+
+    func testApprovedIdsKeepsOnlyApproved() {
+        XCTAssertEqual(approvedIds(["a": .approved, "b": .draft, "c": .approved]), ["a", "c"])
+    }
+
+    func testValidatePropertyForm() {
+        XCTAssertEqual(validatePropertyForm(name: "", idAppartamentoText: ""), "Il nome è obbligatorio")
+        XCTAssertEqual(validatePropertyForm(name: "Casa Mare", idAppartamentoText: "abc"), "ID Appartamento deve essere un numero")
+        XCTAssertNil(validatePropertyForm(name: "Casa Mare", idAppartamentoText: ""))
+        XCTAssertNil(validatePropertyForm(name: "Casa Mare", idAppartamentoText: "42"))
+    }
+
+    /// Le patch dei servizi (con `AnyHashable`) arrivano all'SDK come tipi Foundation semplici.
+    func testPlainCallableValueUnwrapsHashables() {
+        let services: [[String: AnyHashable]] = [["key": "wifi", "category": "work", "paid": true]]
+        let plain = plainCallableValue(["services": services]) as? [String: Any]
+        let first = (plain?["services"] as? [Any])?.first as? [String: Any]
+        XCTAssertEqual(first?["key"] as? String, "wifi")
+        XCTAssertEqual(first?["paid"] as? Bool, true)
+        XCTAssertTrue(plainCallableValue(NSNull()) is NSNull)
+    }
+}

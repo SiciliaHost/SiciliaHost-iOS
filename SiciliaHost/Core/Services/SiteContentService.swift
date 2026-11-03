@@ -21,7 +21,7 @@ struct SiteContentService: @unchecked Sendable {
     }
 
     func upsert(propertyId: String, patch: [String: Any?]) async throws {
-        var payload: [String: Any] = patch.mapValues { (value: Any?) -> Any in value ?? NSNull() }
+        var payload: [String: Any] = patch.mapValues { (value: Any?) -> Any in plainCallableValue(value ?? NSNull()) }
         payload["id"] = propertyId
         _ = try await functions.httpsCallable("upsertProperty").call(payload)
     }
@@ -39,4 +39,13 @@ struct SiteContentService: @unchecked Sendable {
     func deletePhoto(url: String) async {
         try? await storage.reference(forURL: url).delete()
     }
+}
+
+/// Toglie gli `AnyHashable` (usati dalle bozze per confrontare le patch) da dizionari e liste prima di passarli all'SDK
+/// delle Functions, che serializza solo tipi Foundation.
+func plainCallableValue(_ value: Any) -> Any {
+    if type(of: value) == AnyHashable.self, let hashable = value as? AnyHashable { return plainCallableValue(hashable.base) }
+    if let dict = value as? [String: Any] { return dict.mapValues(plainCallableValue) }
+    if let list = value as? [Any] { return list.map(plainCallableValue) }
+    return value
 }

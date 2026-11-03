@@ -138,6 +138,12 @@ struct ListingService {
         _ = try await call("adminUpsertListing", ["propertyId": propertyId, "patch": cleaned])
     }
 
+    /// Elimina per sempre la casa (solo il proprietario). `confirmName` = nome della casa riscritto dall'utente: il server
+    /// lo ricontrolla. Rifiuta con `FAILED_PRECONDITION` (`details.activeBookings`) se ci sono soggiorni del sito attivi.
+    func deleteProperty(propertyId: String, confirmName: String) async throws {
+        _ = try await call("deleteProperty", ["propertyId": propertyId, "confirmName": confirmName])
+    }
+
     func listHosts() async throws -> [HostRow] {
         parseHosts(try await call("listHosts", [:]))
     }

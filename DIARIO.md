@@ -48,14 +48,15 @@ e correggere gli errori (vedi Prossimi passi).
 - **F8 (check-in Alloggiati): COMPILA in CI e i test passano (2026-11-03, run 41681339743)** (checklist `docs/funzioni/F8.md`, test `CheckinTests`).
 - **F6 (Scorte): COMPILA in CI e i test passano (2026-11-03, run 41682083370)** (checklist `docs/funzioni/F6.md`, test `InventoryTests`).
 - **F7 (Finanze) e F9a (membri e inviti): COMPILANO e i test passano** (CI run 41684949732, che include la correzione di `testFormats`).
-- **F9 in corso** (`docs/funzioni/F9.md`): F9b logica pura parte 1 SCRITTA (bozze, posizione, regole Case e creazione guidata); F9b parte 2 (servizi, contenuti) SCRITTA; da fare: F9c, F9d.
-- Segnaposto rimasti: Case, Messaggi, creazione guidata.
+- **F9 in corso** (`docs/funzioni/F9.md`): F9b (logica pura, parti 1 e 2) COMPILA e i test passano (run 41687483059); **F9c (scheda Case) SCRITTA, CI lanciata**; da fare: F9d.
+- Segnaposto rimasti: Messaggi, creazione guidata. Il tab Case ora è `CasesView` (F9c).
 - F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
 0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
-1. Se la CI di F9b non è verde: correggere. Poi **F9c** (scheda Case), F9d (creazione guidata e import), F12 (Messaggi), righe F3 del Profilo, F10.
+1. Se la CI di F9c non è verde: correggere. Poi F9d (creazione guidata e import), F12 (Messaggi), righe F3 del Profilo, F10 (con "Sincronizza ora" e la
+   sync iCal riallineata agli echi Booking della baseline).
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
 3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
@@ -120,6 +121,13 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-03 — Claude (sessione cloud) — F9c scheda Case
+- CI run 41687483059 (F9b parte 2): **verde**.
+- F9c: tab Case completo (elenco, host, scheda a sezioni, foto, contenuti, posizione con MapKit, eliminazione): dettaglio e differenze in
+  `docs/funzioni/F9.md`. `.case_` in `MainTabView` → `CasesView` (modello `CasesModel` in `@State`, sopravvive al cambio di sezione).
+- **Non verificato**: compilazione (CI lanciata dopo questo commit), mappa/trascinamento, PhotosPicker, import di un file da File, nulla provato su iPhone.
+  "Sincronizza ora" (iCal) non portato: va con F10.
 
 ### 2026-11-03 — Claude (sessione cloud) — F9b logica pura (parte 1)
 - CI run 41684949732 (F9a + correzione F7): **verde** (compila e test).

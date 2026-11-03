@@ -1,3 +1,4 @@
+import Observation
 import FirebaseAuth
 import Foundation
 
@@ -21,4 +22,22 @@ actor AccessSession {
     }
 
     func invalidate() { cached = nil }
+
+    /// Una casa non esiste più (eliminata): si scarta la sessione e si avvisa chi osserva `AccessEvents`.
+    func houseRemoved() async {
+        cached = nil
+        await AccessEvents.shared.notifyRemoved()
+    }
+}
+
+/// Avvisi sull'accesso per le schermate (`AccessSession.removed` dell'Android): la schermata principale ricarica le case
+/// quando una sparisce, così Home, Agenda e Finanze non la mostrano più.
+@MainActor
+@Observable
+final class AccessEvents {
+    static let shared = AccessEvents()
+
+    private(set) var removed = 0
+
+    func notifyRemoved() { removed += 1 }
 }

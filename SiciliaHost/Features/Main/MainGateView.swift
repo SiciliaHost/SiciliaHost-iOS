@@ -59,6 +59,7 @@ struct MainGateView: View {
         }
         // Invito accettato: le case cambiano, si ricaricano senza riavviare l'app.
         .onChange(of: PendingInvite.shared.accepted) { _, _ in Task { await model.reloadAfterInvite() } }
+        .onChange(of: AccessEvents.shared.removed) { _, _ in Task { await model.reloadAfterInvite() } }
     }
 
     @ViewBuilder

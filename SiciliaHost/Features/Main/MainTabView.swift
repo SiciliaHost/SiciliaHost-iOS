@@ -13,6 +13,8 @@ struct MainTabView: View {
     @State private var settled = true
     /// Le case con prezzi accessibili e annuncio approvato: solo per queste esiste "Modifica prezzi".
     @State private var approved: Set<String> = []
+    /// Il tab Case conserva elenco e filtro quando si cambia sezione (il ViewModel dell'Android vive quanto l'Activity).
+    @State private var cases = CasesModel()
 
     private let db = FirestoreService()
     private let siteContent = SiteContentService()
@@ -95,7 +97,8 @@ struct MainTabView: View {
             )
         case .scorte: InventoryView(scope: scope)
         case .finanze: FinanceView(scope: scope)
-        case .case_: PlaceholderView(feature: "Case", androidSource: "ui/cases, ui/site, ui/members")
+        case .case_:
+            CasesView(model: cases, tourTarget: tour.current?.target, onOpenMembers: { router.push(.members) })
         }
     }
 
