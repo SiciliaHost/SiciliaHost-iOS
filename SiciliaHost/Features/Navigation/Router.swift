@@ -20,6 +20,17 @@ enum Route: Hashable {
     case newCaseWizard(propertyId: String?, level: WizardLevel)
 }
 
+extension Route {
+    /// Chiave del check-in a cui appartiene la schermata (`<prenotazione>_<casa>`), nil per le altre.
+    var checkinKey: String? {
+        switch self {
+        case let .checkin(r, p), let .mrzScan(r, p), let .checkinSend(r, p): return "\(r)_\(p)"
+        case let .guestForm(r, p, _): return "\(r)_\(p)"
+        default: return nil
+        }
+    }
+}
+
 /// Stack di navigazione condiviso. Mai svuotarlo del tutto con `pop` oltre la radice (la radice è la schermata principale).
 @MainActor
 @Observable

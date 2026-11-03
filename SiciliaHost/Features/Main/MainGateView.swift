@@ -8,6 +8,8 @@ struct MainGateView: View {
     let onSignOut: () -> Void
     @State private var model: MainViewModel
     @State private var router = AppRouter()
+    /// Stato del check-in condiviso dalle sue quattro schermate, per prenotazione.
+    @State private var checkinModels = CheckinModels()
 
     init(user: User, onSignOut: @escaping () -> Void) {
         self.onSignOut = onSignOut
@@ -56,6 +58,8 @@ struct MainGateView: View {
         // Tornando dalla creazione guidata la prima casa esiste già: si ricarica per lasciare l'onboarding.
         .onChange(of: router.path) { old, new in
             if model.access == .noHouses && new.count < old.count { Task { await model.load() } }
+            // Uscendo dal check-in il suo stato si libera (alla prossima apertura si ricarica da Firestore).
+            checkinModels.retain(only: Set(new.compactMap(\.checkinKey)))
         }
         // Invito accettato: le case cambiano, si ricaricano senza riavviare l'app.
         .onChange(of: PendingInvite.shared.accepted) { _, _ in Task { await model.reloadAfterInvite() } }
@@ -79,14 +83,33 @@ struct MainGateView: View {
             )
         case .members:
             PendingScreen(title: "Membri e inviti", androidSource: "ui/members, ui/invite", onBack: router.pop)
-        case .checkin:
-            PendingScreen(title: "Check-in", androidSource: "ui/checkin", onBack: router.pop)
-        case .mrzScan:
-            PendingScreen(title: "Scansione documento", androidSource: "ui/checkin (MrzScannerScreen)", onBack: router.pop)
-        case .guestForm:
-            PendingScreen(title: "Ospite", androidSource: "ui/checkin (GuestFormScreen)", onBack: router.pop)
-        case .checkinSend:
-            PendingScreen(title: "Invio ad Alloggiati Web", androidSource: "ui/checkin (CheckinSendScreen)", onBack: router.pop)
+        case let .checkin(reservationId, propertyId):
+            CheckinView(
+                model: checkinModels.model(reservationId: reservationId, propertyId: propertyId),
+                onScan: { router.push(.mrzScan(reservationId: reservationId, propertyId: propertyId)) },
+                onEditGuest: { router.push(.guestForm(reservationId: reservationId, propertyId: propertyId, guestRecordId: $0)) },
+                onSend: { router.push(.checkinSend(reservationId: reservationId, propertyId: propertyId)) },
+                onBack: router.pop
+            )
+        case let .mrzScan(reservationId, propertyId):
+            MrzScannerView(
+                onDetected: { mrz in
+                    checkinModels.model(reservationId: reservationId, propertyId: propertyId).pendingMrz = mrz
+                    router.replaceTop(with: .guestForm(reservationId: reservationId, propertyId: propertyId, guestRecordId: nil))
+                },
+                onManualEntry: {
+                    router.replaceTop(with: .guestForm(reservationId: reservationId, propertyId: propertyId, guestRecordId: nil))
+                },
+                onBack: router.pop
+            )
+        case let .guestForm(reservationId, propertyId, guestRecordId):
+            GuestFormView(
+                model: checkinModels.model(reservationId: reservationId, propertyId: propertyId),
+                guestRecordId: guestRecordId,
+                onDone: router.pop
+            )
+        case let .checkinSend(reservationId, propertyId):
+            CheckinSendView(model: checkinModels.model(reservationId: reservationId, propertyId: propertyId), onBack: router.pop)
         case .editReservation(let reservationId):
             ReservationEditView(reservationId: reservationId, onBack: router.pop)
         case .priceEditor:

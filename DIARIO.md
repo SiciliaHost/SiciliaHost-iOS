@@ -45,13 +45,14 @@ e correggere gli errori (vedi Prossimi passi).
 - **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
 - **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): COMPILANO in CI e i test passano (2026-11-03, run 41677922733: 187 test, 0 falliti)**
   (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`). Interfaccia non ancora VISTA (screenshot non scaricabili dalla sessione cloud).
-- Segnaposto rimasti: Scorte, Finanze, Case, check-in (le righe della Home portano a `Route.checkin`, ancora segnaposto), membri, creazione guidata.
+- **F8 (check-in Alloggiati): SCRITTA il 2026-11-03** (checklist `docs/funzioni/F8.md`, test `SiciliaHostTests/CheckinTests.swift`); compilazione: vedi Registro.
+- Segnaposto rimasti: Scorte, Finanze, Case, Messaggi, membri, creazione guidata.
 - F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
 0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
-1. **F8 — Check-in Alloggiati** (le righe della Home ci portano già), poi F6 (Scorte), F7 (Finanze), F9 (Case…), F12 (Messaggi), più le righe F3 nuove del Profilo.
+1. Se la CI di F8 non è verde: correggere. Poi **F6 (Scorte)**, F7 (Finanze), F9 (Case…), F12 (Messaggi), più le righe F3 nuove del Profilo.
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
 3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
@@ -116,6 +117,14 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-03 — Claude (sessione cloud) — F8 check-in Alloggiati
+- Portati i 5 file `ui/checkin/*`: `Features/Checkin/CheckinModel.swift` (stato condiviso, `CheckinModels` per prenotazione nel `MainGateView`),
+  `CheckinView.swift` (elenco + `CheckinSendView` + ricevuta PDFKit), `GuestFormView.swift` (modulo, ricerca luoghi), `MrzScannerView.swift`
+  (VisionKit `DataScannerViewController` → `MrzParser`), logica in `Core/Logic/CheckinLogic.swift`, test `CheckinTests` (7). Rotte collegate.
+- Differenze volute: modificare una scheda conserva lo stato d'invio e `FirestoreService.saveGuestRecord` ora fa **merge** sugli aggiornamenti
+  (l'Android azzera `schedInaSent`/`sendError` e cancella `sendingAt`: rischio doppio invio). Dettagli in `docs/funzioni/F8.md`.
+- **Non verificato**: compilazione (CI lanciata dopo il push), scanner su iPhone vero (VisionKit non gira nel simulatore), invio reale.
 
 ### 2026-11-03 — Claude (sessione cloud) — nuovo riferimento Android: `main` `a43eb44`
 - L'utente ha aggiornato l'app Android: il riferimento passa a `main` (scheda Messaggi). Inventario (249 file), `tools/gen_inventario.py` (regola `ui/messages/` → F12)

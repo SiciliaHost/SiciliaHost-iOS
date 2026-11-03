@@ -207,11 +207,11 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/checkin/CheckinScreen.kt` | 208 |  | — |
-| `ui/checkin/CheckinSendScreen.kt` | 216 |  | — |
-| `ui/checkin/CheckinViewModel.kt` | 158 |  | — |
-| `ui/checkin/GuestFormScreen.kt` | 359 |  | — |
-| `ui/checkin/MrzScannerScreen.kt` | 280 |  | — |
+| `ui/checkin/CheckinScreen.kt` | 208 | `Features/Checkin/CheckinView.swift` | scritto |
+| `ui/checkin/CheckinSendScreen.kt` | 216 | `Features/Checkin/CheckinView.swift` (`CheckinSendView`) | scritto+test |
+| `ui/checkin/CheckinViewModel.kt` | 158 | `Features/Checkin/CheckinModel.swift`, `Core/Logic/CheckinLogic.swift` | scritto+test |
+| `ui/checkin/GuestFormScreen.kt` | 359 | `Features/Checkin/GuestFormView.swift`, `Core/Logic/CheckinLogic.swift` | scritto+test |
+| `ui/checkin/MrzScannerScreen.kt` | 280 | `Features/Checkin/MrzScannerView.swift` | scritto |
 
 ## F9 — Case, sito, posizione, membri e inviti
 

@@ -457,7 +457,9 @@ struct FirestoreService: @unchecked Sendable {
             try await ref.setData(created.firestoreData)
             return created
         }
-        try await db.collection("guest_records").document(record.id).setData(record.firestoreData)
+        // Merge: i campi che scrive solo il server (es. `sendingAt` durante un invio) restano. L'Android fa un `set`
+        // completo e li cancella; qui no (vedi CLAUDE.md del sito, fase 4c).
+        try await db.collection("guest_records").document(record.id).setData(record.firestoreData, merge: true)
         return record
     }
 
