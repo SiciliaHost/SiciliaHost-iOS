@@ -87,7 +87,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Risposte dell'utente (2026-10-18)
 
-- **Baseline Android confermata**: `feat/fold-finanze-selezioni` (`379b5c5c`).
+- **Baseline Android confermata**: `feat/fold-finanze-selezioni` (`379b5c5c`) — superata il 2026-11-03 da `app-main-2026-09-28` (vedi in alto).
 - **Cloud Functions**: l'utente conferma che esistono (deploy non verificato da me; controllare con `firebase functions:list` al primo test reale).
 - **iPad: NO** → solo iPhone (`TARGETED_DEVICE_FAMILY: 1` in `project.yml`; nessun layout a due colonne/split da portare: gli ex layout "Fold/cerniera" di F3 sono `n/a`).
 - **L'utente non ha né Mac né iPhone.** Compilazione: CI macOS su GitHub Actions (bozza in `docs/ci/ios.yml` da copiare in `.github/workflows/`, non provata).
