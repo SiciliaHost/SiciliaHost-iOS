@@ -43,6 +43,7 @@ struct AgendaView: View {
 
     private var calendar: Calendar { .current }
 
+    @MainActor
     init(
         scope: AccessScope?,
         canEditPrices: Bool,

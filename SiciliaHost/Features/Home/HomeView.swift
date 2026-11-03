@@ -65,6 +65,7 @@ struct HomeView: View {
     @State private var showPropertyPicker = false
     @State private var chosenPropertyId: String?
 
+    @MainActor
     init(
         scope: AccessScope?,
         onProfile: @escaping () -> Void,

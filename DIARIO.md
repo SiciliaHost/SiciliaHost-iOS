@@ -129,7 +129,9 @@ e correggere gli errori (vedi Prossimi passi).
   Collegati in `MainTabView` e `MainGateView`. Anteprime CI nuove: `arrivals`, `agenda` (dati inventati).
 - Test: `AgendaTests` (CalendarGridTest, PriceSelectionTest, GuestPricingTest portati + logica Home/modifica).
 - Differenze volute: vedi `docs/funzioni/F4-F5.md` (data invariata se il giorno non cambia, errori di rete mostrati, editor prezzi come schermata).
-- **Non verificato**: compilazione (nessuno Swift su Linux) — lanciata la CI macOS sul branch `claude/kind-ptolemy-63nbq5` con `workflow_dispatch`;
+- CI (run 41670274814): **build fallita** con 2 errori — `HomeModel()`/`AgendaModel()` (isolati al main actor) creati come argomento predefinito di un
+  `init` di vista non isolato. Corretto con `@MainActor` sugli `init` di `HomeView`/`AgendaView`; nuova CI rilanciata (esito nella voce successiva o qui sotto).
+- **Non verificato**: esito della seconda CI;
   nulla visto a schermo; trascinamento sulla griglia prezzi dentro uno `ScrollView`; regex literal `#/…/#` (richiede Swift 5.7+, ok con Xcode 16).
 
 ### 2026-10-27 — Claude Sonnet 5.5 — (sessione sito/backend, nessun codice iOS toccato) backend rilasciato e branch ripuliti
