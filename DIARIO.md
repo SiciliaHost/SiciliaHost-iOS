@@ -45,14 +45,15 @@ e correggere gli errori (vedi Prossimi passi).
 - **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
 - **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): COMPILANO in CI e i test passano (2026-11-03, run 41677922733: 187 test, 0 falliti)**
   (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`). Interfaccia non ancora VISTA (screenshot non scaricabili dalla sessione cloud).
-- **F8 (check-in Alloggiati): SCRITTA il 2026-11-03** (checklist `docs/funzioni/F8.md`, test `SiciliaHostTests/CheckinTests.swift`); compilazione: vedi Registro.
-- Segnaposto rimasti: Scorte, Finanze, Case, Messaggi, membri, creazione guidata.
+- **F8 (check-in Alloggiati): COMPILA in CI e i test passano (2026-11-03, run 41681339743)** (checklist `docs/funzioni/F8.md`, test `CheckinTests`).
+- **F6 (Scorte): SCRITTA il 2026-11-03** (checklist `docs/funzioni/F6.md`, test `InventoryTests`); compilazione: vedi Registro.
+- Segnaposto rimasti: Finanze, Case, Messaggi, membri, creazione guidata.
 - F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
 0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
-1. Se la CI di F8 non è verde: correggere. Poi **F6 (Scorte)**, F7 (Finanze), F9 (Case…), F12 (Messaggi), più le righe F3 nuove del Profilo.
+1. Se la CI di F6 non è verde: correggere. Poi **F7 (Finanze)**, F9 (Case…), F12 (Messaggi), più le righe F3 nuove del Profilo.
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
 3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
@@ -117,6 +118,13 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-03 — Claude (sessione cloud) — F6 Scorte
+- CI di F8 (run 41681339743): **compila e test verdi** (passo "Compila e prova" riuscito).
+- Portati `ui/inventory/*`: `Core/Logic/InventoryLogic.swift` (StockStatus, `normalizeBarcode`, regole di quantità, filtri, `ProductLookup` Open Food Facts),
+  `Features/Inventory/InventoryModel.swift`, `InventoryView.swift`, `InventorySheets.swift` (scelta casa, scanner VisionKit singolo e multiplo, riepilogo,
+  moduli, dettaglio, fotocamera). Test `InventoryTests`. Anteprima CI nuova `inventory`. Dettagli in `docs/funzioni/F6.md`.
+- **Non verificato**: compilazione di F6 (CI lanciata), scanner e fotocamera su iPhone vero.
 
 ### 2026-11-03 — Claude (sessione cloud) — F8 check-in Alloggiati
 - Portati i 5 file `ui/checkin/*`: `Features/Checkin/CheckinModel.swift` (stato condiviso, `CheckinModels` per prenotazione nel `MainGateView`),

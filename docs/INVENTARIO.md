@@ -185,11 +185,11 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/inventory/InventoryItemDetailDialog.kt` | 224 |  | — |
-| `ui/inventory/InventoryScreen.kt` | 1503 |  | — |
-| `ui/inventory/StockStatus.kt` | 16 |  | — |
-| 🧪 `ui/inventory/NormalizeBarcodeTest.kt` | 35 |  | — |
-| 🧪 `ui/inventory/StockStatusTest.kt` | 44 |  | — |
+| `ui/inventory/InventoryItemDetailDialog.kt` | 224 | `Features/Inventory/InventorySheets.swift` (`InventoryDetailSheet`) | scritto |
+| `ui/inventory/InventoryScreen.kt` | 1503 | `Features/Inventory/InventoryView.swift`, `InventoryModel.swift`, `InventorySheets.swift`, `Core/Logic/InventoryLogic.swift` | scritto+test |
+| `ui/inventory/StockStatus.kt` | 16 | `Core/Logic/InventoryLogic.swift` | scritto+test |
+| 🧪 `ui/inventory/NormalizeBarcodeTest.kt` | 35 | `SiciliaHostTests/InventoryTests.swift` | scritto |
+| 🧪 `ui/inventory/StockStatusTest.kt` | 44 | `SiciliaHostTests/InventoryTests.swift` | scritto |
 
 ## F7 — Finanze
 
@@ -207,11 +207,11 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/checkin/CheckinScreen.kt` | 208 | `Features/Checkin/CheckinView.swift` | scritto |
-| `ui/checkin/CheckinSendScreen.kt` | 216 | `Features/Checkin/CheckinView.swift` (`CheckinSendView`) | scritto+test |
-| `ui/checkin/CheckinViewModel.kt` | 158 | `Features/Checkin/CheckinModel.swift`, `Core/Logic/CheckinLogic.swift` | scritto+test |
-| `ui/checkin/GuestFormScreen.kt` | 359 | `Features/Checkin/GuestFormView.swift`, `Core/Logic/CheckinLogic.swift` | scritto+test |
-| `ui/checkin/MrzScannerScreen.kt` | 280 | `Features/Checkin/MrzScannerView.swift` | scritto |
+| `ui/checkin/CheckinScreen.kt` | 208 | `Features/Checkin/CheckinView.swift` | compilato |
+| `ui/checkin/CheckinSendScreen.kt` | 216 | `Features/Checkin/CheckinView.swift` (`CheckinSendView`) | compilato+test |
+| `ui/checkin/CheckinViewModel.kt` | 158 | `Features/Checkin/CheckinModel.swift`, `Core/Logic/CheckinLogic.swift` | compilato+test |
+| `ui/checkin/GuestFormScreen.kt` | 359 | `Features/Checkin/GuestFormView.swift`, `Core/Logic/CheckinLogic.swift` | compilato+test |
+| `ui/checkin/MrzScannerScreen.kt` | 280 | `Features/Checkin/MrzScannerView.swift` | compilato |
 
 ## F9 — Case, sito, posizione, membri e inviti
 

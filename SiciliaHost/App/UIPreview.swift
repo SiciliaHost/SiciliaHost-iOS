@@ -21,6 +21,14 @@ enum UIPreview {
         ]
     )
 
+    /// Scorte inventate.
+    static let inventory: [InventoryItem] = [
+        InventoryItem(id: "i1", propertyId: "p1", name: "Detersivo piatti", barcode: "8001090000000", quantity: 6, lowStockThreshold: 2, category: "Pulizia"),
+        InventoryItem(id: "i2", propertyId: "p1", name: "Carta igienica", quantity: 2, lowStockThreshold: 2, category: "Consumabili"),
+        InventoryItem(id: "i3", propertyId: "p2", name: "Caffè macinato", quantity: 0, lowStockThreshold: 1, isDepleted: true, category: "Consumabili"),
+        InventoryItem(id: "i4", propertyId: "p2", name: "Lenzuola matrimoniali", quantity: 4, lowStockThreshold: 2, category: "Biancheria"),
+    ]
+
     /// Prenotazioni inventate attorno a oggi (nomi di fantasia, nessun dato reale).
     static var reservations: [Reservation] {
         let today = AgendaLogic.startOfDay(millisFromDate(Date()))
@@ -62,6 +70,10 @@ struct UIPreviewRoot: View {
             AppScreen {
                 AgendaView(scope: UIPreview.scope, canEditPrices: true,
                            model: AgendaModel(fetch: { _ in UIPreview.reservations }))
+            }
+        case "inventory":
+            AppScreen {
+                InventoryView(scope: UIPreview.scope, model: InventoryModel(db: nil, preview: (UIPreview.inventory, UIPreview.scope.properties)))
             }
         case "tour":
             AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: {}) }

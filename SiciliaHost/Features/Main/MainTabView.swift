@@ -93,7 +93,7 @@ struct MainTabView: View {
                 onEditReservation: { router.push(.editReservation(reservationId: $0)) },
                 onEditPrices: { router.push(.priceEditor) }
             )
-        case .scorte: PlaceholderView(feature: "Scorte", androidSource: "ui/inventory")
+        case .scorte: InventoryView(scope: scope)
         case .finanze: PlaceholderView(feature: "Finanze", androidSource: "ui/finance")
         case .case_: PlaceholderView(feature: "Case", androidSource: "ui/cases, ui/site, ui/members")
         }
