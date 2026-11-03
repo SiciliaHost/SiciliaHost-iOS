@@ -14,6 +14,8 @@ enum Route: Hashable {
     case guestForm(reservationId: String, propertyId: String, guestRecordId: String?)
     case checkinSend(reservationId: String, propertyId: String)
     case editReservation(reservationId: String)
+    /// "Modifica prezzi" dell'Agenda (sull'Android è un dialog a schermo intero).
+    case priceEditor
     /// Creazione guidata di una casa: `propertyId` per riprendere una bozza.
     case newCaseWizard(propertyId: String?, level: WizardLevel)
 }

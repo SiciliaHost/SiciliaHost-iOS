@@ -40,25 +40,22 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Stato attuale
 
-- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario di **tutti** i 211 file Kotlin in `docs/INVENTARIO.md`
-  (`python tools/gen_inventario.py --check`: righe ancora aperte 88 su 211).
-- **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18)** — prima si diceva "mai compilate". Checklist funzioni in `docs/funzioni/F1.md` e `F2.md`.
-  F2 comprende: finanze e statistiche, categorie di spesa, spese fisse, import Booking (CSV + lettore `.xls` OLE2/BIFF8 scritto a mano),
-  piano di importazione, parte pura dell'iCal, geometria, Nominatim, annuncio Airbnb, import servizi, foto, MRZ, link d'invito.
-- **F3 scritta** (`docs/funzioni/F3.md`; restano aperte solo 2 righe `parziale`, che finiscono in F9/F10): palette identica all'Android (chiaro/scuro), tipografia compatta, sfondo ambiente, vetro, pulsanti, card,
-  barra di navigazione a pillola, icona/logo, **login Google**, gate di accesso, onboarding, presentazione a 6 pagine, tour guidato, profilo, condizioni host, stack di navigazione con tutte le destinazioni (segnaposto per quelle di F8/F9), link d'invito. Le 5 sezioni sono segnaposto tranne Home (elenca le case + pulsante profilo).
-- Da fare: F3–F11 (vedi piano). Nessuna schermata vera ancora.
+- Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario in `docs/INVENTARIO.md`, ora con **tutti i 242 file Kotlin** del branch Android
+  `app-main-2026-09-28` (i 31 file nati dopo la baseline aggiunti il 2026-11-03 nelle fasi F3/F9/F10; `python tools/gen_inventario.py --check`: righe aperte 109).
+- **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
+- **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): SCRITTE il 2026-11-03** (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`).
+  Esito della compilazione in CI: vedi la voce del Registro del 2026-11-03.
+- Segnaposto rimasti: Scorte, Finanze, Case, check-in (le righe della Home portano a `Route.checkin`, ancora segnaposto), membri, creazione guidata.
+- F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
-0. **[Mac, appena disponibile — binario G]** `brew install xcodegen && xcodegen generate`, `GoogleService-Info.plist` in
-   `SiciliaHost/Resources/`, compilare, correggere gli errori, far girare i test. Provare anche il file reale:
-   `TEST_RUNNER_BOOKING_XLS_FIXTURE="…/Androidapp/Arrivo con recapiti_ 2026-01-01 - 2026-07-30.xls" xcodebuild test …`
-   (da verificare al primo build: `xcodebuild` inoltra al test solo le variabili col prefisso `TEST_RUNNER_`; in alternativa impostare
-   `BOOKING_XLS_FIXTURE` nell'ambiente dello scheme, Test → Arguments. Senza, il test fa `XCTSkip` e sembra passato: controllare che non sia "skipped".
-   Il file contiene dati personali di ospiti: NON committarlo). Annotare nel registro cosa si è corretto. Dopo F2 il codice non compilato è tanto (≈30 file).
-1. **F4 — Home** (`ui/dashboard`: arrivi, da completare, check-in), poi F5 (Agenda/prezzi), F6 (Scorte), F7 (Finanze), F8 (Check-in), F9 (Case…). Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
-2. **Deployare le regole/Functions con `apple.com`** (a cura dell'utente, vedi sopra) prima di provare l'accesso con Apple; poi F11 (eliminazione account, ecc.).
+0. Se la CI della sessione 2026-11-03 non era verde: correggere gli errori di F4/F5 (`gh run view --log-failed` o i log del workflow) prima di scrivere altro.
+   Guardare gli screenshot nuovi `arrivals` e `agenda` (artefatto `ios-screenshots`).
+1. **F8 — Check-in Alloggiati** (le righe della Home ci portano già), poi F6 (Scorte), F7 (Finanze), F9 (Case…), più le righe F3 nuove del Profilo.
+   Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
+2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
+3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
 
 ## Decisioni prese
 
@@ -120,6 +117,20 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-03 — Claude (sessione cloud, Linux senza Swift) — F4 Home e F5 Agenda/prenotazione/prezzi
+- **Fonte Android**: la repo `SiciliaHost/Androidapp` su GitHub non ha il branch baseline `feat/fold-finanze-selezioni`; ha `app-main-2026-09-28`
+  (`d162317`, 2026-11-02), che contiene la baseline più 31 file nuovi (righe dei file di F4/F5 identiche alla baseline). Usato quello; i 31 file
+  sono ora nell'inventario (F3 Profilo, F9 eliminazione casa e import annunci, F10 canali notifiche). **Domanda per l'utente**: è questo il branch di riferimento?
+- Scritti: `Core/Logic/AgendaLogic.swift` (griglia del mese, arrivi di oggi, da completare, eventi del giorno, `ReservationEditLogic`),
+  `Core/Logic/PriceLogic.swift` (`LocalDay`, `YearMonth`, porting 1:1 di `PriceSelection.kt` + `GuestPricing.kt`), `Features/Home/HomeView.swift`
+  (Home vera), `Features/Agenda/AgendaView.swift`, `Features/Agenda/PriceEditorView.swift` + `PriceEditorModel.swift` (`Route.priceEditor`),
+  `Features/Reservation/ReservationEditView.swift`, `UI/Style/Fields.swift` (campi di testo/data dei moduli, riusabili), `FilterChip`/`FlowLayout`.
+  Collegati in `MainTabView` e `MainGateView`. Anteprime CI nuove: `arrivals`, `agenda` (dati inventati).
+- Test: `AgendaTests` (CalendarGridTest, PriceSelectionTest, GuestPricingTest portati + logica Home/modifica).
+- Differenze volute: vedi `docs/funzioni/F4-F5.md` (data invariata se il giorno non cambia, errori di rete mostrati, editor prezzi come schermata).
+- **Non verificato**: compilazione (nessuno Swift su Linux) — lanciata la CI macOS sul branch `claude/kind-ptolemy-63nbq5` con `workflow_dispatch`;
+  nulla visto a schermo; trascinamento sulla griglia prezzi dentro uno `ScrollView`; regex literal `#/…/#` (richiede Swift 5.7+, ok con Xcode 16).
 
 ### 2026-10-27 — Claude Sonnet 5.5 — (sessione sito/backend, nessun codice iOS toccato) backend rilasciato e branch ripuliti
 - Pannello host del sito (fasi 1f, 2, 3, 4) completato e RILASCIATO: Functions deployate su `siciliahostmanager` (9 esistenti modificate + 25 nuove: prenotazioni/iCal/Excel Booking, finanze, scorte, check-in) e sito spinto su `origin/master` (`a37d6ef`). Le callable nuove usano gli stessi documenti dell'app Android (`reservations`, `expenses`, `inventory`, `guest_records`): l'iOS può riusarle così come sono.

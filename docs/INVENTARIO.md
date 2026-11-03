@@ -146,26 +146,37 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
 | 🧪 `ui/main/MainTabsTest.kt` | 80 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
 | 🧪 `ui/tour/TourLogicTest.kt` | 39 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
+| `ui/profile/PrivacyContent.kt` | 52 |  | — |
+| `ui/profile/ProfileViewModel.kt` | 59 |  | — |
+| `ui/profile/HouseAccessLogic.kt` | 45 |  | — |
+| `ui/profile/HouseAccessScreen.kt` | 140 |  | — |
+| `ui/profile/PrivacySecurityScreen.kt` | 93 |  | — |
+| `ui/profile/DisplayName.kt` | 19 |  | — |
+| `ui/profile/LegalLinks.kt` | 7 |  | — |
+| `ui/profile/HouseAccessViewModel.kt` | 145 |  | — |
+| 🧪 `ui/profile/DisplayNameTest.kt` | 30 |  | — |
+| 🧪 `ui/profile/PrivacyContentTest.kt` | 37 |  | — |
+| 🧪 `ui/profile/HouseAccessLogicTest.kt` | 78 |  | — |
 
 ## F4 — Home
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/dashboard/DashboardScreen.kt` | 412 |  | — |
+| `ui/dashboard/DashboardScreen.kt` | 412 | `Features/Home/HomeView.swift`, `Core/Logic/AgendaLogic.swift` | scritto+test |
 
 ## F5 — Agenda, prenotazioni e prezzi
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/calendar/CalendarScreen.kt` | 391 |  | — |
-| `ui/calendar/GuestPricing.kt` | 69 |  | — |
-| `ui/calendar/PriceEditorScreen.kt` | 470 |  | — |
-| `ui/calendar/PriceEditorViewModel.kt` | 351 |  | — |
-| `ui/calendar/PriceSelection.kt` | 105 |  | — |
-| `ui/reservation/ReservationEditScreen.kt` | 312 |  | — |
-| 🧪 `ui/calendar/CalendarGridTest.kt` | 35 |  | — |
-| 🧪 `ui/calendar/GuestPricingTest.kt` | 85 |  | — |
-| 🧪 `ui/calendar/PriceSelectionTest.kt` | 126 |  | — |
+| `ui/calendar/CalendarScreen.kt` | 391 | `Features/Agenda/AgendaView.swift`, `Core/Logic/AgendaLogic.swift` | scritto+test |
+| `ui/calendar/GuestPricing.kt` | 69 | `Core/Logic/PriceLogic.swift` | scritto+test |
+| `ui/calendar/PriceEditorScreen.kt` | 470 | `Features/Agenda/PriceEditorView.swift` | scritto |
+| `ui/calendar/PriceEditorViewModel.kt` | 351 | `Features/Agenda/PriceEditorModel.swift` | scritto |
+| `ui/calendar/PriceSelection.kt` | 105 | `Core/Logic/PriceLogic.swift` | scritto+test |
+| `ui/reservation/ReservationEditScreen.kt` | 312 | `Features/Reservation/ReservationEditView.swift`, `Core/Logic/AgendaLogic.swift` | scritto+test |
+| 🧪 `ui/calendar/CalendarGridTest.kt` | 35 | `SiciliaHostTests/AgendaTests.swift` | scritto |
+| 🧪 `ui/calendar/GuestPricingTest.kt` | 85 | `SiciliaHostTests/AgendaTests.swift` | scritto |
+| 🧪 `ui/calendar/PriceSelectionTest.kt` | 126 | `SiciliaHostTests/AgendaTests.swift` | scritto |
 
 ## F6 — Scorte
 
@@ -260,6 +271,25 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 |  | — |
 | 🧪 `ui/site/position/PositionStateTest.kt` | 200 |  | — |
 | 🧪 `ui/wizard/WizardLogicTest.kt` | 79 |  | — |
+| `ui/cases/DeleteCase.kt` | 103 |  | — |
+| `ui/wizard/importing/ImportStep.kt` | 258 |  | — |
+| `ui/wizard/importing/ImportApply.kt` | 110 |  | — |
+| `ui/wizard/importing/ImportViewModel.kt` | 175 |  | — |
+| `ui/wizard/importing/OwnershipDeclaration.kt` | 9 |  | — |
+| `ui/wizard/importing/ImportRepository.kt` | 75 |  | — |
+| `ui/wizard/importing/ListingImport.kt` | 105 |  | — |
+| `ui/wizard/importing/ImportUrls.kt` | 41 |  | — |
+| `ui/wizard/importing/ImportReview.kt` | 52 |  | — |
+| `ui/wizard/importing/ListingFetcher.kt` | 186 |  | — |
+| 🧪 `ui/cases/DeleteCaseTest.kt` | 43 |  | — |
+| 🧪 `ui/wizard/importing/ListingFetcherTest.kt` | 91 |  | — |
+| 🧪 `ui/wizard/importing/ImportReviewTest.kt` | 30 |  | — |
+| 🧪 `ui/wizard/importing/ImportUrlsTest.kt` | 39 |  | — |
+| 🧪 `ui/wizard/importing/ImportApplyTest.kt` | 143 |  | — |
+| 🧪 `ui/wizard/importing/PhotoProgressTest.kt` | 45 |  | — |
+| 🧪 `ui/wizard/importing/OwnershipDeclarationTest.kt` | 20 |  | — |
+| 🧪 `ui/wizard/importing/ListingImportTest.kt` | 107 |  | — |
+| 🧪 `ui/wizard/importing/ImportRepositoryTest.kt` | 28 |  | — |
 
 ## F10 — Sfondo, notifiche e sincronizzazioni
 
@@ -270,6 +300,7 @@ Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
 | `sync/BookingExcelReminderWorker.kt` | 49 |  | — |
 | `sync/ICalSyncWorker.kt` | 251 | `Core/Logic/ICalSync.swift (parte pura: parseEvents, buildSyncPlan, safeErrorReason)` | parziale→F10 (download, scrittura, pianificazione) |
 | 🧪 `sync/ICalSyncWorkerTest.kt` | 171 | `SiciliaHostTests/LogicTests.swift` | scritto |
+| `services/NotificationChannels.kt` | 29 |  | — |
 
 ## Risorse e manifest
 

@@ -17,3 +17,9 @@ Il piano delle fasi è in `docs/PIANO.md`. Qui resta solo la corrispondenza tra 
 | Apache POI (Excel Booking) | da decidere (CoreXLSX, o parsing server-side) |
 | WorkManager | `BGTaskScheduler` |
 | Google Sign-In | Sign in with Apple + GoogleSignIn-iOS |
+| `java.time.LocalDate` / `YearMonth` (editor prezzi) | `LocalDay` / `YearMonth` in `Core/Logic/PriceLogic.swift` |
+| `DatePickerDialog` | `DatePicker(.graphical)` in un foglio (`DayPickerSheet`) |
+| `FlowRow` | `FlowLayout` (`Layout` scritto a mano, `PriceEditorView.swift`) |
+| `FilterChip` | `FilterChip` (`PriceEditorView.swift`) |
+| `OutlinedTextField` | `AppTextField` / `AppDateField` (`UI/Style/Fields.swift`) |
+| `pointerInput` + `awaitEachGesture` (trascinamento griglia prezzi) | `DragGesture(minimumDistance: 0)` |

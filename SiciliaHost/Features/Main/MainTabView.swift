@@ -79,8 +79,20 @@ struct MainTabView: View {
     @ViewBuilder
     private func content(for tab: MainTab) -> some View {
         switch tab {
-        case .home: HomeView(scope: scope, onProfile: { router.push(.profile) })
-        case .agenda: PlaceholderView(feature: "Agenda", androidSource: "ui/calendar, ui/reservation")
+        case .home:
+            HomeView(
+                scope: scope,
+                onProfile: { router.push(.profile) },
+                onCheckin: { reservationId, propertyId in router.push(.checkin(reservationId: reservationId, propertyId: propertyId)) },
+                onEditReservation: { router.push(.editReservation(reservationId: $0)) }
+            )
+        case .agenda:
+            AgendaView(
+                scope: scope,
+                canEditPrices: MainTabs.canEditPrices(scope, approvedIds: approved),
+                onEditReservation: { router.push(.editReservation(reservationId: $0)) },
+                onEditPrices: { router.push(.priceEditor) }
+            )
         case .scorte: PlaceholderView(feature: "Scorte", androidSource: "ui/inventory")
         case .finanze: PlaceholderView(feature: "Finanze", androidSource: "ui/finance")
         case .case_: PlaceholderView(feature: "Case", androidSource: "ui/cases, ui/site, ui/members")

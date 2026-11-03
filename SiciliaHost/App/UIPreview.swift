@@ -20,6 +20,22 @@ enum UIPreview {
             Property(id: "p2", name: "Appartamento Centro · Palermo", members: ["preview": "OWNER"], memberUids: ["preview"]),
         ]
     )
+
+    /// Prenotazioni inventate attorno a oggi (nomi di fantasia, nessun dato reale).
+    static var reservations: [Reservation] {
+        let today = AgendaLogic.startOfDay(millisFromDate(Date()))
+        let day: Int64 = 86_400_000
+        return [
+            Reservation(id: "r1", propertyId: "p1", guestName: "Mario Rossi", checkIn: today, checkOut: today + 3 * day,
+                        platform: "AIRBNB", grossAmount: 360, adults: 2),
+            Reservation(id: "r2", propertyId: "p2", guestName: "Anna Muster", checkIn: today, checkOut: today + 2 * day,
+                        platform: "BOOKING", grossAmount: 210, adults: 2, children: 1),
+            Reservation(id: "r3", propertyId: "p1", guestName: nil, checkIn: today + 5 * day, checkOut: today + 8 * day,
+                        platform: "BOOKING", needsReview: true),
+            Reservation(id: "r4", propertyId: "p2", guestName: "Luca Bianchi", checkIn: today - 2 * day, checkOut: today + day,
+                        platform: "MANUAL", needsReview: true),
+        ]
+    }
 }
 
 struct UIPreviewRoot: View {
@@ -37,6 +53,16 @@ struct UIPreviewRoot: View {
             }
         case "home":
             AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: {}) }
+        case "arrivals":
+            AppScreen {
+                HomeView(scope: UIPreview.scope, onProfile: {},
+                         model: HomeModel(fetch: { _ in UIPreview.reservations }, create: { $0 }))
+            }
+        case "agenda":
+            AppScreen {
+                AgendaView(scope: UIPreview.scope, canEditPrices: true,
+                           model: AgendaModel(fetch: { _ in UIPreview.reservations }))
+            }
         case "tour":
             AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: {}) }
                 .task {

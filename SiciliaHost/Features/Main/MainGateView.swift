@@ -87,8 +87,10 @@ struct MainGateView: View {
             PendingScreen(title: "Ospite", androidSource: "ui/checkin (GuestFormScreen)", onBack: router.pop)
         case .checkinSend:
             PendingScreen(title: "Invio ad Alloggiati Web", androidSource: "ui/checkin (CheckinSendScreen)", onBack: router.pop)
-        case .editReservation:
-            PendingScreen(title: "Prenotazione", androidSource: "ui/reservation", onBack: router.pop)
+        case .editReservation(let reservationId):
+            ReservationEditView(reservationId: reservationId, onBack: router.pop)
+        case .priceEditor:
+            PriceEditorView(onBack: router.pop)
         case .newCaseWizard:
             PendingScreen(title: "Nuova casa", androidSource: "ui/wizard", onBack: {
                 router.pop()
