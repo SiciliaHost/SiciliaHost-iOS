@@ -245,9 +245,9 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/site/SiteFormParts.kt` | 66 |  | — |
 | `ui/site/SitePhotosSection.kt` | 116 |  | — |
 | `ui/site/SiteTranslationsSection.kt` | 103 |  | — |
-| `ui/site/content/PageContentDraft.kt` | 373 |  | — |
+| `ui/site/content/PageContentDraft.kt` | 373 | `Core/Logic/PageContentDraftLogic.swift` | scritto+test |
 | `ui/site/content/PageContentEditor.kt` | 262 |  | — |
-| `ui/site/content/ServicesDraft.kt` | 170 |  | — |
+| `ui/site/content/ServicesDraft.kt` | 170 | `Core/Logic/ServicesDraftLogic.swift` | scritto+test |
 | `ui/site/content/ServicesEditor.kt` | 332 |  | — |
 | `ui/site/position/MapMarkerIcons.kt` | 37 |  | — |
 | `ui/site/position/PositionMap.kt` | 266 |  | — |
@@ -270,8 +270,8 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 |  | — |
 | 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 | `SiciliaHostTests/CaseLogicTests.swift` (andata e ritorno `Codable`) | scritto |
 | 🧪 `ui/site/SiteDraftTest.kt` | 389 | `SiciliaHostTests/SiteDraftTests.swift` | scritto |
-| 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 |  | — |
-| 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 |  | — |
+| 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | scritto |
+| 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | scritto |
 | 🧪 `ui/site/position/PositionStateTest.kt` | 200 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
 | 🧪 `ui/wizard/WizardLogicTest.kt` | 79 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
 | `ui/cases/DeleteCase.kt` | 103 | `Core/Logic/CaseLogic.swift` (logica; il dialog va in F9c) | parziale→F9 |
