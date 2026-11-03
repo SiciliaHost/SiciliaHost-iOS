@@ -111,10 +111,11 @@ struct MainGateView: View {
             ReservationEditView(reservationId: reservationId, onBack: router.pop)
         case .priceEditor:
             PriceEditorView(onBack: router.pop)
-        case .newCaseWizard:
-            PendingScreen(title: "Nuova casa", androidSource: "ui/wizard", onBack: {
+        case let .newCaseWizard(propertyId, level):
+            NewCaseWizardView(propertyId: propertyId, level: level, onClose: router.pop, onFinished: {
                 router.pop()
-                // Prima casa fatta: parte il tour (solo se l'account non l'ha già visto). Qui si chiude senza completare.
+                // Prima casa fatta: parte il tour (solo se l'account non l'ha già visto).
+                OnboardingController.shared.tourRequested = true
             })
         }
     }

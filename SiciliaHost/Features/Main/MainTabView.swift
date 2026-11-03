@@ -98,7 +98,12 @@ struct MainTabView: View {
         case .scorte: InventoryView(scope: scope)
         case .finanze: FinanceView(scope: scope)
         case .case_:
-            CasesView(model: cases, tourTarget: tour.current?.target, onOpenMembers: { router.push(.members) })
+            CasesView(
+                model: cases, tourTarget: tour.current?.target,
+                onOpenMembers: { router.push(.members) },
+                onNewCase: { router.push(.newCaseWizard(propertyId: nil, level: .app)) },
+                onOpenSiteWizard: { router.push(.newCaseWizard(propertyId: $0, level: .site)) }
+            )
         }
     }
 

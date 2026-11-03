@@ -123,7 +123,8 @@ final class CasesModel {
     // MARK: Ciclo di vita dell'annuncio
 
     /// Invio per l'approvazione, dopo che l'utente ha accettato le condizioni d'uso (`HostTerms.version`).
-    func submit(_ propertyId: String) async {
+    @discardableResult
+    func submit(_ propertyId: String) async -> Bool {
         await act("Inviata per approvazione") { try await self.listing.submit(propertyId: propertyId, termsVersion: HostTerms.version) }
     }
 

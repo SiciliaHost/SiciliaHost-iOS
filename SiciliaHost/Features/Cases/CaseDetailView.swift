@@ -22,6 +22,7 @@ struct CaseDetailView: View {
     let tourTarget: TourTarget?
     let onBack: () -> Void
     let onOpenMembers: () -> Void
+    let onOpenSiteWizard: (String) -> Void
     private let id: String
 
     @State private var siteModel = SiteContentModel()
@@ -39,8 +40,9 @@ struct CaseDetailView: View {
 
     /// `initial` serve solo a riempire le bozze: i dati vivi si rileggono dal modello a ogni aggiornamento.
     init(initial: CaseItem, model: CasesModel, tourTarget: TourTarget? = nil, onBack: @escaping () -> Void,
-         onOpenMembers: @escaping () -> Void) {
+         onOpenMembers: @escaping () -> Void, onOpenSiteWizard: @escaping (String) -> Void = { _ in }) {
         self.model = model
+        self.onOpenSiteWizard = onOpenSiteWizard
         self.tourTarget = tourTarget
         self.onBack = onBack
         self.onOpenMembers = onOpenMembers
@@ -163,7 +165,7 @@ struct CaseDetailView: View {
                     VStack(alignment: .leading, spacing: Dimens.itemSpacing) {
                         if !site.onSiteTrack && scope.canEditSite(item.property) {
                             PublishOnSiteCard(busy: model.busy) {
-                                Task { await model.startSitePublication(id) }
+                                Task { if await model.startSitePublication(id) { onOpenSiteWizard(id) } }
                             }
                         }
                         ForEach(CaseLogic.visibleSections(canManage: item.canManage, onSiteTrack: site.onSiteTrack)) { section in

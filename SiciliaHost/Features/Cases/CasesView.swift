@@ -6,6 +6,10 @@ struct CasesView: View {
     let model: CasesModel
     var tourTarget: TourTarget?
     let onOpenMembers: () -> Void
+    /// Apre la creazione guidata; nil = il foglio con il solo nome.
+    var onNewCase: (() -> Void)?
+    /// Apre il secondo livello della creazione guidata (dati del sito) per la casa indicata.
+    var onOpenSiteWizard: (String) -> Void = { _ in }
 
     @State private var openId: String?
     @State private var openedByTour = false
@@ -23,7 +27,7 @@ struct CasesView: View {
                 })
             } else if let id = openId, let item = model.item(id) {
                 CaseDetailView(initial: item, model: model, tourTarget: tourTarget, onBack: { openId = nil },
-                               onOpenMembers: onOpenMembers)
+                               onOpenMembers: onOpenMembers, onOpenSiteWizard: onOpenSiteWizard)
                     .id(id)
             } else {
                 listScreen
@@ -64,9 +68,13 @@ struct CasesView: View {
                 }
             }
             Button {
-                newName = ""
-                model.clearMessages()
-                showNew = true
+                if let onNewCase {
+                    onNewCase()
+                } else {
+                    newName = ""
+                    model.clearMessages()
+                    showNew = true
+                }
             } label: {
                 Image(systemName: "plus").font(.system(size: Dimens.iconSmall, weight: .semibold))
                     .frame(width: 44, height: 44)

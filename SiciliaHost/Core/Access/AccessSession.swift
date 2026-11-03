@@ -31,7 +31,7 @@ actor AccessSession {
 }
 
 /// Avvisi sull'accesso per le schermate (`AccessSession.removed` dell'Android): la schermata principale ricarica le case
-/// quando una sparisce, così Home, Agenda e Finanze non la mostrano più.
+/// quando una sparisce (Home, Agenda e Finanze non la mostrano più) o quando la creazione guidata ne aggiunge una.
 @MainActor
 @Observable
 final class AccessEvents {
@@ -40,4 +40,7 @@ final class AccessEvents {
     private(set) var removed = 0
 
     func notifyRemoved() { removed += 1 }
+
+    /// Le case sono cambiate (es. creata dalla creazione guidata): stessa ricarica di una casa eliminata.
+    func notifyChanged() { removed += 1 }
 }
