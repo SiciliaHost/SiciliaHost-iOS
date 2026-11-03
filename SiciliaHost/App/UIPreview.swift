@@ -75,6 +75,15 @@ struct UIPreviewRoot: View {
             AppScreen {
                 InventoryView(scope: UIPreview.scope, model: InventoryModel(db: nil, preview: (UIPreview.inventory, UIPreview.scope.properties)))
             }
+        case "finance":
+            AppScreen {
+                FinanceView(scope: UIPreview.scope, model: FinanceModel(db: nil, preview: (
+                    UIPreview.scope.properties, UIPreview.reservations,
+                    [Expense(id: "x1", propertyId: "p1", description: "Bolletta luce", amount: 84),
+                     Expense(id: "x2", propertyId: "p2", description: "Detersivi e carta", amount: 32)],
+                    [RecurringExpense(id: "f1", propertyId: "p1", description: "Internet", amount: 29.9, startMonth: "2026-01")]
+                )))
+            }
         case "tour":
             AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: {}) }
                 .task {

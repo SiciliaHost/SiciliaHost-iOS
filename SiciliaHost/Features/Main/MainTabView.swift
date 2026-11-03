@@ -94,7 +94,7 @@ struct MainTabView: View {
                 onEditPrices: { router.push(.priceEditor) }
             )
         case .scorte: InventoryView(scope: scope)
-        case .finanze: PlaceholderView(feature: "Finanze", androidSource: "ui/finance")
+        case .finanze: FinanceView(scope: scope)
         case .case_: PlaceholderView(feature: "Case", androidSource: "ui/cases, ui/site, ui/members")
         }
     }

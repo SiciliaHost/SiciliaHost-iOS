@@ -185,23 +185,23 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/inventory/InventoryItemDetailDialog.kt` | 224 | `Features/Inventory/InventorySheets.swift` (`InventoryDetailSheet`) | scritto |
-| `ui/inventory/InventoryScreen.kt` | 1503 | `Features/Inventory/InventoryView.swift`, `InventoryModel.swift`, `InventorySheets.swift`, `Core/Logic/InventoryLogic.swift` | scritto+test |
-| `ui/inventory/StockStatus.kt` | 16 | `Core/Logic/InventoryLogic.swift` | scritto+test |
-| 🧪 `ui/inventory/NormalizeBarcodeTest.kt` | 35 | `SiciliaHostTests/InventoryTests.swift` | scritto |
-| 🧪 `ui/inventory/StockStatusTest.kt` | 44 | `SiciliaHostTests/InventoryTests.swift` | scritto |
+| `ui/inventory/InventoryItemDetailDialog.kt` | 224 | `Features/Inventory/InventorySheets.swift` (`InventoryDetailSheet`) | compilato |
+| `ui/inventory/InventoryScreen.kt` | 1503 | `Features/Inventory/InventoryView.swift`, `InventoryModel.swift`, `InventorySheets.swift`, `Core/Logic/InventoryLogic.swift` | compilato+test |
+| `ui/inventory/StockStatus.kt` | 16 | `Core/Logic/InventoryLogic.swift` | compilato+test |
+| 🧪 `ui/inventory/NormalizeBarcodeTest.kt` | 35 | `SiciliaHostTests/InventoryTests.swift` | compilato, verde |
+| 🧪 `ui/inventory/StockStatusTest.kt` | 44 | `SiciliaHostTests/InventoryTests.swift` | compilato, verde |
 
 ## F7 — Finanze
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/finance/FinanceCharts.kt` | 216 |  | — |
-| `ui/finance/FinanceDetailScreens.kt` | 255 |  | — |
-| `ui/finance/FinanceListKeys.kt` | 21 |  | — |
-| `ui/finance/FinanceParts.kt` | 195 |  | — |
-| `ui/finance/FinanceScreen.kt` | 896 |  | — |
-| `ui/finance/FinanceView.kt` | 69 |  | — |
-| 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 |  | — |
+| `ui/finance/FinanceCharts.kt` | 216 | `Features/Finance/FinanceParts.swift` (grafici) | scritto |
+| `ui/finance/FinanceDetailScreens.kt` | 255 | `Features/Finance/FinanceDetailViews.swift`, `Core/Logic/FinanceViewLogic.swift` (`statsKpis`) | scritto+test |
+| `ui/finance/FinanceListKeys.kt` | 21 | `Core/Logic/FinanceViewLogic.swift` | scritto+test |
+| `ui/finance/FinanceParts.kt` | 195 | `Features/Finance/FinanceParts.swift`, `Core/Logic/FinanceViewLogic.swift` (formati) | scritto+test |
+| `ui/finance/FinanceScreen.kt` | 896 | `Features/Finance/FinanceView.swift`, `FinanceModel.swift` | scritto+test |
+| `ui/finance/FinanceView.kt` | 69 | `Core/Logic/FinanceViewLogic.swift` | scritto+test |
+| 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 | `SiciliaHostTests/FinanceViewTests.swift` | scritto |
 
 ## F8 — Check-in Alloggiati
 
