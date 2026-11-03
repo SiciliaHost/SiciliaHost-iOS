@@ -195,12 +195,12 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/finance/FinanceCharts.kt` | 216 | `Features/Finance/FinanceParts.swift` (grafici) | scritto |
-| `ui/finance/FinanceDetailScreens.kt` | 255 | `Features/Finance/FinanceDetailViews.swift`, `Core/Logic/FinanceViewLogic.swift` (`statsKpis`) | scritto+test |
-| `ui/finance/FinanceListKeys.kt` | 21 | `Core/Logic/FinanceViewLogic.swift` | scritto+test |
-| `ui/finance/FinanceParts.kt` | 195 | `Features/Finance/FinanceParts.swift`, `Core/Logic/FinanceViewLogic.swift` (formati) | scritto+test |
-| `ui/finance/FinanceScreen.kt` | 896 | `Features/Finance/FinanceView.swift`, `FinanceModel.swift` | scritto+test |
-| `ui/finance/FinanceView.kt` | 69 | `Core/Logic/FinanceViewLogic.swift` | scritto+test |
+| `ui/finance/FinanceCharts.kt` | 216 | `Features/Finance/FinanceParts.swift` (grafici) | compilato |
+| `ui/finance/FinanceDetailScreens.kt` | 255 | `Features/Finance/FinanceDetailViews.swift`, `Core/Logic/FinanceViewLogic.swift` (`statsKpis`) | compilato+test |
+| `ui/finance/FinanceListKeys.kt` | 21 | `Core/Logic/FinanceViewLogic.swift` | compilato+test |
+| `ui/finance/FinanceParts.kt` | 195 | `Features/Finance/FinanceParts.swift`, `Core/Logic/FinanceViewLogic.swift` (formati) | compilato+test |
+| `ui/finance/FinanceScreen.kt` | 896 | `Features/Finance/FinanceView.swift`, `FinanceModel.swift` | compilato+test |
+| `ui/finance/FinanceView.kt` | 69 | `Core/Logic/FinanceViewLogic.swift` | compilato+test |
 | 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 | `SiciliaHostTests/FinanceViewTests.swift` | scritto |
 
 ## F8 — Check-in Alloggiati
@@ -228,15 +228,15 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/cases/ListingStatusUi.kt` | 41 |  | — |
 | `ui/cases/PublishOnSiteCard.kt` | 31 |  | — |
 | `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift (isOnSiteTrack, canEditCalendarPrices, approvedIds)` | parziale→F9 |
-| `ui/invite/InviteFormat.kt` | 13 |  | — |
-| `ui/invite/InviteScreen.kt` | 135 |  | — |
-| `ui/invite/InviteViewModel.kt` | 79 | `Core/Services/CloudFunctionsServices.swift (solo protocollo InviteAPI)` | parziale→F9 |
+| `ui/invite/InviteFormat.kt` | 13 | `Core/Logic/MembersLogic.swift` (`InviteText`) | scritto+test |
+| `ui/invite/InviteScreen.kt` | 135 | `Features/Invite/InviteView.swift` | scritto |
+| `ui/invite/InviteViewModel.kt` | 79 | `Features/Invite/InviteView.swift` (`InviteModel`), protocollo `InviteAPI` | scritto+test |
 | `ui/invite/PendingInvite.kt` | 33 | `Core/State/OnboardingState.swift` | scritto |
-| `ui/members/InviteComposerDialog.kt` | 115 |  | — |
-| `ui/members/InviteForm.kt` | 64 |  | — |
-| `ui/members/MembersLogic.kt` | 38 |  | — |
-| `ui/members/MembersScreen.kt` | 279 |  | — |
-| `ui/members/MembersViewModel.kt` | 205 |  | — |
+| `ui/members/InviteComposerDialog.kt` | 115 | `Features/Members/MembersView.swift` (`InviteComposerSheet`) | scritto |
+| `ui/members/InviteForm.kt` | 64 | `Core/Logic/MembersLogic.swift` | scritto+test |
+| `ui/members/MembersLogic.kt` | 38 | `Core/Logic/MembersLogic.swift` | scritto+test |
+| `ui/members/MembersScreen.kt` | 279 | `Features/Members/MembersView.swift` | scritto |
+| `ui/members/MembersViewModel.kt` | 205 | `Features/Members/MembersView.swift` (`MembersModel`) | scritto |
 | `ui/property/CredentialsLogic.kt` | 12 |  | — |
 | `ui/property/PropertyManagementViewModel.kt` | 321 |  | — |
 | `ui/site/SiteContentViewModel.kt` | 174 |  | — |
@@ -261,11 +261,11 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/cases/CaseLogicTest.kt` | 91 |  | — |
 | 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 |  | — |
 | 🧪 `ui/cases/SiteTrackTest.kt` | 41 |  | — |
-| 🧪 `ui/invite/InviteFormatTest.kt` | 33 |  | — |
-| 🧪 `ui/invite/InviteViewModelTest.kt` | 134 |  | — |
+| 🧪 `ui/invite/InviteFormatTest.kt` | 33 | `SiciliaHostTests/MembersTests.swift` | scritto |
+| 🧪 `ui/invite/InviteViewModelTest.kt` | 134 | `SiciliaHostTests/MembersTests.swift` | scritto |
 | 🧪 `ui/invite/PendingInviteTest.kt` | 24 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
-| 🧪 `ui/members/InviteFormTest.kt` | 104 |  | — |
-| 🧪 `ui/members/MembersLogicTest.kt` | 71 |  | — |
+| 🧪 `ui/members/InviteFormTest.kt` | 104 | `SiciliaHostTests/MembersTests.swift` | scritto |
+| 🧪 `ui/members/MembersLogicTest.kt` | 71 | `SiciliaHostTests/MembersTests.swift` | scritto |
 | 🧪 `ui/property/CredentialsLogicTest.kt` | 33 |  | — |
 | 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 |  | — |
 | 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 |  | — |

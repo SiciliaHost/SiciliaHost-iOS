@@ -18,6 +18,8 @@ struct RootView: View {
             } else {
                 LoginView(auth: auth)
             }
+            // Invito in attesa (link o codice incollato): sopra all'app, sotto alla presentazione.
+            InviteOverlay(uid: auth.currentUser?.uid)
             IntroOverlay(uid: auth.currentUser?.uid)
         }
         // Link `https://siciliahost.com/invito/CODICE` o `siciliahost://invito/CODICE`: il codice resta in memoria finché

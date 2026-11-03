@@ -65,7 +65,8 @@ func parseMembers(_ data: Any?) -> [MemberInfo] {
     return list.compactMap { item in
         guard let m = dict(item), let uid = m["uid"] as? String,
               let role = PropertyRole.parse(m["role"] as? String) else { return nil }
-        return MemberInfo(uid: uid, role: role, email: m["email"] as? String ?? "", permissions: permissions(m["permissions"]))
+        return MemberInfo(uid: uid, role: role, email: m["email"] as? String ?? "", permissions: permissions(m["permissions"]),
+                          displayName: (m["displayName"] as? String)?.trimmed ?? "")
     }
 }
 

@@ -81,14 +81,25 @@ enum FinanceListKeys {
 
 /// Formati dei numeri delle Finanze, in italiano e indipendenti dalla lingua del telefono.
 enum FinanceFormat {
-    private static func number(_ value: Double, decimals: Int) -> String {
-        let f = NumberFormatter()
-        f.locale = Locale(identifier: "it_IT")
-        f.numberStyle = .decimal
-        f.minimumFractionDigits = decimals
-        f.maximumFractionDigits = decimals
-        f.roundingMode = .halfUp
-        return f.string(from: NSNumber(value: value)) ?? String(value)
+    /// Come `String.format(Locale.ITALY, "%,.Nf")` dell'Android: punto per le migliaia (anche a 4 cifre: il formattatore
+    /// di sistema in italiano non le separa), virgola per i decimali. Fatto a mano per non dipendere dai dati CLDR.
+    static func number(_ value: Double, decimals: Int) -> String {
+        let fixed = String(format: "%.\(decimals)f", locale: Locale(identifier: "en_US_POSIX"), value)
+        var integer = fixed
+        var fraction = ""
+        if let dot = fixed.firstIndex(of: ".") {
+            integer = String(fixed[..<dot])
+            fraction = String(fixed[fixed.index(after: dot)...])
+        }
+        // "-0" / "-0,00" (un negativo che arrotonda a zero) si scrive senza segno.
+        let negative = integer.hasPrefix("-") && !fixed.allSatisfy { "-0.".contains($0) }
+        if integer.hasPrefix("-") { integer.removeFirst() }
+        var grouped = ""
+        for (i, ch) in integer.reversed().enumerated() {
+            if i > 0 && i % 3 == 0 { grouped.append(".") }
+            grouped.append(ch)
+        }
+        return (negative ? "-" : "") + String(grouped.reversed()) + (fraction.isEmpty ? "" : "," + fraction)
     }
 
     /// "€1.234".

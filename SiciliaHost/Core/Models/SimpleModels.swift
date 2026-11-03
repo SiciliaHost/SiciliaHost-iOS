@@ -102,6 +102,8 @@ struct MemberInfo: Equatable, Identifiable, Sendable {
     let role: PropertyRole
     let email: String
     var permissions: Set<PropertyPermission> = []
+    /// Nome visualizzato dell'account (Firebase Auth), vuoto se non c'è.
+    var displayName = ""
     var id: String { uid }
 }
 

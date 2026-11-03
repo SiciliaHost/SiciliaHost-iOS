@@ -47,14 +47,15 @@ e correggere gli errori (vedi Prossimi passi).
   (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`). Interfaccia non ancora VISTA (screenshot non scaricabili dalla sessione cloud).
 - **F8 (check-in Alloggiati): COMPILA in CI e i test passano (2026-11-03, run 41681339743)** (checklist `docs/funzioni/F8.md`, test `CheckinTests`).
 - **F6 (Scorte): COMPILA in CI e i test passano (2026-11-03, run 41682083370)** (checklist `docs/funzioni/F6.md`, test `InventoryTests`).
-- **F7 (Finanze): SCRITTA il 2026-11-03** (checklist `docs/funzioni/F7.md`, test `FinanceViewTests`); compilazione: vedi Registro.
-- Segnaposto rimasti: Case, Messaggi, membri, creazione guidata.
+- **F7 (Finanze): COMPILA in CI** (run 41684070229); un solo test fallito (`testFormats`, separatore delle migliaia), corretto dopo.
+- **F9 in corso** (`docs/funzioni/F9.md`): F9a membri e inviti SCRITTA il 2026-11-03; F9b–F9d da fare.
+- Segnaposto rimasti: Case, Messaggi, creazione guidata.
 - F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
 0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
-1. Se la CI di F7 non è verde: correggere. Poi **F9 (Case, sito, membri, inviti: 74 righe, la fase più grande)**, F12 (Messaggi), più le righe F3 nuove del Profilo, F10.
+1. Se la CI di F9a non è verde: correggere. Poi **F9b** (logica pura delle bozze con i test), F9c (scheda Case), F9d (creazione guidata e import), F12 (Messaggi), righe F3 del Profilo, F10.
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
 3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
@@ -119,6 +120,12 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-03 — Claude (sessione cloud) — F9a membri e inviti; correzione F7
+- CI di F7 (run 41684070229): compila; fallisce solo `testFormats`: `NumberFormatter` italiano non separa le migliaia a 4 cifre ("€1234").
+  Ora `FinanceFormat.number` raggruppa a mano come `String.format(Locale.ITALY)` dell'Android (+ test).
+- F9a: vedi `docs/funzioni/F9.md`. L'invito si accetta da `InviteOverlay` (in `RootView`, sotto la presentazione). `Route.members` → `MembersView`.
+- **Non verificato**: compilazione (CI lanciata), condivisione dell'invito su iPhone.
 
 ### 2026-11-03 — Claude (sessione cloud) — F7 Finanze
 - CI di F6 (run 41682083370): **verde** al primo colpo (compila, test e screenshot).

@@ -86,7 +86,10 @@ final class FinanceViewTests: XCTestCase {
         XCTAssertEqual(FinanceFormat.euro2(1234.5), "€1.234,50")
         XCTAssertEqual(FinanceFormat.euroPlain(-12.5), "€-12.50")
         XCTAssertEqual(FinanceFormat.pct(0.456), "46%")
-        XCTAssertEqual(FinanceFormat.dec1(2.25), "2,3")
+        XCTAssertEqual(FinanceFormat.dec1(2.5), "2,5")
+        XCTAssertEqual(FinanceFormat.number(1234567.891, decimals: 2), "1.234.567,89")
+        XCTAssertEqual(FinanceFormat.number(-1234, decimals: 0), "-1.234")
+        XCTAssertEqual(FinanceFormat.number(999, decimals: 0), "999")
         XCTAssertEqual(FinanceFormat.countryName("de"), "Germania")
         XCTAssertEqual(FinanceFormat.platformName("MANUAL"), "Dirette / manuali")
     }
