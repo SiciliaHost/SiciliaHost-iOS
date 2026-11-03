@@ -1,14 +1,14 @@
 # Inventario Android → iOS
 
-**Spec di riferimento (baseline Android):** repo `Androidapp`, branch `feat/fold-finanze-selezioni`, commit
-`379b5c5c51bf55e4f79bb4eb433cd3ba029bbd7e` (2026-10-18). Se l'Android cambia, aggiornare questa riga e rilanciare il controllo.
+**Spec di riferimento (baseline Android):** repo `Androidapp`, branch `app-main-2026-09-28`, commit
+`d16231750c4db3d4478aa46c353a550c3075750d` (2026-11-02; prima: `feat/fold-finanze-selezioni` `379b5c5`, 2026-10-18). Se l'Android cambia, aggiornare questa riga e rilanciare il controllo.
 Controllo di completezza (da un clone con `../Androidapp` accanto): `python tools/gen_inventario.py --check` (aggiungi `--strict` nell'audit finale di F11).
 
 Ogni file Kotlin dell'app Android (sorgenti e test) con la fase che lo porta. **Nessun file è fuori dal piano**: lo script di generazione fallisce se un file non ha fase. Aggiorna le colonne *iOS* e *Stato* man mano che porti; la fase F11 chiude solo se non resta nessuna riga con stato `—` (le uniche eccezioni ammesse sono `n/a` con motivo scritto qui).
 
 Stati: `—` da fare · `scritto` scritto ma mai compilato · `compilato` · `provato` (simulatore/dispositivo) · `n/a` non serve su iOS (motivo in nota).
 
-Totale (alla baseline): 211 file Kotlin (154 sorgenti, 57 test).
+Totale (alla baseline): 242 file Kotlin (alla vecchia baseline erano 211: 154 sorgenti, 57 test).
 
 ## F1 — Livello dati completo
 

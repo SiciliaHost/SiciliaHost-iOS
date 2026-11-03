@@ -18,9 +18,9 @@
 
 ## Baseline Android (spec di riferimento)
 
-Repo `../Androidapp`, branch **`feat/fold-finanze-selezioni`**, commit `379b5c5c51bf55e4f79bb4eb433cd3ba029bbd7e` (2026-10-18).
-È una cima di una pila di branch non ancora mergiati (vedi memoria del progetto: prezzi-ospiti-promozioni, stile-vetro, ecc.).
-**Domanda aperta per l'utente:** quale branch Android è la fonte di verità? Se la pila viene scartata, l'iOS avrebbe funzioni che nessuno usa.
+Repo `../Androidapp` (GitHub `SiciliaHost/Androidapp`), branch **`app-main-2026-09-28`**, commit `d16231750c4db3d4478aa46c353a550c3075750d` (2026-11-02).
+**Confermato dall'utente il 2026-11-03.** Sostituisce la vecchia baseline `feat/fold-finanze-selezioni` (`379b5c5`, 2026-10-18), che su GitHub non esiste:
+il nuovo branch la contiene più 31 file (già in inventario). Per aggiornare: `git -C ../Androidapp fetch origin app-main-2026-09-28` e `python tools/gen_inventario.py --check`.
 Callable usate da iOS: quelle del pannello host sono DEPLOYATE (2026-10-27, vedi voce del Registro); le sole non rilasciate sono `startSitePublication`, `siteTrack`, l'obbligo di `termsVersion` in `submitListing` e l'accesso Apple, che vivono nel branch `feat/apple-signin-host` del sito (contiene i commit dell'ex `feat/condizioni-host`, `957b0a8`, cancellato il 2026-10-27); **deploy di questi non verificato**
 (dettaglio in `docs/funzioni/F1.md`). `python tools/gen_inventario.py --check` confronta l'inventario con la repo Android.
 
@@ -121,7 +121,7 @@ e correggere gli errori (vedi Prossimi passi).
 ### 2026-11-03 — Claude (sessione cloud, Linux senza Swift) — F4 Home e F5 Agenda/prenotazione/prezzi
 - **Fonte Android**: la repo `SiciliaHost/Androidapp` su GitHub non ha il branch baseline `feat/fold-finanze-selezioni`; ha `app-main-2026-09-28`
   (`d162317`, 2026-11-02), che contiene la baseline più 31 file nuovi (righe dei file di F4/F5 identiche alla baseline). Usato quello; i 31 file
-  sono ora nell'inventario (F3 Profilo, F9 eliminazione casa e import annunci, F10 canali notifiche). **Domanda per l'utente**: è questo il branch di riferimento?
+  sono ora nell'inventario (F3 Profilo, F9 eliminazione casa e import annunci, F10 canali notifiche). Confermato dall'utente come nuovo riferimento.
 - Scritti: `Core/Logic/AgendaLogic.swift` (griglia del mese, arrivi di oggi, da completare, eventi del giorno, `ReservationEditLogic`),
   `Core/Logic/PriceLogic.swift` (`LocalDay`, `YearMonth`, porting 1:1 di `PriceSelection.kt` + `GuestPricing.kt`), `Features/Home/HomeView.swift`
   (Home vera), `Features/Agenda/AgendaView.swift`, `Features/Agenda/PriceEditorView.swift` + `PriceEditorModel.swift` (`Route.priceEditor`),
