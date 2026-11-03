@@ -217,17 +217,17 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/cases/AppFieldsDraft.kt` | 128 | `Core/Logic/SiteDraftLogic.swift` | scritto+test |
+| `ui/cases/AppFieldsDraft.kt` | 128 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
 | `ui/cases/CaseDetailScreen.kt` | 342 |  | — |
-| `ui/cases/CaseLogic.kt` | 93 | `Core/Logic/CaseLogic.swift` | scritto+test |
-| `ui/cases/CaseSaveLogic.kt` | 26 | `Core/Logic/CaseLogic.swift` | scritto+test |
+| `ui/cases/CaseLogic.kt` | 93 | `Core/Logic/CaseLogic.swift` | compilato+test |
+| `ui/cases/CaseSaveLogic.kt` | 26 | `Core/Logic/CaseLogic.swift` | compilato+test |
 | `ui/cases/CaseSections.kt` | 590 |  | — |
 | `ui/cases/CasesScreen.kt` | 359 |  | — |
 | `ui/cases/CasesViewModel.kt` | 259 |  | — |
 | `ui/cases/HostsScreen.kt` | 142 |  | — |
 | `ui/cases/ListingStatusUi.kt` | 41 |  | — |
 | `ui/cases/PublishOnSiteCard.kt` | 31 |  | — |
-| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift` | scritto+test |
+| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift` | compilato+test |
 | `ui/invite/InviteFormat.kt` | 13 | `Core/Logic/MembersLogic.swift` (`InviteText`) | compilato+test |
 | `ui/invite/InviteScreen.kt` | 135 | `Features/Invite/InviteView.swift` | compilato |
 | `ui/invite/InviteViewModel.kt` | 79 | `Features/Invite/InviteView.swift` (`InviteModel`), protocollo `InviteAPI` | compilato+test |
@@ -237,10 +237,10 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/members/MembersLogic.kt` | 38 | `Core/Logic/MembersLogic.swift` | compilato+test |
 | `ui/members/MembersScreen.kt` | 279 | `Features/Members/MembersView.swift` | compilato |
 | `ui/members/MembersViewModel.kt` | 205 | `Features/Members/MembersView.swift` (`MembersModel`) | compilato |
-| `ui/property/CredentialsLogic.kt` | 12 | `Core/Logic/CaseLogic.swift` (`CaseSaveLogic.credentialsToSave`) | scritto+test |
+| `ui/property/CredentialsLogic.kt` | 12 | `Core/Logic/CaseLogic.swift` (`CaseSaveLogic.credentialsToSave`) | compilato+test |
 | `ui/property/PropertyManagementViewModel.kt` | 321 |  | — |
 | `ui/site/SiteContentViewModel.kt` | 174 |  | — |
-| `ui/site/SiteDraft.kt` | 265 | `Core/Logic/SiteDraftLogic.swift` | scritto+test |
+| `ui/site/SiteDraft.kt` | 265 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
 | `ui/site/SiteDraftSaver.kt` | 85 | n/a: bozze `Codable` in `@State` (niente Bundle Android) | n/a |
 | `ui/site/SiteFormParts.kt` | 66 |  | — |
 | `ui/site/SitePhotosSection.kt` | 116 |  | — |
@@ -253,27 +253,27 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/site/position/PositionMap.kt` | 266 |  | — |
 | `ui/site/position/PositionPickerDialog.kt` | 382 |  | — |
 | `ui/site/position/PositionSection.kt` | 130 |  | — |
-| `ui/site/position/PositionState.kt` | 94 | `Core/Logic/SiteDraftLogic.swift` | scritto+test |
+| `ui/site/position/PositionState.kt` | 94 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
 | `ui/wizard/AppLevelSteps.kt` | 113 |  | — |
 | `ui/wizard/NewCaseWizardScreen.kt` | 489 |  | — |
-| `ui/wizard/WizardLogic.kt` | 68 | `Core/Logic/CaseLogic.swift` | scritto+test |
-| 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
-| 🧪 `ui/cases/CaseLogicTest.kt` | 91 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
-| 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| `ui/wizard/WizardLogic.kt` | 68 | `Core/Logic/CaseLogic.swift` | compilato+test |
+| 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
+| 🧪 `ui/cases/CaseLogicTest.kt` | 91 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
+| 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/cases/SiteTrackTest.kt` | 41 |  | — |
 | 🧪 `ui/invite/InviteFormatTest.kt` | 33 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/invite/InviteViewModelTest.kt` | 134 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/invite/PendingInviteTest.kt` | 24 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/members/InviteFormTest.kt` | 104 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/members/MembersLogicTest.kt` | 71 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
-| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 |  | — |
-| 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 | `SiciliaHostTests/CaseLogicTests.swift` (andata e ritorno `Codable`) | scritto |
-| 🧪 `ui/site/SiteDraftTest.kt` | 389 | `SiciliaHostTests/SiteDraftTests.swift` | scritto |
+| 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 | `SiciliaHostTests/CaseLogicTests.swift` (andata e ritorno `Codable`) | compilato, verde |
+| 🧪 `ui/site/SiteDraftTest.kt` | 389 | `SiciliaHostTests/SiteDraftTests.swift` | compilato, verde |
 | 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | scritto |
 | 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 | `SiciliaHostTests/PageContentTests.swift` (casi principali) | scritto |
-| 🧪 `ui/site/position/PositionStateTest.kt` | 200 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
-| 🧪 `ui/wizard/WizardLogicTest.kt` | 79 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| 🧪 `ui/site/position/PositionStateTest.kt` | 200 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
+| 🧪 `ui/wizard/WizardLogicTest.kt` | 79 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | `ui/cases/DeleteCase.kt` | 103 | `Core/Logic/CaseLogic.swift` (logica; il dialog va in F9c) | parziale→F9 |
 | `ui/wizard/importing/ImportStep.kt` | 258 |  | — |
 | `ui/wizard/importing/ImportApply.kt` | 110 |  | — |
@@ -284,7 +284,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/wizard/importing/ImportUrls.kt` | 41 |  | — |
 | `ui/wizard/importing/ImportReview.kt` | 52 |  | — |
 | `ui/wizard/importing/ListingFetcher.kt` | 186 |  | — |
-| 🧪 `ui/cases/DeleteCaseTest.kt` | 43 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| 🧪 `ui/cases/DeleteCaseTest.kt` | 43 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
 | 🧪 `ui/wizard/importing/ListingFetcherTest.kt` | 91 |  | — |
 | 🧪 `ui/wizard/importing/ImportReviewTest.kt` | 30 |  | — |
 | 🧪 `ui/wizard/importing/ImportUrlsTest.kt` | 39 |  | — |

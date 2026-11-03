@@ -124,7 +124,7 @@ e correggere gli errori (vedi Prossimi passi).
 ### 2026-11-03 — Claude (sessione cloud) — F9b logica pura (parte 1)
 - CI run 41684949732 (F9a + correzione F7): **verde** (compila e test).
 - F9b parte 1 e parte 2 (servizi, contenuti della pagina): vedi `docs/funzioni/F9.md`. `SiteDraftLogic.fieldErrors` restituisce un dizionario (chiave → messaggio) come la mappa Android.
-- **Non verificato**: compilazione e test di F9b (CI lanciata).
+- CI run 41685861268 (F9b parte 1): **verde** al primo colpo. Parte 2 in CI dopo.
 
 ### 2026-11-03 — Claude (sessione cloud) — F9a membri e inviti; correzione F7
 - CI di F7 (run 41684070229): compila; fallisce solo `testFormats`: `NumberFormatter` italiano non separa le migliaia a 4 cifre ("€1234").
