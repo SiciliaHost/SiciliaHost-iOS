@@ -201,7 +201,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/finance/FinanceParts.kt` | 195 | `Features/Finance/FinanceParts.swift`, `Core/Logic/FinanceViewLogic.swift` (formati) | compilato+test |
 | `ui/finance/FinanceScreen.kt` | 896 | `Features/Finance/FinanceView.swift`, `FinanceModel.swift` | compilato+test |
 | `ui/finance/FinanceView.kt` | 69 | `Core/Logic/FinanceViewLogic.swift` | compilato+test |
-| 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 | `SiciliaHostTests/FinanceViewTests.swift` | scritto |
+| 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 | `SiciliaHostTests/FinanceViewTests.swift` | compilato, verde |
 
 ## F8 — Check-in Alloggiati
 
@@ -217,31 +217,31 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/cases/AppFieldsDraft.kt` | 128 |  | — |
+| `ui/cases/AppFieldsDraft.kt` | 128 | `Core/Logic/SiteDraftLogic.swift` | scritto+test |
 | `ui/cases/CaseDetailScreen.kt` | 342 |  | — |
-| `ui/cases/CaseLogic.kt` | 93 | `Core/Models/SimpleModels.swift (solo HostRow)` | parziale→F9 |
-| `ui/cases/CaseSaveLogic.kt` | 26 |  | — |
+| `ui/cases/CaseLogic.kt` | 93 | `Core/Logic/CaseLogic.swift` | scritto+test |
+| `ui/cases/CaseSaveLogic.kt` | 26 | `Core/Logic/CaseLogic.swift` | scritto+test |
 | `ui/cases/CaseSections.kt` | 590 |  | — |
 | `ui/cases/CasesScreen.kt` | 359 |  | — |
 | `ui/cases/CasesViewModel.kt` | 259 |  | — |
 | `ui/cases/HostsScreen.kt` | 142 |  | — |
 | `ui/cases/ListingStatusUi.kt` | 41 |  | — |
 | `ui/cases/PublishOnSiteCard.kt` | 31 |  | — |
-| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift (isOnSiteTrack, canEditCalendarPrices, approvedIds)` | parziale→F9 |
-| `ui/invite/InviteFormat.kt` | 13 | `Core/Logic/MembersLogic.swift` (`InviteText`) | scritto+test |
-| `ui/invite/InviteScreen.kt` | 135 | `Features/Invite/InviteView.swift` | scritto |
-| `ui/invite/InviteViewModel.kt` | 79 | `Features/Invite/InviteView.swift` (`InviteModel`), protocollo `InviteAPI` | scritto+test |
+| `ui/cases/SiteTrack.kt` | 24 | `Core/Models/ListingStatus.swift` | scritto+test |
+| `ui/invite/InviteFormat.kt` | 13 | `Core/Logic/MembersLogic.swift` (`InviteText`) | compilato+test |
+| `ui/invite/InviteScreen.kt` | 135 | `Features/Invite/InviteView.swift` | compilato |
+| `ui/invite/InviteViewModel.kt` | 79 | `Features/Invite/InviteView.swift` (`InviteModel`), protocollo `InviteAPI` | compilato+test |
 | `ui/invite/PendingInvite.kt` | 33 | `Core/State/OnboardingState.swift` | scritto |
-| `ui/members/InviteComposerDialog.kt` | 115 | `Features/Members/MembersView.swift` (`InviteComposerSheet`) | scritto |
-| `ui/members/InviteForm.kt` | 64 | `Core/Logic/MembersLogic.swift` | scritto+test |
-| `ui/members/MembersLogic.kt` | 38 | `Core/Logic/MembersLogic.swift` | scritto+test |
-| `ui/members/MembersScreen.kt` | 279 | `Features/Members/MembersView.swift` | scritto |
-| `ui/members/MembersViewModel.kt` | 205 | `Features/Members/MembersView.swift` (`MembersModel`) | scritto |
-| `ui/property/CredentialsLogic.kt` | 12 |  | — |
+| `ui/members/InviteComposerDialog.kt` | 115 | `Features/Members/MembersView.swift` (`InviteComposerSheet`) | compilato |
+| `ui/members/InviteForm.kt` | 64 | `Core/Logic/MembersLogic.swift` | compilato+test |
+| `ui/members/MembersLogic.kt` | 38 | `Core/Logic/MembersLogic.swift` | compilato+test |
+| `ui/members/MembersScreen.kt` | 279 | `Features/Members/MembersView.swift` | compilato |
+| `ui/members/MembersViewModel.kt` | 205 | `Features/Members/MembersView.swift` (`MembersModel`) | compilato |
+| `ui/property/CredentialsLogic.kt` | 12 | `Core/Logic/CaseLogic.swift` (`CaseSaveLogic.credentialsToSave`) | scritto+test |
 | `ui/property/PropertyManagementViewModel.kt` | 321 |  | — |
 | `ui/site/SiteContentViewModel.kt` | 174 |  | — |
-| `ui/site/SiteDraft.kt` | 265 |  | — |
-| `ui/site/SiteDraftSaver.kt` | 85 |  | — |
+| `ui/site/SiteDraft.kt` | 265 | `Core/Logic/SiteDraftLogic.swift` | scritto+test |
+| `ui/site/SiteDraftSaver.kt` | 85 | n/a: bozze `Codable` in `@State` (niente Bundle Android) | n/a |
 | `ui/site/SiteFormParts.kt` | 66 |  | — |
 | `ui/site/SitePhotosSection.kt` | 116 |  | — |
 | `ui/site/SiteTranslationsSection.kt` | 103 |  | — |
@@ -253,28 +253,28 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/site/position/PositionMap.kt` | 266 |  | — |
 | `ui/site/position/PositionPickerDialog.kt` | 382 |  | — |
 | `ui/site/position/PositionSection.kt` | 130 |  | — |
-| `ui/site/position/PositionState.kt` | 94 |  | — |
+| `ui/site/position/PositionState.kt` | 94 | `Core/Logic/SiteDraftLogic.swift` | scritto+test |
 | `ui/wizard/AppLevelSteps.kt` | 113 |  | — |
 | `ui/wizard/NewCaseWizardScreen.kt` | 489 |  | — |
-| `ui/wizard/WizardLogic.kt` | 68 |  | — |
-| 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 |  | — |
-| 🧪 `ui/cases/CaseLogicTest.kt` | 91 |  | — |
-| 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 |  | — |
+| `ui/wizard/WizardLogic.kt` | 68 | `Core/Logic/CaseLogic.swift` | scritto+test |
+| 🧪 `ui/cases/AppFieldsDraftTest.kt` | 62 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| 🧪 `ui/cases/CaseLogicTest.kt` | 91 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| 🧪 `ui/cases/CaseSaveLogicTest.kt` | 37 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
 | 🧪 `ui/cases/SiteTrackTest.kt` | 41 |  | — |
-| 🧪 `ui/invite/InviteFormatTest.kt` | 33 | `SiciliaHostTests/MembersTests.swift` | scritto |
-| 🧪 `ui/invite/InviteViewModelTest.kt` | 134 | `SiciliaHostTests/MembersTests.swift` | scritto |
+| 🧪 `ui/invite/InviteFormatTest.kt` | 33 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
+| 🧪 `ui/invite/InviteViewModelTest.kt` | 134 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/invite/PendingInviteTest.kt` | 24 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
-| 🧪 `ui/members/InviteFormTest.kt` | 104 | `SiciliaHostTests/MembersTests.swift` | scritto |
-| 🧪 `ui/members/MembersLogicTest.kt` | 71 | `SiciliaHostTests/MembersTests.swift` | scritto |
-| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 |  | — |
+| 🧪 `ui/members/InviteFormTest.kt` | 104 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
+| 🧪 `ui/members/MembersLogicTest.kt` | 71 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
+| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
 | 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 |  | — |
-| 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 |  | — |
-| 🧪 `ui/site/SiteDraftTest.kt` | 389 |  | — |
+| 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 | `SiciliaHostTests/CaseLogicTests.swift` (andata e ritorno `Codable`) | scritto |
+| 🧪 `ui/site/SiteDraftTest.kt` | 389 | `SiciliaHostTests/SiteDraftTests.swift` | scritto |
 | 🧪 `ui/site/content/PageContentDraftTest.kt` | 324 |  | — |
 | 🧪 `ui/site/content/ServicesDraftTest.kt` | 204 |  | — |
-| 🧪 `ui/site/position/PositionStateTest.kt` | 200 |  | — |
-| 🧪 `ui/wizard/WizardLogicTest.kt` | 79 |  | — |
-| `ui/cases/DeleteCase.kt` | 103 |  | — |
+| 🧪 `ui/site/position/PositionStateTest.kt` | 200 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| 🧪 `ui/wizard/WizardLogicTest.kt` | 79 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
+| `ui/cases/DeleteCase.kt` | 103 | `Core/Logic/CaseLogic.swift` (logica; il dialog va in F9c) | parziale→F9 |
 | `ui/wizard/importing/ImportStep.kt` | 258 |  | — |
 | `ui/wizard/importing/ImportApply.kt` | 110 |  | — |
 | `ui/wizard/importing/ImportViewModel.kt` | 175 |  | — |
@@ -284,7 +284,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/wizard/importing/ImportUrls.kt` | 41 |  | — |
 | `ui/wizard/importing/ImportReview.kt` | 52 |  | — |
 | `ui/wizard/importing/ListingFetcher.kt` | 186 |  | — |
-| 🧪 `ui/cases/DeleteCaseTest.kt` | 43 |  | — |
+| 🧪 `ui/cases/DeleteCaseTest.kt` | 43 | `SiciliaHostTests/CaseLogicTests.swift` | scritto |
 | 🧪 `ui/wizard/importing/ListingFetcherTest.kt` | 91 |  | — |
 | 🧪 `ui/wizard/importing/ImportReviewTest.kt` | 30 |  | — |
 | 🧪 `ui/wizard/importing/ImportUrlsTest.kt` | 39 |  | — |
