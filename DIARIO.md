@@ -43,15 +43,14 @@ e correggere gli errori (vedi Prossimi passi).
 
 - Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario in `docs/INVENTARIO.md`, ora con **tutti i 249 file Kotlin** di `main` (`a43eb44`): 31 file aggiunti il 2026-11-03 (F3/F9/F10) e 7 della scheda Messaggi (F1/F12); righe aperte 120.
 - **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
-- **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): SCRITTE il 2026-11-03** (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`).
-  Esito della compilazione in CI: vedi la voce del Registro del 2026-11-03.
+- **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): COMPILANO in CI e i test passano (2026-11-03, run 41677922733: 187 test, 0 falliti)**
+  (checklist `docs/funzioni/F4-F5.md`, test in `SiciliaHostTests/AgendaTests.swift`). Interfaccia non ancora VISTA (screenshot non scaricabili dalla sessione cloud).
 - Segnaposto rimasti: Scorte, Finanze, Case, check-in (le righe della Home portano a `Route.checkin`, ancora segnaposto), membri, creazione guidata.
 - F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
-0. Se la CI della sessione 2026-11-03 non era verde: correggere gli errori di F4/F5 (`gh run view --log-failed` o i log del workflow) prima di scrivere altro.
-   Guardare gli screenshot nuovi `arrivals` e `agenda` (artefatto `ios-screenshots`).
+0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
 1. **F8 — Check-in Alloggiati** (le righe della Home ci portano già), poi F6 (Scorte), F7 (Finanze), F9 (Case…), F12 (Messaggi), più le righe F3 nuove del Profilo.
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
@@ -137,8 +136,12 @@ e correggere gli errori (vedi Prossimi passi).
   `init` di vista non isolato. `@MainActor` sugli `init` NON basta (run 41673131732, stesso errore: con Swift 5 l'argomento predefinito resta non isolato).
   Corretto con `model: HomeModel? = nil` e `model ?? HomeModel()` nel corpo dell'`init` (idem `AgendaModel`). Regola: **mai creare un oggetto
   `@MainActor` come argomento predefinito**. Terza CI (run 41675603234): superato, nuovo errore `SelectField` con opzioni `Property` (non `Hashable`): ora le opzioni sono gli id
-  (Home e editor prezzi). Regola: **`SelectField` vuole opzioni `Hashable`, passare gli id**. Quarta CI rilanciata.
-- **Non verificato**: esito della seconda CI;
+  (Home e editor prezzi). Regola: **`SelectField` vuole opzioni `Hashable`, passare gli id**. Quarta CI (run 41677922733, commit 4c11792): **VERDE — compila, 187 test eseguiti, 0 falliti, 1 saltato** (il solito `.xls` reale).
+  Screenshot `arrivals`/`agenda` (chiaro e scuro) generati nell'artefatto `ios-screenshots`, **non guardati**: dalla sessione cloud il dominio di
+  download degli artefatti (`*.blob.core.windows.net`) è bloccato dalla rete. Da guardare: `gh run download 41677922733 -n ios-screenshots -D <cartella>`.
+  Nota CI: nel passo screenshot `simctl install` fallisce (percorso dell'app vuoto: `build/DerivedData/Build/Products` non esiste) ma le foto escono lo stesso
+  perché l'app è già installata dai test; da sistemare nello script prima o poi.
+- **Non verificato**:
   nulla visto a schermo; trascinamento sulla griglia prezzi dentro uno `ScrollView`; regex literal `#/…/#` (richiede Swift 5.7+, ok con Xcode 16).
 
 ### 2026-10-27 — Claude Sonnet 5.5 — (sessione sito/backend, nessun codice iOS toccato) backend rilasciato e branch ripuliti

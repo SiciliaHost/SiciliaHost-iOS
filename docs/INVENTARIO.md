@@ -165,21 +165,21 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/dashboard/DashboardScreen.kt` | 412 | `Features/Home/HomeView.swift`, `Core/Logic/AgendaLogic.swift` | scritto+test |
+| `ui/dashboard/DashboardScreen.kt` | 412 | `Features/Home/HomeView.swift`, `Core/Logic/AgendaLogic.swift` | compilato+test |
 
 ## F5 — Agenda, prenotazioni e prezzi
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/calendar/CalendarScreen.kt` | 391 | `Features/Agenda/AgendaView.swift`, `Core/Logic/AgendaLogic.swift` | scritto+test |
-| `ui/calendar/GuestPricing.kt` | 69 | `Core/Logic/PriceLogic.swift` | scritto+test |
-| `ui/calendar/PriceEditorScreen.kt` | 470 | `Features/Agenda/PriceEditorView.swift` | scritto |
-| `ui/calendar/PriceEditorViewModel.kt` | 351 | `Features/Agenda/PriceEditorModel.swift` | scritto |
-| `ui/calendar/PriceSelection.kt` | 105 | `Core/Logic/PriceLogic.swift` | scritto+test |
-| `ui/reservation/ReservationEditScreen.kt` | 312 | `Features/Reservation/ReservationEditView.swift`, `Core/Logic/AgendaLogic.swift` | scritto+test |
-| 🧪 `ui/calendar/CalendarGridTest.kt` | 35 | `SiciliaHostTests/AgendaTests.swift` | scritto |
-| 🧪 `ui/calendar/GuestPricingTest.kt` | 85 | `SiciliaHostTests/AgendaTests.swift` | scritto |
-| 🧪 `ui/calendar/PriceSelectionTest.kt` | 126 | `SiciliaHostTests/AgendaTests.swift` | scritto |
+| `ui/calendar/CalendarScreen.kt` | 391 | `Features/Agenda/AgendaView.swift`, `Core/Logic/AgendaLogic.swift` | compilato+test |
+| `ui/calendar/GuestPricing.kt` | 69 | `Core/Logic/PriceLogic.swift` | compilato+test |
+| `ui/calendar/PriceEditorScreen.kt` | 470 | `Features/Agenda/PriceEditorView.swift` | compilato |
+| `ui/calendar/PriceEditorViewModel.kt` | 351 | `Features/Agenda/PriceEditorModel.swift` | compilato |
+| `ui/calendar/PriceSelection.kt` | 105 | `Core/Logic/PriceLogic.swift` | compilato+test |
+| `ui/reservation/ReservationEditScreen.kt` | 312 | `Features/Reservation/ReservationEditView.swift`, `Core/Logic/AgendaLogic.swift` | compilato+test |
+| 🧪 `ui/calendar/CalendarGridTest.kt` | 35 | `SiciliaHostTests/AgendaTests.swift` | compilato, verde |
+| 🧪 `ui/calendar/GuestPricingTest.kt` | 85 | `SiciliaHostTests/AgendaTests.swift` | compilato, verde |
+| 🧪 `ui/calendar/PriceSelectionTest.kt` | 126 | `SiciliaHostTests/AgendaTests.swift` | compilato, verde |
 
 ## F6 — Scorte
 
