@@ -226,10 +226,11 @@ struct HomeView: View {
             Text("Per quale casa?").appStyle(.titleMedium).foregroundStyle(Theme.onSurface)
             SelectField(
                 label: "Casa",
-                options: model.properties,
-                selected: model.properties.first { $0.id == chosenPropertyId },
-                optionLabel: \.name,
-                onSelect: { chosenPropertyId = $0.id }
+                // `Property` non è Hashable: le opzioni sono gli id, l'etichetta è il nome.
+                options: model.properties.map(\.id),
+                selected: chosenPropertyId,
+                optionLabel: { id in model.properties.first { $0.id == id }?.name ?? id },
+                onSelect: { chosenPropertyId = $0 }
             )
             HStack {
                 Spacer()

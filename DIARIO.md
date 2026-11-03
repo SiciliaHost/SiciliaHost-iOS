@@ -136,7 +136,8 @@ e correggere gli errori (vedi Prossimi passi).
 - CI (run 41670274814): **build fallita** con 2 errori — `HomeModel()`/`AgendaModel()` (isolati al main actor) creati come argomento predefinito di un
   `init` di vista non isolato. `@MainActor` sugli `init` NON basta (run 41673131732, stesso errore: con Swift 5 l'argomento predefinito resta non isolato).
   Corretto con `model: HomeModel? = nil` e `model ?? HomeModel()` nel corpo dell'`init` (idem `AgendaModel`). Regola: **mai creare un oggetto
-  `@MainActor` come argomento predefinito**. Terza CI rilanciata.
+  `@MainActor` come argomento predefinito**. Terza CI (run 41675603234): superato, nuovo errore `SelectField` con opzioni `Property` (non `Hashable`): ora le opzioni sono gli id
+  (Home e editor prezzi). Regola: **`SelectField` vuole opzioni `Hashable`, passare gli id**. Quarta CI rilanciata.
 - **Non verificato**: esito della seconda CI;
   nulla visto a schermo; trascinamento sulla griglia prezzi dentro uno `ScrollView`; regex literal `#/…/#` (richiede Swift 5.7+, ok con Xcode 16).
 

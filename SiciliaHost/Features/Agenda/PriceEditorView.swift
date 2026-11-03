@@ -67,10 +67,14 @@ struct PriceEditorView: View {
             } else {
                 SelectField(
                     label: "Casa",
-                    options: model.properties,
-                    selected: model.properties.first { $0.id == model.propertyId },
-                    optionLabel: { $0.name.trimmed.isEmpty ? $0.id : $0.name },
-                    onSelect: { model.selectProperty($0.id) }
+                    // `PropertySiteContent` non è Hashable: le opzioni sono gli id, l'etichetta è il nome.
+                    options: model.properties.map(\.id),
+                    selected: model.propertyId,
+                    optionLabel: { id in
+                        let name = model.properties.first { $0.id == id }?.name ?? ""
+                        return name.trimmed.isEmpty ? id : name
+                    },
+                    onSelect: { model.selectProperty($0) }
                 )
                 .disabled(model.isSaving)
             }
