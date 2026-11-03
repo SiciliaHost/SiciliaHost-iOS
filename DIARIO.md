@@ -130,7 +130,9 @@ e correggere gli errori (vedi Prossimi passi).
 - Test: `AgendaTests` (CalendarGridTest, PriceSelectionTest, GuestPricingTest portati + logica Home/modifica).
 - Differenze volute: vedi `docs/funzioni/F4-F5.md` (data invariata se il giorno non cambia, errori di rete mostrati, editor prezzi come schermata).
 - CI (run 41670274814): **build fallita** con 2 errori — `HomeModel()`/`AgendaModel()` (isolati al main actor) creati come argomento predefinito di un
-  `init` di vista non isolato. Corretto con `@MainActor` sugli `init` di `HomeView`/`AgendaView`; nuova CI rilanciata (esito nella voce successiva o qui sotto).
+  `init` di vista non isolato. `@MainActor` sugli `init` NON basta (run 41673131732, stesso errore: con Swift 5 l'argomento predefinito resta non isolato).
+  Corretto con `model: HomeModel? = nil` e `model ?? HomeModel()` nel corpo dell'`init` (idem `AgendaModel`). Regola: **mai creare un oggetto
+  `@MainActor` come argomento predefinito**. Terza CI rilanciata.
 - **Non verificato**: esito della seconda CI;
   nulla visto a schermo; trascinamento sulla griglia prezzi dentro uno `ScrollView`; regex literal `#/…/#` (richiede Swift 5.7+, ok con Xcode 16).
 

@@ -49,13 +49,13 @@ struct AgendaView: View {
         canEditPrices: Bool,
         onEditReservation: @escaping (String) -> Void = { _ in },
         onEditPrices: @escaping () -> Void = {},
-        model: AgendaModel = AgendaModel()
+        model: AgendaModel? = nil
     ) {
         self.scope = scope
         self.canEditPrices = canEditPrices
         self.onEditReservation = onEditReservation
         self.onEditPrices = onEditPrices
-        _model = State(initialValue: model)
+        _model = State(initialValue: model ?? AgendaModel())
     }
 
     var body: some View {

@@ -71,13 +71,13 @@ struct HomeView: View {
         onProfile: @escaping () -> Void,
         onCheckin: @escaping (String, String) -> Void = { _, _ in },
         onEditReservation: @escaping (String) -> Void = { _ in },
-        model: HomeModel = HomeModel()
+        model: HomeModel? = nil
     ) {
         self.scope = scope
         self.onProfile = onProfile
         self.onCheckin = onCheckin
         self.onEditReservation = onEditReservation
-        _model = State(initialValue: model)
+        _model = State(initialValue: model ?? HomeModel())
     }
 
     var body: some View {
