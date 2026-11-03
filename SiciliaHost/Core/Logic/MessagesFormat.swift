@@ -141,8 +141,8 @@ func mergeMessages(_ current: [ChatMessage], _ incoming: [ChatMessage]) -> [Chat
 func isValidPhone(_ value: String) -> Bool {
     let text = value.trimmingCharacters(in: .whitespacesAndNewlines)
     if text.isEmpty { return true }
-    if text.count > 30 || text.range(of: "^\+?[0-9\s().\-/]+$", options: .regularExpression) == nil { return false }
-    let compact = text.replacingOccurrences(of: "[\s().\-/]", with: "", options: .regularExpression)
+    if text.count > 30 || text.range(of: #"^\+?[0-9\s().\-/]+$"#, options: .regularExpression) == nil { return false }
+    let compact = text.replacingOccurrences(of: #"[\s().\-/]"#, with: "", options: .regularExpression)
     let digits: String
     if compact.hasPrefix("+") { digits = String(compact.dropFirst()) }
     else if compact.hasPrefix("00") { digits = String(compact.dropFirst(2)) }

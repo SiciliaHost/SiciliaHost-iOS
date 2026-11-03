@@ -126,6 +126,7 @@ e correggere gli errori (vedi Prossimi passi).
 - Il `main` locale è stato allineato al ramo `claude/kind-ptolemy-63nbq5` dell'agente cloud (fast-forward, F4–F9 compilati e verdi).
 - F12 scritta: modelli, parser, `MessagingService`, `MessagesFormat`/`mergeMessages`/`isValidPhone`, `MessagesModel`, `MessagesView`, scheda `.messaggi`
   in `MainTab`/`MainTabView` (abilitata da `getMessagingStatus`, barra nascosta con la chat aperta), test `MessagingTests`. Dettaglio in `docs/funzioni/F12.md`.
+- CI run 41708954409: errore di compilazione (escape delle regex in `isValidPhone`), corretto con stringhe raw; rilanciata.
 - **Non compilato** (Windows): la CI su ramo `feat/f12-messaggi` dirà. Nulla provato su iPhone né con dati reali.
 
 ### 2026-11-03 — Claude (sessione cloud) — F9d creazione guidata e import annunci
