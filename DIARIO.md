@@ -49,13 +49,13 @@ e correggere gli errori (vedi Prossimi passi).
 - **F6 (Scorte): COMPILA in CI e i test passano (2026-11-03, run 41682083370)** (checklist `docs/funzioni/F6.md`, test `InventoryTests`).
 - **F7 (Finanze) e F9a (membri e inviti): COMPILANO e i test passano** (CI run 41684949732, che include la correzione di `testFormats`).
 - **F9** (`docs/funzioni/F9.md`): F9a, F9b, **F9c (scheda Case) COMPILANO e i test passano** (run 41689890292); **F9d (creazione guidata e import) COMPILA e i test passano** (run 41691071972). **F9 completa** (interfaccia mai vista su iPhone).
-- **F12 (Messaggi) scritta 2026-11-03, in attesa della CI** (`docs/funzioni/F12.md`). Nessun segnaposto di schermata rimasto. Il tab Case è `CasesView` (F9c), la creazione guidata `NewCaseWizardView` (F9d).
+- **F12 (Messaggi): COMPILA e i test passano (2026-11-03, run 41709423673, ramo `feat/f12-messaggi`, non unito a `main`)** (`docs/funzioni/F12.md`). Nessun segnaposto di schermata rimasto. Il tab Case è `CasesView` (F9c), la creazione guidata `NewCaseWizardView` (F9d).
 - F3 ha 11 righe nuove aperte (Profilo 2026-10-30 dell'Android: nome visualizzato, "Le mie case", accesso alla casa, privacy, canali notifiche).
 
 ## Prossimi passi (in ordine)
 
 0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
-1. (F12 scritta: attendere/correggere la CI) Righe F3 del Profilo, F10 (con "Sincronizza ora" e la
+1. Unire `feat/f12-messaggi` in `main` (a richiesta), poi righe F3 del Profilo, F10 (con "Sincronizza ora" e la
    sync iCal riallineata agli echi Booking della baseline).
    Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
 2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
@@ -126,8 +126,8 @@ e correggere gli errori (vedi Prossimi passi).
 - Il `main` locale è stato allineato al ramo `claude/kind-ptolemy-63nbq5` dell'agente cloud (fast-forward, F4–F9 compilati e verdi).
 - F12 scritta: modelli, parser, `MessagingService`, `MessagesFormat`/`mergeMessages`/`isValidPhone`, `MessagesModel`, `MessagesView`, scheda `.messaggi`
   in `MainTab`/`MainTabView` (abilitata da `getMessagingStatus`, barra nascosta con la chat aperta), test `MessagingTests`. Dettaglio in `docs/funzioni/F12.md`.
-- CI run 41708954409: errore di compilazione (escape delle regex in `isValidPhone`), corretto con stringhe raw; rilanciata.
-- **Non compilato** (Windows): la CI su ramo `feat/f12-messaggi` dirà. Nulla provato su iPhone né con dati reali.
+- CI run 41708954409: errore di compilazione (escape delle regex in `isValidPhone`), corretto con stringhe raw; rilanciata: **verde (run 41709423673)**.
+- Compilata e testata in CI. Nulla provato su iPhone né con dati reali.
 
 ### 2026-11-03 — Claude (sessione cloud) — F9d creazione guidata e import annunci
 - CI run 41689890292 (F9c): **compila e test verdi** al primo colpo (passo "Compila e prova").

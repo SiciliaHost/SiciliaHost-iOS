@@ -53,9 +53,9 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `data/repository/ListingRepositoryParseTest.kt` | 30 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
 | 🧪 `data/repository/ParseSeasonalRatesTest.kt` | 39 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
 | 🧪 `data/repository/PriceRepositoryParseTest.kt` | 31 | `SiciliaHostTests/CallableParsersTests.swift` | scritto |
-| `data/model/Messaging.kt` | 51 | `Core/Models/Messaging.swift` | scritto |
-| `data/repository/MessagingRepository.kt` | 144 | `Core/Services/CloudFunctionsServices.swift (MessagingService), CallableParsers.swift, Core/Logic/MessagesFormat.swift (mergeMessages, isValidPhone)` | scritto |
-| 🧪 `data/repository/MessagingRepositoryTest.kt` | 88 | `SiciliaHostTests/MessagingTests.swift` | scritto |
+| `data/model/Messaging.kt` | 51 | `Core/Models/Messaging.swift` | compilato, test ok |
+| `data/repository/MessagingRepository.kt` | 144 | `Core/Services/CloudFunctionsServices.swift (MessagingService), CallableParsers.swift, Core/Logic/MessagesFormat.swift (mergeMessages, isValidPhone)` | compilato, test ok |
+| 🧪 `data/repository/MessagingRepositoryTest.kt` | 88 | `SiciliaHostTests/MessagingTests.swift` | compilato, test ok |
 
 ## F2 — Logica pura e utilità
 
@@ -309,10 +309,10 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/messages/MessagesScreen.kt` | 391 | `Features/Messages/MessagesView.swift` | scritto |
-| `ui/messages/MessagesViewModel.kt` | 204 | `Features/Messages/MessagesModel.swift` | scritto |
-| `ui/messages/MessagesFormat.kt` | 81 | `Core/Logic/MessagesFormat.swift` | scritto |
-| 🧪 `ui/messages/MessagesFormatTest.kt` | 35 | `SiciliaHostTests/MessagingTests.swift` | scritto |
+| `ui/messages/MessagesScreen.kt` | 391 | `Features/Messages/MessagesView.swift` | compilato, test ok |
+| `ui/messages/MessagesViewModel.kt` | 204 | `Features/Messages/MessagesModel.swift` | compilato, test ok |
+| `ui/messages/MessagesFormat.kt` | 81 | `Core/Logic/MessagesFormat.swift` | compilato, test ok |
+| 🧪 `ui/messages/MessagesFormatTest.kt` | 35 | `SiciliaHostTests/MessagingTests.swift` | compilato, test ok |
 
 ## Risorse e manifest
 
