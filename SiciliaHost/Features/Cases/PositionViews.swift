@@ -2,8 +2,9 @@ import MapKit
 import SwiftUI
 
 // Posizione della casa (`PositionSection.kt`, `PositionPickerDialog.kt`, `PositionMap.kt`, `MapMarkerIcons.kt`) con
-// MapKit al posto di osmdroid. Il pin esatto lo vedono solo gli ospiti confermati; l'area pubblica (cerchio di 300 m) è
-// visibile a tutti. La geometria (50–250 m tra pin e centro dell'area) è in `PositionState`/`GeoMath`.
+// MapKit al posto di osmdroid. Il pin esatto (`coordinates`) è visibile sulla mappa del sito (mentre l'indirizzo civico
+// resta riservato agli ospiti confermati); l'area di riserva (cerchio di 300 m) è usata se manca il pin. La geometria
+// (50–250 m tra pin e centro dell'area) è in `PositionState`/`GeoMath`.
 
 extension LatLng {
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lng) }
@@ -248,9 +249,9 @@ struct PositionPickerView: View {
     private func infoBlock(problem: String?) -> some View {
         VStack(alignment: .leading, spacing: Dimens.itemSpacing) {
             // Legenda: forma + testo, non solo colore.
-            Label("Pin esatto · solo ospiti con prenotazione", systemImage: "mappin.circle.fill")
+            Label("Pin esatto · visibile sulla mappa del sito", systemImage: "mappin.circle.fill")
                 .appStyle(.labelMedium).foregroundStyle(Theme.primary)
-            Label("Area pubblica · visibile a tutti", systemImage: "eye.circle.fill")
+            Label("Area di riserva · raggio 300 m", systemImage: "eye.circle.fill")
                 .appStyle(.labelMedium).foregroundStyle(Theme.secondary)
             if let problem { Text(problem).appStyle(.bodyMedium).foregroundStyle(Theme.error) }
             if state.exact != nil {

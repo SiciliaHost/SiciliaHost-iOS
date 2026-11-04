@@ -123,6 +123,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-04 — Antigravity (locale, Windows senza Swift) — allineamento testi posizione, privacy e condizioni d'uso host
+- Aggiornati `HostTerms.swift` (testo completo senza segnaposto `[...]`, pin visibile sulla mappa del sito e indirizzo civico riservato agli ospiti confermati, caparra del 30% diretta all'host via IBAN/PayPal.me con cancellazione gratuita a 15 giorni, dati del titolare e Foro di Palermo), `ProfileLogic.swift` (voce "Pagamenti" allineata alla caparra diretta senza Stripe) e `PositionViews.swift` (legenda del pin esatto visibile sulla mappa del sito e area di riserva di raggio 300 m), in parità con Android e sito.
+- **Non verificato**: compilazione Swift locale (Windows senza Swift).
+
 ### 2026-11-04 — Claude Sonnet 5.5 (locale, Windows senza Swift) — F10 sfondo, notifiche, sincronizzazioni
 - `ICalSync.buildSyncPlan` riallineato alla baseline Android (echi Booking: `otherFutureReservations`, `now`, `Plan.echoes`, `romeDay`, `isUntouchedPlaceholder`),
   test `BackgroundSyncTests`. `ICalSyncService` (download https, piano, scrittura, cancellazioni con spese solo con permesso finanze).

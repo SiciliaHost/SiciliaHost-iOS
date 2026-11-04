@@ -97,7 +97,10 @@ let privacySections: [PrivacySection] = [
         title: "Posizione delle case",
         body: "Se la casa ha un pin sulla mappa, sul sito compare il punto esatto (mai l'indirizzo); senza pin si vede solo un'area di circa 300 metri di raggio. L'indirizzo preciso lo vedono i membri della casa e gli ospiti con prenotazione confermata."
     ),
-    PrivacySection(title: "Pagamenti", body: "I pagamenti dal sito passano da Stripe. Questa app non vede né conserva i dati delle carte."),
+    PrivacySection(
+        title: "Pagamenti",
+        body: "Il sito non incassa con carta: l'ospite versa la caparra del 30% direttamente al proprietario (tramite IBAN o PayPal.me configurati nel pannello). L'app registra solo gli importi dei soggiorni per la contabilità."
+    ),
     PrivacySection(
         title: "Notifiche",
         body: "Per inviarti le notifiche salviamo nel tuo profilo un identificativo del dispositivo (token). Puoi disattivare le notifiche in qualsiasi momento dalle impostazioni del telefono."
