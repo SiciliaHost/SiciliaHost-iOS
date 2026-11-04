@@ -298,12 +298,12 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `services/LocalNotifier.kt` | 45 |  | — |
-| `services/MyFirebaseMessagingService.kt` | 38 |  | — |
-| `sync/BookingExcelReminderWorker.kt` | 49 |  | — |
-| `sync/ICalSyncWorker.kt` | 251 | `Core/Logic/ICalSync.swift (parte pura: parseEvents, buildSyncPlan, safeErrorReason)` | parziale→F10 (download, scrittura, pianificazione) |
-| 🧪 `sync/ICalSyncWorkerTest.kt` | 171 | `SiciliaHostTests/LogicTests.swift` | scritto |
-| `services/NotificationChannels.kt` | 29 |  | — |
+| `services/LocalNotifier.kt` | 45 | `Core/Services/Notifications.swift (LocalNotifier)` | scritto |
+| `services/MyFirebaseMessagingService.kt` | 38 | `App/AppDelegate.swift, Core/Services/Notifications.swift (PushToken)` | scritto |
+| `sync/BookingExcelReminderWorker.kt` | 49 | `Core/Logic/ExcelReminder.swift, Core/Services/Notifications.swift (ExcelReminderScheduler)` | scritto (notifica locale pianificata, non un lavoro periodico) |
+| `sync/ICalSyncWorker.kt` | 251 | `Core/Logic/ICalSync.swift (parte pura: parseEvents, buildSyncPlan, safeErrorReason)` | scritto (`Core/Services/ICalSyncService.swift`, giro in `AutoSync`; echi Booking portati) |
+| 🧪 `sync/ICalSyncWorkerTest.kt` | 171 | `SiciliaHostTests/LogicTests.swift, BackgroundSyncTests.swift (echi)` | scritto |
+| `services/NotificationChannels.kt` | 29 | n/a | iOS non ha canali di notifica: si regola tutto dalle impostazioni di sistema (Profilo → Notifiche) |
 
 ## F12 — Messaggi degli ospiti
 

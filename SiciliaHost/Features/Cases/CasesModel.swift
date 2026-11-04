@@ -265,6 +265,14 @@ final class CasesModel {
         }
     }
 
+    /// "Sincronizza ora" (`syncNow` dell'Android): un giro immediato per ogni URL iCal salvato, con l'esito per l'utente.
+    func syncNow(_ propertyId: String) async -> String {
+        guard let property = item(propertyId)?.property else { return "Casa non trovata" }
+        guard !ICalSyncService.feeds(of: property).isEmpty else { return "Nessun URL iCal configurato per questa struttura" }
+        let failed = await ICalSyncService().syncProperty(property)
+        return failed.isEmpty ? "Sincronizzazione completata" : "Sincronizzazione fallita — " + failed.joined(separator: " | ")
+    }
+
     /// Import dell'export "Arrivi con recapiti" di Booking (.xls o CSV), come `importBookingExcel` dell'Android: il
     /// prezzo è già nel file, quindi le prenotazioni entrano complete. Una riga sovrapposta a un segnaposto iCal lo
     /// completa; una prenotazione già completa riceve solo i dati statistici. Restituisce il messaggio per l'utente.

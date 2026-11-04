@@ -3,12 +3,11 @@ import SwiftUI
 
 @main
 struct SiciliaHostApp: App {
+    /// Push e giro in sfondo (F10): il delegato configura Firebase già all'avvio (`FirebaseBootstrap`).
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     /// Senza `GoogleService-Info.plist` Firebase va in crash: si mostra invece una schermata che spiega cosa fare.
-    private static let firebaseConfigured: Bool = {
-        guard Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil else { return false }
-        FirebaseApp.configure()
-        return true
-    }()
+    private static let firebaseConfigured = FirebaseBootstrap.configured
 
     var body: some Scene {
         WindowGroup {

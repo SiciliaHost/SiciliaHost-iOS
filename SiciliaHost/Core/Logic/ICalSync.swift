@@ -13,6 +13,8 @@ enum ICalSync {
     struct Plan {
         let toUpsert: [Reservation]
         let toDelete: [Reservation]
+        /// Eventi Booking che sono solo l'eco di prenotazioni di altre piattaforme (non importati).
+        var echoes = 0
     }
 
     // Summary usato dalle piattaforme per le date bloccate a causa di una prenotazione arrivata da un'altra
@@ -76,6 +78,63 @@ enum ICalSync {
         return events
     }
 
+    private static let rome: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Rome")!
+        return calendar
+    }()
+
+    /// Giorno di calendario a Roma (giorni dal 1970). I documenti iCal sono a mezzanotte UTC, quelli scritti a mano a
+    /// mezzanotte di Roma: confrontando i millisecondi non coinciderebbero mai.
+    static func romeDay(_ epochMs: Int64) -> Int64 {
+        let c = rome.dateComponents([.year, .month, .day], from: dateFromMillis(epochMs))
+        return utcMillis(year: c.year!, month: c.month!, day: c.day!) / millisPerDay
+    }
+
+    /// Notti [from, to) di un soggiorno, nil se vuoto o rovesciato.
+    private static func nightsOf(_ checkIn: Int64, _ checkOut: Int64) -> Range<Int64>? {
+        let from = romeDay(checkIn), to = romeDay(checkOut)
+        return to > from ? from..<to : nil
+    }
+
+    /// Unione delle notti occupate, con gli intervalli contigui fusi (due soggiorni attaccati coprono anche una chiusura
+    /// Booking che li abbraccia entrambi). Ogni elemento: (prima notte, mattina di uscita).
+    private static func mergedNights(_ reservations: [Reservation]) -> [(Int64, Int64)] {
+        let sorted = reservations.compactMap { r in nightsOf(r.checkIn, r.checkOut).map { ($0.lowerBound, $0.upperBound) } }
+            .sorted { $0.0 < $1.0 }
+        var merged: [(Int64, Int64)] = []
+        for n in sorted {
+            if let last = merged.last, n.0 <= last.1 {
+                merged[merged.count - 1] = (last.0, max(last.1, n.1))
+            } else {
+                merged.append(n)
+            }
+        }
+        return merged
+    }
+
+    /// Eco = stesse notti di una prenotazione di un'altra piattaforma, o di più prenotazioni attaccate: notti tutte
+    /// coperte E inizio/fine uguali all'inizio/fine di una di esse. Un evento strettamente dentro un soggiorno più lungo
+    /// (Airbnb 1-10, Booking 3-5) non è un'eco: è il tipico overbooking nato dal ritardo di sincronizzazione.
+    private static func echoMatcher(_ foreign: [Reservation]) -> (Int64, Int64) -> Bool {
+        let merged = mergedNights(foreign)
+        let nights = foreign.compactMap { nightsOf($0.checkIn, $0.checkOut) }
+        let starts = Set(nights.map(\.lowerBound))
+        let ends = Set(nights.map(\.upperBound))
+        return { checkIn, checkOut in
+            guard let n = nightsOf(checkIn, checkOut) else { return false }
+            return starts.contains(n.lowerBound) && ends.contains(n.upperBound)
+                && merged.contains { $0.0 <= n.lowerBound && $0.1 >= n.upperBound }
+        }
+    }
+
+    /// Segnaposto Booking creato dall'iCal e mai toccato dall'host: niente importo, niente nome, non dall'Excel. Solo
+    /// questi si tolgono come «eco» senza perdere dati (non hanno la spesa biancheria).
+    static func isUntouchedPlaceholder(_ r: Reservation) -> Bool {
+        guard let uid = r.icalUid else { return false }
+        return !uid.hasPrefix("booking-xls-") && r.grossAmount == nil && (r.guestName ?? "").trimmed.isEmpty
+    }
+
     /// Decide cosa importare e cosa cancellare, per piattaforma:
     /// - AIRBNB: importa solo gli eventi non bloccati; cancella le prenotazioni note il cui UID non è più nel feed
     ///   (UID stabili per Airbnb, quindi è il modo preciso per rilevare una cancellazione).
@@ -83,8 +142,15 @@ enum ICalSync {
     ///   available"), scartando quelli le cui date si sovrappongono a una prenotazione Booking già nota (Excel o iCal);
     ///   cancella le prenotazioni note le cui date non si sovrappongono più a nessun evento del feed fresco (gli UID
     ///   Excel/iCal sono estranei tra loro, quindi qui il confronto è per data, non per UID).
+    /// - ECHI (solo BOOKING): Booking scrive «CLOSED - Not available» anche per le date che ha importato dai calendari
+    ///   collegati (Airbnb, il sito). Un evento le cui notti sono tutte occupate da prenotazioni future di ALTRE
+    ///   piattaforme (`otherFutureReservations`: Airbnb, MANUAL) è l'eco di quelle e non si importa; un segnaposto mai
+    ///   toccato diventato eco si cancella. Una sovrapposizione solo parziale si importa comunque: è un vero doppio.
+    /// Porta 1:1 `ICalSyncWorker.buildSyncPlan` dell'Android e `reservationSyncPlan.ts` del sito: cambiare tutti e tre.
+    /// `now`: Booking crea solo da eventi con checkout futuro (stesso taglio delle prenotazioni note).
     static func buildSyncPlan(
-        events: [ParsedEvent], propertyId: String, platform: String, existingFutureReservations: [Reservation]
+        events: [ParsedEvent], propertyId: String, platform: String, existingFutureReservations: [Reservation],
+        otherFutureReservations: [Reservation] = [], now: Int64 = 0
     ) -> Plan {
         // Un feed valido ma con zero eventi è indistinguibile da un feed rotto: non è un segnale abbastanza forte da
         // giustificare la cancellazione di ogni prenotazione nota. Senza eventi non si importa né si cancella nulla.
@@ -107,22 +173,32 @@ enum ICalSync {
             return Plan(toUpsert: toUpsert, toDelete: toDelete)
 
         case "BOOKING":
-            let toUpsert = validEvents
+            let isEcho = echoMatcher(otherFutureReservations)
+            let futureEvents = validEvents.filter { $0.checkOut > now }
+            let echoes = futureEvents.filter { isEcho($0.checkIn, $0.checkOut) }.count
+            // Due eventi con le stesse identiche date nello stesso feed sono una sola occupazione.
+            var seen = Set<[Int64]>()
+            let toUpsert = futureEvents
+                .filter { !isEcho($0.checkIn, $0.checkOut) }
                 .filter { event in
                     !existingFutureReservations.contains {
                         dateRangesOverlap($0.checkIn, $0.checkOut, event.checkIn, event.checkOut)
                     }
                 }
+                .filter { seen.insert([$0.checkIn, $0.checkOut]).inserted }
                 .map { event in
                     Reservation(
                         propertyId: propertyId, guestName: nil, checkIn: event.checkIn, checkOut: event.checkOut,
                         platform: platform, icalUid: event.uid, needsReview: true
                     )
                 }
+            // Mai creare e cancellare lo stesso id nello stesso giro: un evento che si sovrappone a un segnaposto
+            // cancellato ora resta fuori fino al giro dopo.
             let toDelete = existingFutureReservations.filter { existing in
                 !validEvents.contains { dateRangesOverlap(existing.checkIn, existing.checkOut, $0.checkIn, $0.checkOut) }
+                    || (isUntouchedPlaceholder(existing) && isEcho(existing.checkIn, existing.checkOut))
             }
-            return Plan(toUpsert: toUpsert, toDelete: toDelete)
+            return Plan(toUpsert: toUpsert, toDelete: toDelete, echoes: echoes)
 
         default:
             return Plan(toUpsert: [], toDelete: [])

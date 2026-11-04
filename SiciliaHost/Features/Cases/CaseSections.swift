@@ -206,6 +206,7 @@ struct GestioneSection: View {
     let isSuperAdmin: Bool
     @Binding var importMessage: String?
     let onImport: (Data) -> Void
+    let onSyncNow: () -> Void
     let onOpenMembers: () -> Void
 
     @State private var picking = false
@@ -216,6 +217,10 @@ struct GestioneSection: View {
         AppTextField(label: "URL iCal Booking", text: $draft.icalUrlBooking, keyboard: .URL, capitalization: .never)
         SectionNote(text: "L'iCal Booking importa le date bloccate come prenotazioni da completare (nome/importo). Per prezzo e contatti già pronti usa anche \"Importa Excel Booking\".")
         FlowButtons {
+            // "Sincronizza ora" usa gli URL salvati: con modifiche non salvate si salva prima.
+            if !ICalSyncService.feeds(of: property).isEmpty {
+                Button("Sincronizza ora", action: onSyncNow).buttonStyle(.appOutlined)
+            }
             Button("Importa Excel Booking") { picking = true }
                 .buttonStyle(.appOutlined)
                 .tourTarget(.caseBookingImport)

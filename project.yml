@@ -44,6 +44,9 @@ targets:
           - CFBundleURLName: com.google.signin
             CFBundleURLSchemes: ["$(GOOGLE_REVERSED_CLIENT_ID)"]
         UILaunchScreen: {}
+        # F10: notifiche push in sfondo e giro dei calendari iCal (BGAppRefreshTask).
+        UIBackgroundModes: [fetch, remote-notification]
+        BGTaskSchedulerPermittedIdentifiers: [com.siciliahost.manager.icalsync]
     # Link universali degli inviti (https://siciliahost.com/invito/CODICE): richiedono anche il file
     # apple-app-site-association sul sito (repo Siciliahost.it) e un account Apple Developer.
     entitlements:
@@ -51,6 +54,8 @@ targets:
       properties:
         com.apple.developer.associated-domains: ["applinks:siciliahost.com"]
         com.apple.developer.applesignin: [Default]
+        # Push (APNs): serve la capability "Push Notifications" sull'App ID e la chiave APNs caricata su Firebase.
+        aps-environment: development
     scheme:
       testTargets:
         - SiciliaHostTests

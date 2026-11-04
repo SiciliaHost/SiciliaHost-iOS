@@ -22,6 +22,8 @@ struct MainTabView: View {
     /// Chat aperta: niente barra flottante (la tastiera e il campo di risposta hanno la precedenza).
     @State private var chatOpen = false
 
+    @Environment(\.scenePhase) private var scenePhase
+
     private let db = FirestoreService()
     private let messagingService = MessagingService()
     private let siteContent = SiteContentService()
@@ -82,6 +84,11 @@ struct MainTabView: View {
         }
         .task(id: scope) { await loadApprovedListings() }
         .task(id: scope) { await refreshMessaging() }
+        // F10: permesso notifiche e token push, poi il giro dei calendari (non nelle anteprime degli screenshot).
+        .task(id: scope) { await startBackgroundWork() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await startBackgroundWork() } }
+        }
         // Tornando dalla scheda Messaggi lo stato si rilegge (nuovi ospiti, case aggiunte).
         .onChange(of: selected) { old, _ in if old == .messaggi { Task { await refreshMessaging() } } }
         .animation(.easeInOut(duration: 0.2), value: chatOpen)
@@ -121,6 +128,14 @@ struct MainTabView: View {
                 onOpenSiteWizard: { router.push(.newCaseWizard(propertyId: $0, level: .site)) }
             )
         }
+    }
+
+    private func startBackgroundWork() async {
+        guard scope != nil, UIPreview.requestedScreen == nil else { return }
+        await NotificationPermission.requestIfNeeded()
+        await PushToken.saveForCurrentUser()
+        AutoSync.schedule()
+        await AutoSync.runIfDue()
     }
 
     private func hidesBar(for tab: MainTab) -> Bool { tab == .messaggi && chatOpen }

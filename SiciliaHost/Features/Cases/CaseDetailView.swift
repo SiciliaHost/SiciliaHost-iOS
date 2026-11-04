@@ -104,6 +104,8 @@ struct CaseDetailView: View {
 
     private func save(_ item: CaseItem) async -> Bool {
         let credsToSave = creds.value
+        let icalChanged = appDraft.icalUrlAirbnb.trimmed != appOriginal(item).icalUrlAirbnb.trimmed
+            || appDraft.icalUrlBooking.trimmed != appOriginal(item).icalUrlBooking.trimmed
         let ok = await model.saveCase(
             id, originalApp: appOriginal(item), currentApp: appDraft,
             originalSite: siteOriginal(item), currentSite: siteCurrent(item),
@@ -112,6 +114,14 @@ struct CaseDetailView: View {
         guard ok else { return false }
         if item.canManage, credsChanged, let credsToSave {
             if await model.saveCredentials(id, credsToSave) { credsOriginal = credsToSave }
+        }
+        // URL iCal cambiati: sincronizzazione subito (l'Android ne accoda una e pianifica quella oraria), così non si
+        // aspetta il giro successivo per vedere le prime prenotazioni; i promemoria Excel si ripianificano da soli.
+        if icalChanged {
+            Task {
+                _ = await model.syncNow(id)
+                await AutoSync.refreshReminders()
+            }
         }
         // La casa è già stata ricaricata: le bozze ripartono dai valori salvati (normalizzati).
         if let fresh = model.item(id) {
@@ -306,7 +316,14 @@ struct CaseDetailView: View {
                 importMessage: $importMessage,
                 onImport: { data in
                     importMessage = "Importazione in corso..."
-                    Task { importMessage = await model.importBookingExcel(id, data: data) }
+                    Task {
+                        importMessage = await model.importBookingExcel(id, data: data)
+                        await AutoSync.refreshReminders()
+                    }
+                },
+                onSyncNow: {
+                    importMessage = "Sincronizzazione in corso..."
+                    Task { importMessage = await model.syncNow(id) }
                 },
                 onOpenMembers: onOpenMembers
             )
