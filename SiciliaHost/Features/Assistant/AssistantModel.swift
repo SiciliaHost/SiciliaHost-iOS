@@ -65,7 +65,7 @@ final class AssistantModel: @unchecked Sendable {
 
     /// ID del messaggio i cui widget possono essere toccati adesso.
     var activeWidgetMessageId: Int? {
-        AssistantWidgetLogic.activeWidgetMessageId(messages: messages, blocked: busy || consent != nil)
+        activeWidgetMessageId(messages: messages, blocked: busy || consent != nil)
     }
 
     // MARK: - Gestione Disponibilità e Case

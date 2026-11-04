@@ -132,6 +132,9 @@ e correggere gli errori (vedi Prossimi passi).
 - Risolto conflitto sul nome `ChatMessage`: disaccoppiato `AssistantChatMessage` (F13 Cactus) da `ChatMessage` di F12 (messaggistica ospite-host in `Messaging.swift`).
 - Aggiunta conformità ad `Error` per `AmountError`.
 - Adeguati i livelli di accesso in `AssistantModel`, `AssistantController` e `CactusLiveLogic` per evitare errori `method/function/property cannot be declared public because its parameter/type uses an internal type`.
+- Corretto pattern matching Route su `.mrzScan` invece del nome errato `.mrzScanner`.
+- Rimosso prefisso tipo non esistente `AssistantWidgetLogic.` nella chiamata di `activeWidgetMessageId`.
+- Aggiunto parametro opzionale `controller` all'init di `CactusOverlayView`.
 - Aggiornati tutti i test unitari correlati.
 
 ### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Completamento porting F13 Assistente Cactus (F13a–F13f)

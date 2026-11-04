@@ -83,7 +83,7 @@ func showFloatingAssistant(
         return mainReady
     }
     switch route {
-    case .mrzScanner, .newCaseWizard, .checkin, .checkinSend, .guestForm, .editReservation:
+    case .mrzScan, .newCaseWizard, .checkin, .checkinSend, .guestForm, .editReservation:
         return false
     default:
         return true

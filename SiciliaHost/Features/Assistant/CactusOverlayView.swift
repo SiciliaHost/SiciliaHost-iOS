@@ -13,8 +13,9 @@ struct CactusOverlayView: View {
     @State private var typingElapsedMs: Int64 = 0
     @State private var timerTask: Task<Void, Never>? = nil
 
-    init(model: AssistantModel) {
+    init(model: AssistantModel, controller: AssistantController = .shared) {
         self.model = model
+        self.controller = controller
     }
 
     var body: some View {
