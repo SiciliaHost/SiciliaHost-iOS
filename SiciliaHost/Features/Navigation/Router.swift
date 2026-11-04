@@ -9,6 +9,9 @@ enum WizardLevel: String, Hashable, Codable { case app = "APP", site = "SITE" }
 enum Route: Hashable {
     case profile
     case members
+    /// Ruolo e permessi su una casa (dal Profilo → Le mie case).
+    case houseAccess(propertyId: String)
+    case privacy
     case checkin(reservationId: String, propertyId: String)
     case mrzScan(reservationId: String, propertyId: String)
     case guestForm(reservationId: String, propertyId: String, guestRecordId: String?)

@@ -68,9 +68,10 @@ struct MainGateView: View {
         case .profile:
             ProfileView(
                 roleLabel: model.scope?.profileLabel ?? "",
-                showMembers: model.scope?.owned.isEmpty == false,
+                scope: model.scope,
                 onBack: router.pop,
-                onMembers: { router.push(.members) },
+                onHouse: { router.push(.houseAccess(propertyId: $0)) },
+                onPrivacy: { router.push(.privacy) },
                 onReplayTour: {
                     OnboardingController.shared.tourForced = true
                     OnboardingController.shared.tourRequested = true
@@ -78,8 +79,15 @@ struct MainGateView: View {
                 },
                 onLogout: onSignOut
             )
-        case .members:
-            MembersView(onBack: router.pop)
+        case let .houseAccess(propertyId):
+            HouseAccessView(
+                propertyId: propertyId, onBack: router.pop,
+                onOpenMembers: { router.push(.members) },
+                onLeft: { router.popToRoot() }
+            )
+        case .privacy:
+            PrivacyView(onBack: router.pop)
+        case .members:            MembersView(onBack: router.pop)
         case let .checkin(reservationId, propertyId):
             CheckinView(
                 model: checkinModels.model(reservationId: reservationId, propertyId: propertyId),
