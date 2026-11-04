@@ -50,7 +50,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **F7 (Finanze) e F9a (membri e inviti): COMPILANO e i test passano** (CI run 41684949732, che include la correzione di `testFormats`).
 - **F9** (`docs/funzioni/F9.md`): F9a, F9b, **F9c (scheda Case) COMPILANO e i test passano** (run 41689890292); **F9d (creazione guidata e import) COMPILA e i test passano** (run 41691071972). **F9 completa** (interfaccia mai vista su iPhone).
 - **F12 (Messaggi): COMPILA e i test passano (2026-11-03, run 41709423673, ramo `feat/f12-messaggi`, non unito a `main`)** (`docs/funzioni/F12.md`). Nessun segnaposto di schermata rimasto. Il tab Case è `CasesView` (F9c), la creazione guidata `NewCaseWizardView` (F9d).
-- **Profilo 2026-10-30 (nome visualizzato, "Le mie case", accesso alla casa, privacy, notifiche) portato 2026-11-04, in attesa della CI**: `Features/Profile/*`, `Core/Logic/ProfileLogic.swift`, `ProfileTests`.
+- **Profilo 2026-10-30 (nome visualizzato, "Le mie case", accesso alla casa, privacy, notifiche) portato 2026-11-04: COMPILA e i test passano (run 41806457332)**: `Features/Profile/*`, `Core/Logic/ProfileLogic.swift`, `ProfileTests`.
 
 ## Prossimi passi (in ordine)
 
@@ -126,7 +126,7 @@ e correggere gli errori (vedi Prossimi passi).
 - `main` con F12 e CI verde (run 41712897852). Profilo riscritto sul modello Android: nome modificabile (Firebase Auth `displayName`), "Le mie case"
   (ruolo e permessi), schermata accesso casa (membri e inviti / lascia casa), privacy con link a informativa e termini, notifiche (rimando alle impostazioni di iOS;
   avviso se negate), versione. Rotte nuove `.houseAccess`, `.privacy`. Il testo privacy dice "Google o Apple" (su iPhone c'è anche Apple).
-- **Non compilato** (Windows); da provare su iPhone: modifica nome, uscita da una casa da collaboratore, apertura delle impostazioni notifiche.
+- Compilato e testato in CI (run 41806457332). Da provare su iPhone: modifica nome, uscita da una casa da collaboratore, apertura delle impostazioni notifiche.
 
 ### 2026-11-03 — Claude Sonnet 5.5 (locale, Windows senza Swift) — F12 Messaggi
 - Il `main` locale è stato allineato al ramo `claude/kind-ptolemy-63nbq5` dell'agente cloud (fast-forward, F4–F9 compilati e verdi).

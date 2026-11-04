@@ -131,7 +131,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/main/MainScreenViewModel.kt` | 135 | `Features/Main/MainViewModel.swift` | parziale (`refreshMessaging` è in `MainTabView`, senza badge: l'Android non lo mostra) |
 | `ui/main/MainTabs.kt` | 30 | `Features/Main/MainTab.swift` | scritto (`MainTab.messaggi`, `messagingEnabled`) |
 | `ui/main/OnboardingScreen.kt` | 212 | `Features/Main/OnboardingView.swift` | scritto |
-| `ui/profile/ProfileScreen.kt` | 138 | `Features/Profile/ProfileView.swift` | scritto (n/a: riga diagnostica del Fold e widget Cactus; canali notifiche → impostazioni di sistema) |
+| `ui/profile/ProfileScreen.kt` | 138 | `Features/Profile/ProfileView.swift` | compilato (n/a: riga diagnostica del Fold e widget Cactus; canali notifiche → impostazioni di sistema) |
 | `ui/style/AmbientBackground.kt` | 81 | `UI/Style/AmbientBackground.swift` | scritto |
 | `ui/style/Buttons.kt` | 183 | `UI/Style/Buttons.swift` | scritto |
 | `ui/style/Glass.kt` | 109 | `UI/Style/Glass.swift` | scritto |
@@ -149,17 +149,17 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/main/AccessStateTest.kt` | 48 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
 | 🧪 `ui/main/MainTabsTest.kt` | 90 | `SiciliaHostTests/AccessScopeTests.swift` | scritto (caso Messaggi in `MessagingTests`) |
 | 🧪 `ui/tour/TourLogicTest.kt` | 39 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
-| `ui/profile/PrivacyContent.kt` | 52 | `Core/Logic/ProfileLogic.swift` | scritto |
-| `ui/profile/ProfileViewModel.kt` | 59 | `Features/Profile/ProfileModels.swift` | scritto |
-| `ui/profile/HouseAccessLogic.kt` | 45 | `Core/Logic/ProfileLogic.swift` | scritto |
-| `ui/profile/HouseAccessScreen.kt` | 140 | `Features/Profile/HouseAccessView.swift` | scritto |
-| `ui/profile/PrivacySecurityScreen.kt` | 93 | `Features/Profile/PrivacyView.swift` | scritto |
-| `ui/profile/DisplayName.kt` | 19 | `Core/Logic/ProfileLogic.swift` | scritto |
-| `ui/profile/LegalLinks.kt` | 7 | `Core/Logic/ProfileLogic.swift` | scritto |
-| `ui/profile/HouseAccessViewModel.kt` | 145 | `Features/Profile/ProfileModels.swift` | scritto |
-| 🧪 `ui/profile/DisplayNameTest.kt` | 30 | `SiciliaHostTests/ProfileTests.swift` | scritto |
-| 🧪 `ui/profile/PrivacyContentTest.kt` | 37 | `SiciliaHostTests/ProfileTests.swift` | scritto |
-| 🧪 `ui/profile/HouseAccessLogicTest.kt` | 78 | `SiciliaHostTests/ProfileTests.swift` | scritto |
+| `ui/profile/PrivacyContent.kt` | 52 | `Core/Logic/ProfileLogic.swift` | compilato, test ok |
+| `ui/profile/ProfileViewModel.kt` | 59 | `Features/Profile/ProfileModels.swift` | compilato, test ok |
+| `ui/profile/HouseAccessLogic.kt` | 45 | `Core/Logic/ProfileLogic.swift` | compilato, test ok |
+| `ui/profile/HouseAccessScreen.kt` | 140 | `Features/Profile/HouseAccessView.swift` | compilato, test ok |
+| `ui/profile/PrivacySecurityScreen.kt` | 93 | `Features/Profile/PrivacyView.swift` | compilato, test ok |
+| `ui/profile/DisplayName.kt` | 19 | `Core/Logic/ProfileLogic.swift` | compilato, test ok |
+| `ui/profile/LegalLinks.kt` | 7 | `Core/Logic/ProfileLogic.swift` | compilato, test ok |
+| `ui/profile/HouseAccessViewModel.kt` | 145 | `Features/Profile/ProfileModels.swift` | compilato, test ok |
+| 🧪 `ui/profile/DisplayNameTest.kt` | 30 | `SiciliaHostTests/ProfileTests.swift` | compilato, test ok |
+| 🧪 `ui/profile/PrivacyContentTest.kt` | 37 | `SiciliaHostTests/ProfileTests.swift` | compilato, test ok |
+| 🧪 `ui/profile/HouseAccessLogicTest.kt` | 78 | `SiciliaHostTests/ProfileTests.swift` | compilato, test ok |
 
 ## F4 — Home
 
