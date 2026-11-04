@@ -70,7 +70,7 @@ public final class AssistantController: @unchecked Sendable {
 }
 
 /// Decide se mostrare il pulsante flottante in basso a destra sulle schermate secondarie.
-public func showFloatingAssistant(
+func showFloatingAssistant(
     available: Bool,
     open: Bool,
     navbarVisible: Bool,

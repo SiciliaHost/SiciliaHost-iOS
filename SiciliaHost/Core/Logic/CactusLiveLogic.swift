@@ -243,13 +243,13 @@ public func mergePlans(_ plans: [[LiveStep]]) -> [LiveStep] {
 
 // MARK: - Mappatura Verso l'App iOS
 
-public struct LiveAppTarget: Equatable, Sendable {
-    public let tab: MainTab
-    public let propertyId: String?
-    public let caseSection: CaseSection?
-    public let caseSub: CaseSubEditor?
+struct LiveAppTarget: Equatable, Sendable {
+    let tab: MainTab
+    let propertyId: String?
+    let caseSection: CaseSection?
+    let caseSub: CaseSubEditor?
 
-    public init(
+    init(
         tab: MainTab,
         propertyId: String? = nil,
         caseSection: CaseSection? = nil,
@@ -262,7 +262,7 @@ public struct LiveAppTarget: Equatable, Sendable {
     }
 }
 
-public func liveTargetFor(step: LiveStep) -> LiveAppTarget {
+func liveTargetFor(step: LiveStep) -> LiveAppTarget {
     let propId = step.propertyId.isEmpty ? nil : step.propertyId
     switch step.section {
     case .overview:

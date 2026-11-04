@@ -1,13 +1,13 @@
 import Foundation
 import SwiftUI
 
-public struct PendingSend: Equatable, Sendable {
-    public let text: String
-    public let widgetRef: WidgetRef?
-    public let selection: [String]?
-    public let propertyId: String?
+struct PendingSend: Equatable, Sendable {
+    let text: String
+    let widgetRef: WidgetRef?
+    let selection: [String]?
+    let propertyId: String?
 
-    public init(text: String, widgetRef: WidgetRef? = nil, selection: [String]? = nil, propertyId: String? = nil) {
+    init(text: String, widgetRef: WidgetRef? = nil, selection: [String]? = nil, propertyId: String? = nil) {
         self.text = text
         self.widgetRef = widgetRef
         self.selection = selection
@@ -17,32 +17,32 @@ public struct PendingSend: Equatable, Sendable {
 
 /// Modello e gestione dello stato per l'assistente Cactus in SwiftUI / iOS 17+.
 @Observable
-public final class AssistantModel: @unchecked Sendable {
+final class AssistantModel: @unchecked Sendable {
     private let api: AssistantAPI
-    public let language: String
+    let language: String
 
-    public var messages: [ChatMessage] = []
-    public var busy: Bool = false
-    public var error: ChatError? = nil
-    public var remaining: Int? = nil
-    public var consent: ConsentState? = nil
-    public var hasConversation: Bool = false
+    var messages: [AssistantChatMessage] = []
+    var busy: Bool = false
+    var error: ChatError? = nil
+    var remaining: Int? = nil
+    var consent: ConsentState? = nil
+    var hasConversation: Bool = false
 
     /// Disponibilità dell'assistente per l'account (letto da `assistantStatus`).
-    public var available: Bool = false
-    public var statusKnown: Bool = false
+    var available: Bool = false
+    var statusKnown: Bool = false
 
     /// Casa selezionata per la conversazione (indipendente dalla selezione nelle schermate).
-    public var propertyId: String? = nil
+    var propertyId: String? = nil
 
     /// Lista case disponibili per il selettore in alto.
-    public var houses: [HouseOption] = []
+    var houses: [HouseOption] = []
 
     /// ID dell'ultimo messaggio di Cactus la cui nuvoletta è già stata animata a macchina.
-    public var lastTypedMessageId: Int? = nil
+    var lastTypedMessageId: Int? = nil
 
-    public var conversationId: String? = nil
-    public var pendingSend: PendingSend? = nil
+    var conversationId: String? = nil
+    var pendingSend: PendingSend? = nil
 
     /// Traccia le proposte in esecuzione (singole o batch) per evitare rientranze.
     private var busyProposals: Set<String> = []
@@ -51,7 +51,7 @@ public final class AssistantModel: @unchecked Sendable {
     private var nextMessageId = 1
     private var undoTimerTask: Task<Void, Never>? = nil
 
-    public init(
+    init(
         api: AssistantAPI = AssistantService(),
         language: String = assistantLanguage(Locale.current.language.languageCode?.identifier)
     ) {
@@ -64,13 +64,13 @@ public final class AssistantModel: @unchecked Sendable {
     }
 
     /// ID del messaggio i cui widget possono essere toccati adesso.
-    public var activeWidgetMessageId: Int? {
+    var activeWidgetMessageId: Int? {
         AssistantWidgetLogic.activeWidgetMessageId(messages: messages, blocked: busy || consent != nil)
     }
 
     // MARK: - Gestione Disponibilità e Case
 
-    public func refreshAvailability() async {
+    func refreshAvailability() async {
         guard !statusKnown || !available else { return }
         do {
             let isAvail = try await api.status()
@@ -86,7 +86,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func syncHouses(_ properties: [Property]) {
+    func syncHouses(_ properties: [Property]) {
         let opts = properties.map { HouseOption(id: $0.id, name: $0.name.isEmpty ? AssistantTexts.houseUnnamed : $0.name) }
         self.houses = opts
 
@@ -99,7 +99,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func setProperty(_ newId: String?) {
+    func setProperty(_ newId: String?) {
         guard newId != propertyId else { return }
         propertyId = newId
         let name: String
@@ -108,7 +108,7 @@ public final class AssistantModel: @unchecked Sendable {
         } else {
             name = AssistantTexts.houseNone
         }
-        let noteMsg = ChatMessage(
+        let noteMsg = AssistantChatMessage(
             id: nextMessageId,
             role: .note,
             text: AssistantTexts.houseSet(name)
@@ -119,7 +119,7 @@ public final class AssistantModel: @unchecked Sendable {
 
     // MARK: - Invio Messaggi
 
-    public func send(text: String, widgetRef: WidgetRef? = nil, selection: [String]? = nil) {
+    func send(text: String, widgetRef: WidgetRef? = nil, selection: [String]? = nil) {
         if let prob = validateDraft(text) {
             if prob == .tooLong {
                 self.error = .tooLong
@@ -133,7 +133,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
 
         let currentProp = propertyId
-        let userMsg = ChatMessage(
+        let userMsg = AssistantChatMessage(
             id: nextMessageId,
             role: .user,
             text: text,
@@ -172,7 +172,7 @@ public final class AssistantModel: @unchecked Sendable {
                     proposalViews.append(ProposalView(ref: p))
                 }
 
-                let assistantMsg = ChatMessage(
+                let assistantMsg = AssistantChatMessage(
                     id: self.nextMessageId,
                     role: .assistant,
                     text: result.reply,
@@ -218,7 +218,7 @@ public final class AssistantModel: @unchecked Sendable {
 
     // MARK: - Risposta ai Widget
 
-    public func answerWidget(messageId: Int, widgetId: String, text: String, selection: [String]? = nil) {
+    func answerWidget(messageId: Int, widgetId: String, text: String, selection: [String]? = nil) {
         guard activeWidgetMessageId == messageId else { return }
 
         // Segna risposta nel messaggio
@@ -234,7 +234,7 @@ public final class AssistantModel: @unchecked Sendable {
 
     // MARK: - Consenso
 
-    public func acceptConsent() {
+    func acceptConsent() {
         guard let current = consent else { return }
         consent?.busy = true
         consent?.failed = false
@@ -258,14 +258,14 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func declineConsent() {
+    func declineConsent() {
         consent = nil
         pendingSend = nil
     }
 
     // MARK: - Proposte e Modifiche (Conferma, Annulla, Raggruppamento)
 
-    public func confirm(proposalId: String) {
+    func confirm(proposalId: String) {
         guard !busyProposals.contains(proposalId) else { return }
         busyProposals.insert(proposalId)
         updateProposalStatus(id: proposalId, status: .busy)
@@ -305,7 +305,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func undo(proposalId: String) {
+    func undo(proposalId: String) {
         guard !busyProposals.contains(proposalId) else { return }
         busyProposals.insert(proposalId)
         updateProposalStatus(id: proposalId, status: .undoing)
@@ -343,7 +343,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func decline(proposalId: String) {
+    func decline(proposalId: String) {
         guard !busyProposals.contains(proposalId) else { return }
         busyProposals.insert(proposalId)
         updateProposalStatus(id: proposalId, status: .busy)
@@ -368,7 +368,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func confirmMany(messageId: Int) {
+    func confirmMany(messageId: Int) {
         guard !groupRunning.contains(messageId) else { return }
         groupRunning.insert(messageId)
 
@@ -385,7 +385,7 @@ public final class AssistantModel: @unchecked Sendable {
         }
     }
 
-    public func declineMany(messageId: Int) {
+    func declineMany(messageId: Int) {
         guard !groupRunning.contains(messageId) else { return }
         groupRunning.insert(messageId)
 
@@ -457,7 +457,7 @@ public final class AssistantModel: @unchecked Sendable {
 
     // MARK: - Reset e Pulizia Conversazione
 
-    public func newChat() {
+    func newChat() {
         if let cid = conversationId {
             Task {
                 try? await api.deleteConversation(conversationId: cid)
@@ -466,7 +466,7 @@ public final class AssistantModel: @unchecked Sendable {
         reset()
     }
 
-    public func reset() {
+    func reset() {
         conversationId = nil
         messages.removeAll()
         busy = false
@@ -482,7 +482,7 @@ public final class AssistantModel: @unchecked Sendable {
         undoTimerTask = nil
     }
 
-    public func discardAndWait() async {
+    func discardAndWait() async {
         guard let cid = conversationId else { return }
         try? await api.deleteConversation(conversationId: cid)
         reset()

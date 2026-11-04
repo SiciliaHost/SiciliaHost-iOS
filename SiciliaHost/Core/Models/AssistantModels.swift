@@ -348,7 +348,7 @@ public struct WidgetRef: Equatable, Sendable {
     }
 }
 
-public struct ChatMessage: Equatable, Identifiable, Sendable {
+public struct AssistantChatMessage: Equatable, Identifiable, Sendable {
     public let id: Int
     public let role: ChatRole
     public let text: String
@@ -375,6 +375,8 @@ public struct ChatMessage: Equatable, Identifiable, Sendable {
         self.widgetRef = widgetRef
     }
 }
+
+public typealias AssistantMessage = AssistantChatMessage
 
 /// Una casa dell'elenco della chat (id e nome).
 public struct HouseOption: Equatable, Identifiable, Sendable {

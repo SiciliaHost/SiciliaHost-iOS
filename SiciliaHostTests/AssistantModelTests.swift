@@ -158,7 +158,7 @@ final class AssistantModelTests: XCTestCase {
             summary: "Aumenta prezzo a 150 €",
             expiresAt: 1_900_000_000_000
         )
-        let msg = ChatMessage(
+        let msg = AssistantChatMessage(
             id: 1,
             role: .assistant,
             text: "Ecco la modifica",

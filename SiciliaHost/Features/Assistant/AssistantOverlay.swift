@@ -1,14 +1,14 @@
 import SwiftUI
 
 /// Pulsante compatto di Cactus in fondo alla barra di navigazione principale.
-public struct AssistantPill: View {
-    public let onClick: () -> Void
+struct AssistantPill: View {
+    let onClick: () -> Void
 
-    public init(onClick: @escaping () -> Void) {
+    init(onClick: @escaping () -> Void) {
         self.onClick = onClick
     }
 
-    public var body: some View {
+    var body: some View {
         Button(action: onClick) {
             HStack(spacing: 4) {
                 Image(systemName: "sparkles")
@@ -28,14 +28,14 @@ public struct AssistantPill: View {
 }
 
 /// Pulsante rotondo flottante da 56pt in basso a destra sulle schermate secondarie.
-public struct FloatingAssistantButton: View {
-    public let onClick: () -> Void
+struct FloatingAssistantButton: View {
+    let onClick: () -> Void
 
-    public init(onClick: @escaping () -> Void) {
+    init(onClick: @escaping () -> Void) {
         self.onClick = onClick
     }
 
-    public var body: some View {
+    var body: some View {
         Button(action: onClick) {
             ZStack {
                 Circle()
@@ -62,17 +62,17 @@ public struct FloatingAssistantButton: View {
 }
 
 /// Contenitore per presentare l'overlay di Cactus sopra l'intera gerarchia di viste.
-public struct AssistantOverlayHost<Content: View>: View {
-    @Bindable public var controller: AssistantController = .shared
-    public var model: AssistantModel
-    @ViewBuilder public let content: () -> Content
+struct AssistantOverlayHost<Content: View>: View {
+    @Bindable var controller: AssistantController = .shared
+    var model: AssistantModel
+    @ViewBuilder let content: () -> Content
 
-    public init(model: AssistantModel, @ViewBuilder content: @escaping () -> Content) {
+    init(model: AssistantModel, @ViewBuilder content: @escaping () -> Content) {
         self.model = model
         self.content = content
     }
 
-    public var body: some View {
+    var body: some View {
         ZStack {
             content()
 

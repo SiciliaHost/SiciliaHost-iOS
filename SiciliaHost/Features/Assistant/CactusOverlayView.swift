@@ -1,10 +1,10 @@
 import SwiftUI
 
-public let cactusCyan = Color(red: 0.0, green: 0.87, blue: 1.0) // #00DEFF
+let cactusCyan = Color(red: 0.0, green: 0.87, blue: 1.0) // #00DEFF
 
-public struct CactusOverlayView: View {
-    @Bindable public var model: AssistantModel
-    @Bindable public var controller: AssistantController = .shared
+struct CactusOverlayView: View {
+    @Bindable var model: AssistantModel
+    @Bindable var controller: AssistantController = .shared
     @State private var voice = AssistantVoice()
 
     @State private var inputText: String = ""
@@ -13,11 +13,11 @@ public struct CactusOverlayView: View {
     @State private var typingElapsedMs: Int64 = 0
     @State private var timerTask: Task<Void, Never>? = nil
 
-    public init(model: AssistantModel) {
+    init(model: AssistantModel) {
         self.model = model
     }
 
-    public var body: some View {
+    var body: some View {
         ZStack {
             // Velo di sfondo oscurato al 38% che assorbe i tocchi
             Color.black.opacity(0.38)
@@ -188,7 +188,7 @@ public struct CactusOverlayView: View {
         }
     }
 
-    private func displayedTextForCurrent(_ msg: ChatMessage) -> String {
+    private func displayedTextForCurrent(_ msg: AssistantChatMessage) -> String {
         if isTypingAnimation && model.lastTypedMessageId != msg.id {
             let n = typedChars(elapsedMs: typingElapsedMs, length: msg.text.count)
             return typedPrefix(text: msg.text, n: n)

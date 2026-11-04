@@ -4,7 +4,7 @@ import Foundation
 
 /// Un widget è attivo solo nell'ultimo messaggio di Cactus, se dopo non c'è un messaggio dell'host (le note locali
 /// non contano) e finché non c'è un invio in corso o un consenso aperto (`blocked`).
-public func activeWidgetMessageId(messages: [ChatMessage], blocked: Bool) -> Int? {
+public func activeWidgetMessageId(messages: [AssistantChatMessage], blocked: Bool) -> Int? {
     if blocked { return nil }
     guard let last = messages.last(where: { $0.role != .note }) else { return nil }
     return (last.role == .assistant && !last.widgets.isEmpty) ? last.id : nil
@@ -153,7 +153,7 @@ public func replyAmount(value: Double, w: AmountWidget, language: String) -> Str
 
 // MARK: - Validazione Importo
 
-public enum AmountError: Equatable, Sendable {
+public enum AmountError: Error, Equatable, Sendable {
     case empty
     case format
     case decimals

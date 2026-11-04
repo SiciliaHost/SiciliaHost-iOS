@@ -37,10 +37,10 @@ public enum BubbleKind: Equatable, Sendable {
 
 public struct BubbleSlot: Equatable, Identifiable, Sendable {
     public var id: Int { message.id }
-    public let message: ChatMessage
+    public let message: AssistantChatMessage
     public let kind: BubbleKind
 
-    public init(message: ChatMessage, kind: BubbleKind) {
+    public init(message: AssistantChatMessage, kind: BubbleKind) {
         self.message = message
         self.kind = kind
     }
@@ -49,7 +49,7 @@ public struct BubbleSlot: Equatable, Identifiable, Sendable {
 private let maxAsksAfter = 2
 
 /// Determina quali nuvolette mostrare a schermo.
-public func bubbleSlots(messages: [ChatMessage]) -> [BubbleSlot] {
+public func bubbleSlots(messages: [AssistantChatMessage]) -> [BubbleSlot] {
     let chat = messages.filter { $0.role != .note && !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     guard let current = chat.lastIndex(where: { $0.role == .assistant }) else {
         return Array(chat.suffix(maxAsksAfter)).map { BubbleSlot(message: $0, kind: .ask) }
@@ -78,7 +78,7 @@ public func bubbleSlots(messages: [ChatMessage]) -> [BubbleSlot] {
 }
 
 /// Identifica l'ultimo messaggio di Cactus che contiene widget o proposte.
-public func cardsMessageId(messages: [ChatMessage]) -> Int? {
+public func cardsMessageId(messages: [AssistantChatMessage]) -> Int? {
     return messages.last(where: { $0.role == .assistant && (!$0.widgets.isEmpty || !$0.proposals.isEmpty) })?.id
 }
 

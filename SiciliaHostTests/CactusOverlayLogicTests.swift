@@ -19,11 +19,11 @@ final class CactusOverlayLogicTests: XCTestCase {
     }
 
     func testBubbleSlots() {
-        let m1 = ChatMessage(id: 1, role: .user, text: "Domanda 1")
-        let m2 = ChatMessage(id: 2, role: .assistant, text: "Risposta 1")
-        let m3 = ChatMessage(id: 3, role: .user, text: "Domanda 2")
-        let m4 = ChatMessage(id: 4, role: .assistant, text: "Risposta 2")
-        let m5 = ChatMessage(id: 5, role: .user, text: "Domanda 3")
+        let m1 = AssistantChatMessage(id: 1, role: .user, text: "Domanda 1")
+        let m2 = AssistantChatMessage(id: 2, role: .assistant, text: "Risposta 1")
+        let m3 = AssistantChatMessage(id: 3, role: .user, text: "Domanda 2")
+        let m4 = AssistantChatMessage(id: 4, role: .assistant, text: "Risposta 2")
+        let m5 = AssistantChatMessage(id: 5, role: .user, text: "Domanda 3")
 
         let slots = bubbleSlots(messages: [m1, m2, m3, m4, m5])
         XCTAssertEqual(slots.count, 4) // previous (m2), ask (m3), current (m4), ask (m5)
@@ -38,9 +38,9 @@ final class CactusOverlayLogicTests: XCTestCase {
     }
 
     func testCardsMessageId() {
-        let m1 = ChatMessage(id: 1, role: .assistant, text: "Testo senza carte")
-        let m2 = ChatMessage(id: 2, role: .assistant, text: "Testo con widget", widgets: [.summary(SummaryWidget(id: "s1", title: "T", rows: []))])
-        let m3 = ChatMessage(id: 3, role: .user, text: "Domanda utente")
+        let m1 = AssistantChatMessage(id: 1, role: .assistant, text: "Testo senza carte")
+        let m2 = AssistantChatMessage(id: 2, role: .assistant, text: "Testo con widget", widgets: [.summary(SummaryWidget(id: "s1", title: "T", rows: []))])
+        let m3 = AssistantChatMessage(id: 3, role: .user, text: "Domanda utente")
 
         XCTAssertEqual(cardsMessageId(messages: [m1, m2, m3]), 2)
         XCTAssertNil(cardsMessageId(messages: [m1, m3]))

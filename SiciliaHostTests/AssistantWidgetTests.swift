@@ -171,14 +171,14 @@ final class AssistantWidgetTests: XCTestCase {
     }
 
     func testActiveWidgetMessageId() {
-        let msg1 = ChatMessage(id: 1, role: .assistant, text: "Scegli", widgets: [.choice(ChoiceWidget(id: "c1", prompt: "P", multiple: false, options: []))])
-        let msg2 = ChatMessage(id: 2, role: .user, text: "Ho scelto")
+        let msg1 = AssistantChatMessage(id: 1, role: .assistant, text: "Scegli", widgets: [.choice(ChoiceWidget(id: "c1", prompt: "P", multiple: false, options: []))])
+        let msg2 = AssistantChatMessage(id: 2, role: .user, text: "Ho scelto")
 
         XCTAssertEqual(activeWidgetMessageId(messages: [msg1], blocked: false), 1)
         XCTAssertNil(activeWidgetMessageId(messages: [msg1], blocked: true))
         XCTAssertNil(activeWidgetMessageId(messages: [msg1, msg2], blocked: false))
 
-        let note = ChatMessage(id: 3, role: .note, text: "Casa impostata")
+        let note = AssistantChatMessage(id: 3, role: .note, text: "Casa impostata")
         XCTAssertEqual(activeWidgetMessageId(messages: [msg1, note], blocked: false), 1)
     }
 
