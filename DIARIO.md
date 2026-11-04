@@ -128,7 +128,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Risolti errori di compilazione CI per F13
+### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Risolti errori di compilazione CI per F13 (In pausa)
 - Risolto conflitto sul nome `ChatMessage`: disaccoppiato `AssistantChatMessage` (F13 Cactus) da `ChatMessage` di F12 (messaggistica ospite-host in `Messaging.swift`).
 - Aggiunta conformità ad `Error` per `AmountError`.
 - Adeguati i livelli di accesso in `AssistantModel`, `AssistantController` e `CactusLiveLogic` per evitare errori `method/function/property cannot be declared public because its parameter/type uses an internal type`.
@@ -136,7 +136,8 @@ e correggere gli errori (vedi Prossimi passi).
 - Qualificata la chiamata `SiciliaHost.activeWidgetMessageId` dentro `AssistantModel` per disambiguarla dalla proprietà calcolata omonima.
 - Aggiunto parametro opzionale `controller` all'init di `CactusOverlayView`.
 - Corretti i case dell'enum `Route` (`.mrzScan`, `.members`, `.checkin`) in `AssistantModelTests.swift`.
-- Aggiornati tutti i test unitari correlati.
+- Corretti tipi in UI: `Color(hex: 0x1E3A2F)` (UInt32) e `Link(destination: LegalLinks.privacy)` (URL già tipizzato).
+- Sessione messa in pausa dall'utente: commit locale `22bafe7` pronto in locale, da pushare su GitHub domani per confermare il passaggio della CI.
 
 ### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Completamento porting F13 Assistente Cactus (F13a–F13f)
 - Censiti tutti i 42 file Kotlin di Android dell'assistente Cactus in `tools/gen_inventario.py` e `docs/INVENTARIO.md` (totale 291 file, 0 mancanti, 0 righe aperte su F13).

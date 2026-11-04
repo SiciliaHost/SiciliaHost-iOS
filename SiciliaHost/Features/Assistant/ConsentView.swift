@@ -38,7 +38,7 @@ public struct ConsentView: View {
                         }
                     }
 
-                    Link(destination: URL(string: LegalLinks.privacy)!) {
+                    Link(destination: LegalLinks.privacy) {
                         HStack(spacing: 4) {
                             Text(AssistantTexts.consentPrivacy)
                             Image(systemName: "arrow.up.right")

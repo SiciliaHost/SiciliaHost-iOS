@@ -464,7 +464,7 @@ public struct CactusAvatarView: View {
                 // Testa e Visiera Neon
                 ZStack {
                     RoundedRectangle(cornerRadius: 18)
-                        .fill(Color(hex: "#1E3A2F")) // Verde pala scuro
+                        .fill(Color(hex: 0x1E3A2F)) // Verde pala scuro
                         .frame(width: 64, height: 56)
                         .overlay(RoundedRectangle(cornerRadius: 18).stroke(cactusCyan, lineWidth: 1.5))
 
