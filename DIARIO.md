@@ -50,7 +50,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **F7 (Finanze) e F9a (membri e inviti): COMPILANO e i test passano** (CI run 41684949732, che include la correzione di `testFormats`).
 - **F9** (`docs/funzioni/F9.md`): F9a, F9b, **F9c (scheda Case) COMPILANO e i test passano** (run 41689890292); **F9d (creazione guidata e import) COMPILA e i test passano** (run 41691071972). **F9 completa** (interfaccia mai vista su iPhone).
 - **F12 (Messaggi): COMPILA e i test passano (2026-11-03, run 41709423673, ramo `feat/f12-messaggi`, non unito a `main`)** (`docs/funzioni/F12.md`). Nessun segnaposto di schermata rimasto. Il tab Case è `CasesView` (F9c), la creazione guidata `NewCaseWizardView` (F9d).
-- **F10 (sfondo, notifiche, sincronizzazioni) scritta 2026-11-04, in attesa della CI** (`docs/funzioni/F10.md`): push FCM/APNs, notifiche locali, sync iCal con gli echi Booking (all'apertura, in primo piano e `BGAppRefreshTask`), "Sincronizza ora", promemoria Excel come notifica locale.
+- **F10 (sfondo, notifiche, sincronizzazioni): COMPILA e i test passano (2026-11-04, run 41809382057)** (`docs/funzioni/F10.md`): push FCM/APNs, notifiche locali, sync iCal con gli echi Booking (all'apertura, in primo piano e `BGAppRefreshTask`), "Sincronizza ora", promemoria Excel come notifica locale.
 - **Profilo 2026-10-30 (nome visualizzato, "Le mie case", accesso alla casa, privacy, notifiche) portato 2026-11-04: COMPILA e i test passano (run 41806457332)**: `Features/Profile/*`, `Core/Logic/ProfileLogic.swift`, `ProfileTests`.
 
 ## Prossimi passi (in ordine)
@@ -130,7 +130,7 @@ e correggere gli errori (vedi Prossimi passi).
   Gestione; sync subito dopo aver cambiato gli URL. `ExcelReminder` come notifica locale alle 10:00 dopo 30 giorni dall'ultimo import.
 - Push: `AppDelegate` (APNs → FCM, token nel profilo, messaggi solo-dati mostrati come locali), permesso chiesto al primo ingresso nello shell. `project.yml`: UIBackgroundModes,
   BGTaskSchedulerPermittedIdentifiers, `aps-environment`.
-- CI run 41808891782: compila; un test aveva l atteso sbagliato (30 giorni dal 1 nov = 1 dic), corretto. **Da fare dall utente** per le push vere: capability Push Notifications sull'App ID, chiave APNs caricata su Firebase (Cloud Messaging), poi prova su iPhone.
+- CI run 41809382057 verde. Il run 41808891782 compilava; un test aveva l atteso sbagliato (30 giorni dal 1 nov = 1 dic), corretto. **Da fare dall utente** per le push vere: capability Push Notifications sull'App ID, chiave APNs caricata su Firebase (Cloud Messaging), poi prova su iPhone.
   Limite noto: iOS decide quando concedere il giro in sfondo (molto più rado di un'ora); il promemoria Excel non si ripete da solo se l'app non si apre.
 
 ### 2026-11-04 — Claude Sonnet 5.5 (locale, Windows senza Swift) — righe F3 del Profilo
