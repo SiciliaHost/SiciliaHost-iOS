@@ -137,7 +137,7 @@ final class BackgroundSyncTests: XCTestCase {
     func testReminderWaitsThirtyDaysFromTheLastImport() {
         let last = millisFromDate(romeDate(2026, 11, 1, 9))
         let fire = ExcelReminder.fireDate(lastImportAt: last, now: romeDate(2026, 11, 4, 12), calendar: rome)
-        XCTAssertEqual(fire, romeDate(2026, 12, 2, 10))
+        XCTAssertEqual(fire, romeDate(2026, 12, 1, 10))
     }
 
     func testReminderIsOverdueWhenTheLastImportIsOld() {

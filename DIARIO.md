@@ -130,7 +130,7 @@ e correggere gli errori (vedi Prossimi passi).
   Gestione; sync subito dopo aver cambiato gli URL. `ExcelReminder` come notifica locale alle 10:00 dopo 30 giorni dall'ultimo import.
 - Push: `AppDelegate` (APNs → FCM, token nel profilo, messaggi solo-dati mostrati come locali), permesso chiesto al primo ingresso nello shell. `project.yml`: UIBackgroundModes,
   BGTaskSchedulerPermittedIdentifiers, `aps-environment`.
-- **Non compilato** (Windows). **Da fare dall'utente** per le push vere: capability Push Notifications sull'App ID, chiave APNs caricata su Firebase (Cloud Messaging), poi prova su iPhone.
+- CI run 41808891782: compila; un test aveva l atteso sbagliato (30 giorni dal 1 nov = 1 dic), corretto. **Da fare dall utente** per le push vere: capability Push Notifications sull'App ID, chiave APNs caricata su Firebase (Cloud Messaging), poi prova su iPhone.
   Limite noto: iOS decide quando concedere il giro in sfondo (molto più rado di un'ora); il promemoria Excel non si ripete da solo se l'app non si apre.
 
 ### 2026-11-04 — Claude Sonnet 5.5 (locale, Windows senza Swift) — righe F3 del Profilo
