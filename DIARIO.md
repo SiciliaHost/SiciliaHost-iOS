@@ -135,6 +135,7 @@ e correggere gli errori (vedi Prossimi passi).
 - Corretto pattern matching Route su `.mrzScan` invece del nome errato `.mrzScanner`.
 - Qualificata la chiamata `SiciliaHost.activeWidgetMessageId` dentro `AssistantModel` per disambiguarla dalla proprietà calcolata omonima.
 - Aggiunto parametro opzionale `controller` all'init di `CactusOverlayView`.
+- Corretti i case dell'enum `Route` (`.mrzScan`, `.members`, `.checkin`) in `AssistantModelTests.swift`.
 - Aggiornati tutti i test unitari correlati.
 
 ### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Completamento porting F13 Assistente Cactus (F13a–F13f)

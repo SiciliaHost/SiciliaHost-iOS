@@ -63,13 +63,13 @@ final class AssistantModelTests: XCTestCase {
 
         // Con navbar nascosta e assistente disponibile
         XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: nil))
-        XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .caseDetail(propertyId: "p1")))
-        XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .members(propertyId: "p1")))
+        XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .houseAccess(propertyId: "p1")))
+        XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .members))
 
         // Su schermate escluse (form / scanner)
-        XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .mrzScanner(propertyId: "p1", reservationId: "r1")))
+        XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .mrzScan(reservationId: "r1", propertyId: "p1")))
         XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .newCaseWizard(propertyId: nil, level: .app)))
-        XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .checkin(propertyId: "p1", reservationId: "r1")))
+        XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .checkin(reservationId: "r1", propertyId: "p1")))
     }
 
     @MainActor
