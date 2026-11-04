@@ -52,15 +52,20 @@ e correggere gli errori (vedi Prossimi passi).
 - **F12 (Messaggi): COMPILA e i test passano (2026-11-03, run 41709423673, ramo `feat/f12-messaggi`, non unito a `main`)** (`docs/funzioni/F12.md`). Nessun segnaposto di schermata rimasto. Il tab Case è `CasesView` (F9c), la creazione guidata `NewCaseWizardView` (F9d).
 - **F10 (sfondo, notifiche, sincronizzazioni): COMPILA e i test passano (2026-11-04, run 41809382057)** (`docs/funzioni/F10.md`): push FCM/APNs, notifiche locali, sync iCal con gli echi Booking (all'apertura, in primo piano e `BGAppRefreshTask`), "Sincronizza ora", promemoria Excel come notifica locale.
 - **Profilo 2026-10-30 (nome visualizzato, "Le mie case", accesso alla casa, privacy, notifiche) portato 2026-11-04: COMPILA e i test passano (run 41806457332)**: `Features/Profile/*`, `Core/Logic/ProfileLogic.swift`, `ProfileTests`.
+- **F13 (Assistente Cactus) COMPLETAMENTE SCRITTO**: tutti i 42 file Android censiti in `INVENTARIO.md` e `tools/gen_inventario.py` (totale 291 file Kotlin, 0 non censiti, 0 righe aperte su F13). Copre tutte le fasi F13a–F13f:
+  - F13a (dati, modelli, parser, logica pura e testi): `Core/Models/AssistantModels.swift`, `Core/Models/AssistantWidgets.swift`, `Core/Logic/AssistantWidgetLogic.swift`, `Core/Logic/AssistantTexts.swift`, `Core/Services/AssistantService.swift`, test `AssistantTests.swift`, `AssistantWidgetTests.swift`.
+  - F13b (controller e ViewModel): `Features/Assistant/AssistantController.swift`, `Features/Assistant/AssistantModel.swift`, test `AssistantModelTests.swift`.
+  - F13c (componenti UI widget, proposte e consenso): `Features/Assistant/WidgetViews.swift`, `Features/Assistant/ProposalViews.swift`, `Features/Assistant/ConsentView.swift`.
+  - F13d (voce e trascrizione iOS): `Features/Assistant/AssistantVoice.swift` (`SFSpeechRecognizer` + `AVSpeechSynthesizer`).
+  - F13e (overlay Cactus neon, avatar e integrazione shell): `Features/Assistant/CactusOverlayView.swift`, `Features/Assistant/AssistantOverlay.swift`, `Core/Logic/CactusOverlayLogic.swift`, integrazione in `SiciliaNavBar` (`AssistantPill`), `MainGateView` (`AssistantOverlayHost`, `FloatingAssistantButton`), test `CactusOverlayLogicTests.swift`.
+  - F13f (operatore dal vivo e avatar 3D): `Core/Logic/CactusLiveLogic.swift`, `Core/Logic/CactusPose.swift`, `Features/Assistant/CactusNodes.swift`, `Features/Assistant/CactusAvatarGate.swift`, `Features/Assistant/CactusAvatarEngine.swift` (SceneKit), `Features/Assistant/ReducedMotion.swift`, test `CactusLiveTests.swift`, `CactusPoseTests.swift`, `CactusAvatarTests.swift`.
+  - `project.yml`: aggiunti permessi microfono e speech recognition.
 
 ## Prossimi passi (in ordine)
 
-0. Guardare gli screenshot `arrivals-*` e `agenda-*` del run 41677922733 (artefatto `ios-screenshots`) e confrontarli con l'Android.
-1. Unire `feat/f12-messaggi` in `main` (a richiesta), poi righe F3 del Profilo, F10 (con "Sincronizza ora" e la
-   sync iCal riallineata agli echi Booking della baseline).
-   Prima di ogni fase scrivere `docs/funzioni/F<n>.md`.
-2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11.
-3. Il file reale `.xls` di Booking (vedi sotto) resta da provare su un Mac.
+0. Eseguire push e verificare la compilazione in CI su GitHub Actions (macOS 15 runner) con esecuzione della suite test completa (inclusi i 7 nuovi file di test di F13).
+1. Provare l'overlay di Cactus con simulatore o dispositivo reale.
+2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11 (asset icona finale).
 
 ## Decisioni prese
 
@@ -122,6 +127,39 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Completamento porting F13 Assistente Cactus (F13a–F13f)
+- Censiti tutti i 42 file Kotlin di Android dell'assistente Cactus in `tools/gen_inventario.py` e `docs/INVENTARIO.md` (totale 291 file, 0 mancanti, 0 righe aperte su F13).
+- Creata la specifica e checklist `docs/funzioni/F13.md` (fasi F13a–F13f completate).
+- **F13a (Dati e Logica Pura)**:
+  - `Core/Models/AssistantModels.swift`: proposte (`ProposalRef`, `ConfirmResult`, `UndoResult`), cronologia messaggi (`ChatMessage`, `ProposalView`), messa in scena (`LiveSection`, `LiveStep`, `Change`), errori (`ChatError`, `AssistantException`), countdown `formatCountdown`, `speechText`, validazione bozza.
+  - `Core/Models/AssistantWidgets.swift`: modelli dei 5 widget supportati da Cactus (`ChoiceWidget`, `DatesWidget`, `QuickRepliesWidget`, `SummaryWidget`, `AmountWidget`), contenitore `AnyWidget`, e `sanitizeSelection`.
+  - `Core/Logic/AssistantWidgetLogic.swift`: `activeWidgetMessageId`, date UTC (`isDayDisabled`, `rangeIsValid`, `initialDay`), formati e risposte host (`replyChoice`, `replyDates`, `replyAmount`), parser completi risposte callable.
+  - `Core/Logic/AssistantTexts.swift`: stringhe complete in lingua italiana, consenso privacy aggiornato con riferimento ai servizi vocali Apple.
+  - `Core/Services/AssistantService.swift`: protocollo `AssistantAPI` e implementazione Cloud Functions con timeout client a 130s.
+  - Test unitari: `AssistantTests.swift`, `AssistantWidgetTests.swift`.
+- **F13b (Controller e ViewModel)**:
+  - `Features/Assistant/AssistantController.swift`: stato globale condiviso, visibilità navbar/gate, regole `showFloatingAssistant`, tracciamento moduli modificati `setDirty`.
+  - `Features/Assistant/AssistantModel.swift`: ViewModel `@Observable`, invio messaggi, risposte widget, flusso consenso e ri-invio, conferma/annulla proposte con timer 10 minuti, raggruppamento proposte, selezione indipendente della casa, cancellazione in background (10 min idle) e logout.
+  - Test unitari: `AssistantModelTests.swift`.
+- **F13c (Componenti UI Widget e Proposte)**:
+  - `Features/Assistant/WidgetViews.swift`: viste SwiftUI per i 5 widget (scelta singola/multipla, date con DatePicker grafico, risposte rapide, riepilogo, importo con +/- e suggerimenti rapidi).
+  - `Features/Assistant/ProposalViews.swift`: scheda singola `ProposalCard` con tabella prima/dopo `ChangesTable` (testi troncati con espansione), timer annulla m:ss, gruppo proposte multiple `ProposalGroupView`.
+  - `Features/Assistant/ConsentView.swift`: scheda informativa sul trattamento dati e consenso.
+- **F13d (Voce e Trascrizione)**:
+  - `Features/Assistant/AssistantVoice.swift`: Speech-to-Text nativo (`SFSpeechRecognizer` + `AVAudioEngine`) e Text-to-Speech (`AVSpeechSynthesizer`) con gestione automatica lingua e permessi.
+- **F13e (Schermata Overlay Cactus e Integrazione Shell)**:
+  - `Features/Assistant/CactusOverlayView.swift`: velo scuro 38%, cornice neon ciano `#00DEFF`, avatar animato reattivo agli stati, nuvolette a macchina da scrivere (~120 car/s) con tap per testo immediato, bolla thinking a 3 puntini, comandi inferiori, barra input con microfono pulsante.
+  - `Features/Assistant/AssistantOverlay.swift`: pillola compatto `AssistantPill`, pulsante tondo flottante da 56pt `FloatingAssistantButton`, contenitore radice `AssistantOverlayHost`.
+  - Integrazione in `SiciliaNavBar` (`AssistantPill`) e `MainGateView` (`AssistantOverlayHost` e pulsante flottante sulle schermate secondarie).
+  - Test unitari: `CactusOverlayLogicTests.swift`.
+- **F13f (Operatore dal Vivo e Avatar 3D)**:
+  - `Core/Logic/CactusLiveLogic.swift`: riduttore `liveReducer`, interpolazione numerica/testuale `countedText`/`typedText`, durata campi, inversione `invertChanges`, fusione piani `mergePlans`, mappatura schermate app `liveTargetFor`.
+  - `Core/Logic/CactusPose.swift`: calcolo matematico posa procedurale frutti, occhi e bocca.
+  - `Features/Assistant/CactusNodes.swift`, `CactusAvatarGate.swift`, `CactusAvatarEngine.swift` (SceneKit), `ReducedMotion.swift`.
+  - Test unitari: `CactusLiveTests.swift`, `CactusPoseTests.swift`, `CactusAvatarTests.swift`.
+- `project.yml`: aggiunte chiavi `INFOPLIST_KEY_NSMicrophoneUsageDescription` e `INFOPLIST_KEY_NSSpeechRecognitionUsageDescription`.
+- **Non verificato**: compilazione Swift locale (Windows senza Swift; validazione prevista tramite CI GitHub Actions).
 
 ### 2026-11-04 — Antigravity (locale, Windows senza Swift) — allineamento testi posizione, privacy e condizioni d'uso host
 - Aggiornati `HostTerms.swift` (testo completo senza segnaposto `[...]`, pin visibile sulla mappa del sito e indirizzo civico riservato agli ospiti confermati, caparra del 30% diretta all'host via IBAN/PayPal.me con cancellazione gratuita a 15 giorni, dati del titolare e Foro di Palermo), `ProfileLogic.swift` (voce "Pagamenti" allineata alla caparra diretta senza Stripe) e `PositionViews.swift` (legenda del pin esatto visibile sulla mappa del sito e area di riserva di raggio 300 m), in parità con Android e sito.

@@ -10,6 +10,7 @@ struct MainGateView: View {
     @State private var router = AppRouter()
     /// Stato del check-in condiviso dalle sue quattro schermate, per prenotazione.
     @State private var checkinModels = CheckinModels()
+    @State private var assistantModel = AssistantModel()
 
     init(user: User, onSignOut: @escaping () -> Void) {
         self.onSignOut = onSignOut
@@ -17,40 +18,66 @@ struct MainGateView: View {
     }
 
     var body: some View {
-        Group {
-            switch model.access {
-            case .loading:
-                ProgressView().tint(Theme.primary)
-            case .ready:
-                NavigationStack(path: $router.path) {
-                    MainTabView(scope: model.scope, router: router, onSignOut: onSignOut)
-                        .toolbar(.hidden, for: .navigationBar)
-                        .navigationDestination(for: Route.self) { destination(for: $0) }
+        AssistantOverlayHost(model: assistantModel) {
+            ZStack(alignment: .bottomTrailing) {
+                Group {
+                    switch model.access {
+                    case .loading:
+                        ProgressView().tint(Theme.primary)
+                    case .ready:
+                        NavigationStack(path: $router.path) {
+                            MainTabView(scope: model.scope, router: router, onSignOut: onSignOut)
+                                .toolbar(.hidden, for: .navigationBar)
+                                .navigationDestination(for: Route.self) { destination(for: $0) }
+                        }
+                    case .noHouses:
+                        NavigationStack(path: $router.path) {
+                            OnboardingView(
+                                isBusy: model.isBusy, error: model.actionError,
+                                onCreateHouse: { router.push(.newCaseWizard(propertyId: nil, level: .app)) },
+                                // Il codice resta in attesa: lo mostra `InviteOverlay` (accetta / rifiuta).
+                                onInviteCode: { PendingInvite.shared.set($0) },
+                                onDismissError: model.clearActionError,
+                                onLogout: onSignOut
+                            )
+                            .toolbar(.hidden, for: .navigationBar)
+                            .navigationDestination(for: Route.self) { destination(for: $0) }
+                        }
+                    case .failed:
+                        StateMessage(
+                            systemImage: "lock.fill", title: "Caricamento non riuscito",
+                            message: "Non riesco a caricare le tue case. Controlla la connessione e riprova."
+                        ) {
+                            Button("Riprova") { Task { await model.load() } }.buttonStyle(.appPrimary)
+                            Button("Esci", action: onSignOut).buttonStyle(.appOutlined)
+                        }
+                    }
                 }
-            case .noHouses:
-                NavigationStack(path: $router.path) {
-                    OnboardingView(
-                        isBusy: model.isBusy, error: model.actionError,
-                        onCreateHouse: { router.push(.newCaseWizard(propertyId: nil, level: .app)) },
-                        // Il codice resta in attesa: lo mostra `InviteOverlay` (accetta / rifiuta).
-                        onInviteCode: { PendingInvite.shared.set($0) },
-                        onDismissError: model.clearActionError,
-                        onLogout: onSignOut
-                    )
-                    .toolbar(.hidden, for: .navigationBar)
-                    .navigationDestination(for: Route.self) { destination(for: $0) }
-                }
-            case .failed:
-                StateMessage(
-                    systemImage: "lock.fill", title: "Caricamento non riuscito",
-                    message: "Non riesco a caricare le tue case. Controlla la connessione e riprova."
+
+                if showFloatingAssistant(
+                    available: AssistantController.shared.available,
+                    open: AssistantController.shared.open,
+                    navbarVisible: router.path.isEmpty,
+                    isKeyboardShowing: false,
+                    mainReady: model.access == .ready,
+                    route: router.path.last
                 ) {
-                    Button("Riprova") { Task { await model.load() } }.buttonStyle(.appPrimary)
-                    Button("Esci", action: onSignOut).buttonStyle(.appOutlined)
+                    FloatingAssistantButton {
+                        withAnimation(.spring(response: 0.35)) {
+                            AssistantController.shared.open = true
+                        }
+                    }
                 }
             }
         }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            await assistantModel.refreshAvailability()
+            if let scope = model.scope {
+                assistantModel.syncHouses(scope.properties)
+            }
+            AssistantController.shared.mainReady = (model.access == .ready)
+        }
         // Tornando dalla creazione guidata la prima casa esiste già: si ricarica per lasciare l'onboarding.
         .onChange(of: router.path) { old, new in
             if model.access == .noHouses && new.count < old.count { Task { await model.load() } }

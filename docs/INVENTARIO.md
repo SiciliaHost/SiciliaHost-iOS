@@ -314,6 +314,53 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/messages/MessagesFormat.kt` | 81 | `Core/Logic/MessagesFormat.swift` | compilato, test ok |
 | 🧪 `ui/messages/MessagesFormatTest.kt` | 35 | `SiciliaHostTests/MessagingTests.swift` | compilato, test ok |
 
+## F13 — Assistente Cactus
+
+| Android | Righe | iOS | Stato |
+|---|---|---|---|
+| `data/repository/AssistantRepository.kt` | 267 | `Core/Services/AssistantService.swift` | scritto |
+| `ui/assistant/AssistantApi.kt` | 27 | `Core/Services/AssistantService.swift (AssistantAPI)` | scritto |
+| `ui/assistant/AssistantModels.kt` | 198 | `Core/Models/AssistantModels.swift` | scritto |
+| `ui/assistant/AssistantWidgets.kt` | 41 | `Core/Models/AssistantWidgets.swift` | scritto |
+| `ui/assistant/AssistantWidgetLogic.kt` | 123 | `Core/Logic/AssistantWidgetLogic.swift` | scritto |
+| `ui/assistant/AssistantTexts.kt` | 171 | `Core/Logic/AssistantTexts.swift` | scritto |
+| `ui/assistant/AssistantVoice.kt` | 184 | `Features/Assistant/AssistantVoice.swift` | scritto |
+| `ui/assistant/AssistantViewModel.kt` | 841 | `Features/Assistant/AssistantModel.swift` | scritto |
+| `ui/assistant/AssistantOverlay.kt` | 371 | `Features/Assistant/AssistantOverlay.swift` | scritto |
+| `ui/assistant/AssistantSheet.kt` | 546 | `Features/Assistant/CactusOverlayView.swift` | scritto |
+| `ui/assistant/CactusOverlayScreen.kt` | 1377 | `Features/Assistant/CactusOverlayView.swift` | scritto |
+| `ui/assistant/cactus/CactusAvatarEngine.kt` | 553 | `Features/Assistant/CactusAvatarEngine.swift` | scritto |
+| `ui/assistant/cactus/CactusAvatarGate.kt` | 136 | `Features/Assistant/CactusAvatarGate.swift` | scritto |
+| `ui/assistant/cactus/CactusAvatarView.kt` | 80 | `Features/Assistant/CactusAvatarView.swift` | scritto |
+| `ui/assistant/cactus/CactusLiveLogic.kt` | 207 | `Core/Logic/CactusLiveLogic.swift` | scritto |
+| `ui/assistant/cactus/CactusNeon.kt` | 93 | `Features/Assistant/CactusOverlayView.swift` | scritto |
+| `ui/assistant/cactus/CactusNodes.kt` | 62 | `Features/Assistant/CactusNodes.swift` | scritto |
+| `ui/assistant/cactus/CactusOverlayLogic.kt` | 112 | `Core/Logic/CactusOverlayLogic.swift` | scritto |
+| `ui/assistant/cactus/CactusPose.kt` | 169 | `Core/Logic/CactusPose.swift` | scritto |
+| `ui/assistant/cactus/ReducedMotion.kt` | 36 | `Features/Assistant/ReducedMotion.swift` | scritto |
+| `ui/assistant/home/CactusAppWidgetProvider.kt` | 106 | n/a (iOS WidgetKit estensione a parte) | n/a |
+| `ui/assistant/home/CactusHomeWidgetLogic.kt` | 127 | n/a (iOS WidgetKit estensione a parte) | n/a |
+| `ui/assistant/home/CactusQuickActivity.kt` | 249 | n/a (iOS WidgetKit estensione a parte) | n/a |
+| `ui/assistant/widgets/AmountWidgetView.kt` | 98 | `Features/Assistant/WidgetViews.swift` | scritto |
+| `ui/assistant/widgets/ChoiceWidgetView.kt` | 79 | `Features/Assistant/WidgetViews.swift` | scritto |
+| `ui/assistant/widgets/DatesWidgetView.kt` | 160 | `Features/Assistant/WidgetViews.swift` | scritto |
+| `ui/assistant/widgets/ProposalGroup.kt` | 340 | `Features/Assistant/ProposalViews.swift` | scritto |
+| `ui/assistant/widgets/SimpleWidgetViews.kt` | 61 | `Features/Assistant/WidgetViews.swift` | scritto |
+| `ui/assistant/widgets/WidgetCommon.kt` | 59 | `Features/Assistant/WidgetViews.swift` | scritto |
+| `ui/assistant/widgets/WidgetView.kt` | 30 | `Features/Assistant/WidgetViews.swift` | scritto |
+| 🧪 `data/repository/AssistantRepositoryTest.kt` | 125 | `SiciliaHostTests/AssistantTests.swift` | scritto |
+| 🧪 `data/repository/AssistantWidgetParsingTest.kt` | 117 | `SiciliaHostTests/AssistantWidgetTests.swift` | scritto |
+| 🧪 `ui/assistant/AssistantModelsTest.kt` | 92 | `SiciliaHostTests/AssistantTests.swift` | scritto |
+| 🧪 `ui/assistant/AssistantOverlayTest.kt` | 56 | `SiciliaHostTests/AssistantModelTests.swift` | scritto |
+| 🧪 `ui/assistant/AssistantViewModelTest.kt` | 1159 | `SiciliaHostTests/AssistantModelTests.swift` | scritto |
+| 🧪 `ui/assistant/AssistantWidgetLogicTest.kt` | 147 | `SiciliaHostTests/AssistantWidgetTests.swift` | scritto |
+| 🧪 `ui/assistant/cactus/CactusAvatarAssetTest.kt` | 172 | `SiciliaHostTests/CactusAvatarTests.swift` | scritto |
+| 🧪 `ui/assistant/cactus/CactusAvatarGateTest.kt` | 134 | `SiciliaHostTests/CactusAvatarTests.swift` | scritto |
+| 🧪 `ui/assistant/cactus/CactusLiveLogicTest.kt` | 136 | `SiciliaHostTests/CactusLiveTests.swift` | scritto |
+| 🧪 `ui/assistant/cactus/CactusOverlayLogicTest.kt` | 151 | `SiciliaHostTests/CactusOverlayLogicTests.swift` | scritto |
+| 🧪 `ui/assistant/cactus/CactusPoseTest.kt` | 217 | `SiciliaHostTests/CactusPoseTests.swift` | scritto |
+| 🧪 `ui/assistant/home/CactusHomeWidgetLogicTest.kt` | 119 | n/a (iOS WidgetKit estensione a parte) | n/a |
+
 ## Risorse e manifest
 
 | Fase | Voce | Cosa | Stato |

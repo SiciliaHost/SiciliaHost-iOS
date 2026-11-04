@@ -33,6 +33,7 @@ Consiglio: far partire G dopo F1–F2. Alternativa da verificare PRIMA di afferm
 | **F10** | Sfondo, notifiche, sincronizzazioni | 5 |
 | **F11** | Rifinitura e rilascio | risorse |
 | **F12** | Messaggi degli ospiti (aggiunta Android 2026-11-03) | 4 + 3 F1 |
+| **F13** | Assistente Cactus (aggiunta Android 2026-11-04) | 42 |
 
 ## F1 — Livello dati completo
 Tutto ciò che parla con Firebase, senza interfaccia.

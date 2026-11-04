@@ -15,6 +15,13 @@ struct SiciliaNavBar: View {
                     withAnimation(.slideSpring) { selected = tab }
                 }
             }
+            if AssistantController.shared.available {
+                AssistantPill {
+                    withAnimation(.spring(response: 0.35)) {
+                        AssistantController.shared.open = true
+                    }
+                }
+            }
         }
         .padding(4)
         .glass(Capsule(), elevation: 18)

@@ -21,6 +21,7 @@ PKG = ["java", "com", "example", "casevacanzeapp"]
 
 # (prefisso relativo al package, fase). Il primo che combacia vince.
 RULES = [
+    ("data/repository/Assistant", "F13"),
     ("data/model/", "F1"), ("data/repository/", "F1"), ("data/access/", "F1"), ("data/alloggiati/", "F1"),
     ("data/invite/", "F2"), ("data/mrz/", "F2"), ("data/utils/", "F2"),
     ("sync/", "F10"), ("services/", "F10"),
@@ -36,13 +37,14 @@ RULES = [
     ("ui/cases/", "F9"), ("ui/site/", "F9"), ("ui/wizard/", "F9"), ("ui/members/", "F9"),
     ("ui/invite/", "F9"), ("ui/property/", "F9"),
     ("ui/messages/", "F12"),
+    ("ui/assistant/", "F13"),
 ]
 
 PHASE_TITLES = {
     "F1": "Livello dati completo", "F2": "Logica pura e utilità", "F3": "Accesso, shell, stile e navigazione",
     "F4": "Home", "F5": "Agenda, prenotazioni e prezzi", "F6": "Scorte", "F7": "Finanze", "F8": "Check-in Alloggiati",
     "F9": "Case, sito, posizione, membri e inviti", "F10": "Sfondo, notifiche e sincronizzazioni",
-    "F11": "Rifinitura e rilascio", "F12": "Messaggi degli ospiti",
+    "F11": "Rifinitura e rilascio", "F12": "Messaggi degli ospiti", "F13": "Assistente Cactus",
 }
 
 ROW = re.compile(r"^\| (🧪 )?`([^`]+)` \| (\d+) \|[^|]*\|\s*([^|]*?)\s*\|$")

@@ -76,6 +76,8 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_NSCameraUsageDescription: La fotocamera serve a scansionare documenti e codici a barre.
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Il microfono serve a dettare i messaggi all'assistente.
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Il riconoscimento vocale serve a trascrivere la tua voce per l'assistente.
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.business
 
   SiciliaHostTests:
