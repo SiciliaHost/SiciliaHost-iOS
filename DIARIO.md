@@ -129,7 +129,8 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Configurato rilascio automatico TestFlight con Fastlane
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineato percorso keychain per Fastlane get_certificates
+- In `fastlane/Fastfile`: impostato il percorso assoluto `~/Library/Keychains/ci_keychain-db` per `keychain_path` in `get_certificates`, risolvendo l'errore `Keychain not found at path .../ci_keychain`.
 - Aggiunti `fastlane/Appfile` e `fastlane/Fastfile` con corsia `:beta`: autenticazione tramite App Store Connect API Key, creazione portachiavi temporaneo su runner macOS, download/creazione automatica di certificato Apple Distribution e provisioning profile App Store per `com.siciliahost.cactushost`, compilazione dell'IPA con `build_app` e upload automatico a TestFlight (`upload_to_testflight`).
 - Aggiunto workflow `.github/workflows/testflight.yml` (on `workflow_dispatch`) per rilasciare su TestFlight direttamente da GitHub Actions.
 
