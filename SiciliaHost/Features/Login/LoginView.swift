@@ -11,6 +11,7 @@ struct LoginView: View {
     @State private var errorMessage: String?
     /// Stringa casuale il cui hash è stato mandato ad Apple nella richiesta in corso.
     @State private var appleNonce: String?
+    @State private var isDemoActive = false
 
     private let ink = Color(hex: Brand.ink)
     private let yellow = Color(hex: Brand.yellow)
@@ -61,10 +62,25 @@ struct LoginView: View {
                     .frame(height: Dimens.controlHeight + 4)
                     .clipShape(roundedShape(10))
                     .padding(.top, 10)
+
+                    Button(action: { isDemoActive = true }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "play.circle.fill")
+                            Text("Esplora con dati dimostrativi (Demo)")
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundStyle(yellow)
+                        .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 14)
                 }
             }
             .frame(maxWidth: 360)
             .padding(Dimens.screenPadding)
+        }
+        .fullScreenCover(isPresented: $isDemoActive) {
+            UIPreviewRoot(screen: "home", onDismiss: { isDemoActive = false })
         }
         .preferredColorScheme(.dark) // fondo scuro fisso: controlli di sistema coerenti
     }

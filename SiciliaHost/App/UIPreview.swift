@@ -48,6 +48,7 @@ enum UIPreview {
 
 struct UIPreviewRoot: View {
     let screen: String
+    var onDismiss: (() -> Void)? = nil
 
     var body: some View {
         switch screen {
@@ -60,7 +61,7 @@ struct UIPreviewRoot: View {
                 OnboardingView(isBusy: false, error: nil, onCreateHouse: {}, onInviteCode: { _ in }, onDismissError: {}, onLogout: {})
             }
         case "home":
-            AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: {}) }
+            AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: { onDismiss?() }) }
         case "arrivals":
             AppScreen {
                 HomeView(scope: UIPreview.scope, onProfile: {},

@@ -52,6 +52,9 @@ targets:
     entitlements:
       path: Config/SiciliaHost.entitlements
       properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.siciliahost.manager
+          - com.siciliahost.manager
         com.apple.developer.associated-domains: ["applinks:siciliahost.com"]
         com.apple.developer.applesignin: [Default]
         # Push (APNs): serve la capability "Push Notifications" sull'App ID e la chiave APNs caricata su Firebase.
