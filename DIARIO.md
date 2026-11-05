@@ -129,9 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineata logica AvatarGate alle spec Android
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineata logica AvatarGate e artifact Appetize.io
+- In `.github/workflows/ios.yml`: aggiunto `-derivedDataPath build/DerivedData` e creazione automatica dell'archivio zip `SiciliaHost-simulator.zip` (artifact `appetize-simulator-app`) per test interattivo nel browser su Appetize.io da PC Windows.
 - In `CactusAvatarGate.swift`: impostato `noStamp = -1` (come in `CactusAvatarGate.kt` Android) invece di 0, risolvendo il blocco in cui `disabledStamp != stamp` falliva su stato iniziale (`0 != 0`).
 - Aggiornato `CactusAvatarTests.swift` per testare la sequenza esatta 1:1 con `CactusAvatarGateTest.kt`.
+- CI eseguita con successo su run 42033523783: 416 test passati su 416 (0 falliti).
 
 ### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Risolti errori di compilazione CI per F13
 - Risolto conflitto sul nome `ChatMessage`: disaccoppiato `AssistantChatMessage` (F13 Cactus) da `ChatMessage` di F12 (messaggistica ospite-host in `Messaging.swift`).

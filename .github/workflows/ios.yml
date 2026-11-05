@@ -55,6 +55,7 @@ jobs:
             -project SiciliaHost.xcodeproj \
             -scheme SiciliaHost \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
             -resultBundlePath build/TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             | tee build/xcodebuild.log
@@ -63,9 +64,27 @@ jobs:
       - name: Screenshot delle anteprime
         if: success()
         run: |
-          APP=$(find build/DerivedData/Build/Products -maxdepth 2 -name 'SiciliaHost.app' | head -1)
+          APP=$(find build/DerivedData/Build/Products -name 'SiciliaHost.app' | head -1)
           echo "App: $APP"
           bash tools/ci_screenshots.sh "$APP" "${{ steps.sim.outputs.udid }}" build/screenshots
+
+      # Pacchetto per simulatore pronto per Appetize.io (test interattivo nel browser su Windows)
+      - name: Prepara archivio per Appetize.io
+        if: success()
+        run: |
+          APP=$(find build/DerivedData/Build/Products -name 'SiciliaHost.app' | head -1)
+          if [ -n "$APP" ]; then
+            cd "$(dirname "$APP")"
+            zip -r "$GITHUB_WORKSPACE/build/SiciliaHost-simulator.zip" "SiciliaHost.app"
+          fi
+
+      - name: Salva archivio per Appetize.io
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appetize-simulator-app
+          path: build/SiciliaHost-simulator.zip
+          if-no-files-found: warn
 
       - name: Salva gli screenshot
         if: always()
