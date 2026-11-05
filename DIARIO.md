@@ -129,11 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Risolto Keychain Error su simulatore, aggiunta modalità Demo e verificato build CI 42054630038
-- In `project.yml`: aggiunti `keychain-access-groups` (`$(AppIdentifierPrefix)com.siciliahost.manager` e `com.siciliahost.manager`) alle entitlements dell'app, necessari a Firebase Auth e GoogleSignIn per accedere al portachiavi su iOS Simulator.
-- In `.github/workflows/ios.yml`: aggiunta firma ad-hoc con le entitlements (`codesign --force --sign - --entitlements "$ENTITLEMENTS" --deep "$APP"`) nel packaging per Appetize.io, eliminando l'errore `FIRAuthErrorCodeKeychainError` (-34018 / missing entitlement).
-- In `LoginView.swift`: aggiunto pulsante "Esplora con dati dimostrativi (Demo)" che apre direttamente `UIPreviewRoot` a tutto schermo, consentendo di provare e navigare tutta l'app istantaneamente su Appetize.io senza dover inserire credenziali Google reali in un browser cloud.
-- Verificato CI run 42054630038: 416 unit test eseguiti con successo (0 falliti), pacchetto firmato e generato `SiciliaHost-simulator.zip` (20.4 MB), scaricato in locale in `SiciliaHost-iOS/build/appetize/SiciliaHost-simulator.zip` pronto per il re-upload su Appetize.io.
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Risolto crash immediato all'avvio su Appetize.io
+- Causa crash: l'archivio per Appetize veniva preso dall'output di `xcodebuild test`, che conteneva `libXCTestBundleInject.dylib` e `SiciliaHostTests.xctest` iniettati, e la firma manuale `codesign --deep` con entitlements non espanse (`$(AppIdentifierPrefix)`) corrompeva le firme dei framework integrati, causando il crash immediato di `dyld` e `amfid` all'avvio standalone.
+- In `.github/workflows/ios.yml`: sostituito il packaging con un comando pulito `xcodebuild build` dedicato (senza test bundle o dylib di iniezione) con firma ad-hoc nativa di Xcode (`CODE_SIGN_IDENTITY="-"`).
+- In `project.yml`: rimossa la sezione non necessaria `keychain-access-groups` (che richiede un Apple Team ID valido per risolvere il prefisso).
+- Modalità Demo: mantenuto il pulsante "Esplora con dati dimostrativi (Demo)" in `LoginView.swift`.
 
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineata logica AvatarGate e artifact Appetize.io
 - In `.github/workflows/ios.yml`: aggiunto `-derivedDataPath build/DerivedData` e creazione automatica dell'archivio zip `SiciliaHost-simulator.zip` (artifact `appetize-simulator-app`) per test interattivo nel browser su Appetize.io da PC Windows.

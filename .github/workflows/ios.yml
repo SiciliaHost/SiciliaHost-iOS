@@ -68,19 +68,22 @@ jobs:
           echo "App: $APP"
           bash tools/ci_screenshots.sh "$APP" "${{ steps.sim.outputs.udid }}" build/screenshots
 
-      # Pacchetto per simulatore pronto per Appetize.io (test interattivo nel browser su Windows)
+      # Pacchetto per simulatore pronto per Appetize.io (test interattivo nel browser su Windows).
+      # Compiliamo direttamente il target app (senza test bundle o dylib di XCTest iniettati)
+      # e usiamo la firma Ad-Hoc nativa di Xcode per il simulatore.
       - name: Prepara archivio per Appetize.io
         if: success()
         run: |
-          APP=$(find build/DerivedData/Build/Products -name 'SiciliaHost.app' | head -1)
+          xcodebuild build \
+            -project SiciliaHost.xcodeproj \
+            -scheme SiciliaHost \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/AppetizeDerivedData \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO
+          APP=$(find build/AppetizeDerivedData/Build/Products -name 'SiciliaHost.app' | head -1)
+          echo "App per Appetize: $APP"
           if [ -n "$APP" ]; then
-            ENTITLEMENTS=$(find Config -name "*.entitlements" 2>/dev/null | head -1)
-            echo "Entitlements: $ENTITLEMENTS"
-            if [ -n "$ENTITLEMENTS" ] && [ -f "$ENTITLEMENTS" ]; then
-              codesign --force --sign - --entitlements "$ENTITLEMENTS" --deep "$APP" || true
-            else
-              codesign --force --sign - --deep "$APP" || true
-            fi
             cd "$(dirname "$APP")"
             zip -r "$GITHUB_WORKSPACE/build/SiciliaHost-simulator.zip" "SiciliaHost.app"
           fi
