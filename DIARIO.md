@@ -129,6 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineato TEST_HOST e avviata CI con repo pubblica
+- Risolto errore XcodeGen su `TEST_HOST`: mantenuto il nome del binario target `SiciliaHost` per coerenza con il bundle dei test unitari `SiciliaHostTests`, lasciando `CFBundleDisplayName: CactusHost` e Bundle ID `com.siciliahost.cactushost`.
+- Repo resa pubblica dall'utente: minuti GitHub Actions sbloccati, gratuiti e illimitati su runner macOS 15.
+- Preparazione secret App Store Connect per distribuzione TestFlight.
+
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Configurato Apple Developer Team ID e Bundle ID CactusHost
 - L'utente ha fornito l'Apple Developer Team ID `4D6QBBJVG5` e ha scelto il nome definitivo dell'app: «CactusHost: Assistente digitale e strumenti Case Vacanze» con display name «CactusHost» e Bundle ID `com.siciliahost.cactushost`.
 - In `project.yml`: impostato `DEVELOPMENT_TEAM: 4D6QBBJVG5`, `PRODUCT_BUNDLE_IDENTIFIER: com.siciliahost.cactushost`, `PRODUCT_NAME: CactusHost`, `CFBundleDisplayName: CactusHost`, `CFBundleURLTypes` con schemi `[cactushost, siciliahost]`, e `keychain-access-groups` con `4D6QBBJVG5.com.siciliahost.cactushost` e `com.siciliahost.cactushost`.
