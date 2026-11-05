@@ -2,6 +2,7 @@ import Foundation
 
 public let maxFailedStarts = 2
 public let startConfirmFrames = 15
+private let noStamp: Int64 = -1
 
 public func avatarAllowed(isSupported: Bool, initPending: Bool, disabledStamp: Int64, appStamp: Int64) -> Bool {
     return isSupported && !initPending && disabledStamp != appStamp
@@ -66,7 +67,7 @@ public final class AvatarGate: @unchecked Sendable {
 
     public func begin() -> Bool {
         let s = store.read()
-        let stamp = (s.initPending || s.disabledStamp != 0) ? appStampProvider() : 0
+        let stamp = (s.initPending || s.disabledStamp != 0) ? appStampProvider() : noStamp
         let failed = s.initPending ? s.failedStarts + 1 : s.failedStarts
         let turnOff = failed >= maxFailedStarts
         let allowed = !turnOff && avatarAllowed(isSupported: isSupported, initPending: false, disabledStamp: s.disabledStamp, appStamp: stamp)

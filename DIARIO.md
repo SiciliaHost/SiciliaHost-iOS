@@ -129,7 +129,7 @@ e correggere gli errori (vedi Prossimi passi).
 ## Registro (più recente in alto)
 
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineata logica AvatarGate alle spec Android
-- In `CactusAvatarGate.swift`: allineata la logica di `begin()` esattamente alle spec Android (`CactusAvatarGate.kt`). Un singolo avvio fallito ritenta una seconda volta impostando `failedStarts = 1`; il secondo avvio fallito consecutivo spegne l'avatar 3D impostando `disabledStamp` e resettando `failedStarts = 0`.
+- In `CactusAvatarGate.swift`: impostato `noStamp = -1` (come in `CactusAvatarGate.kt` Android) invece di 0, risolvendo il blocco in cui `disabledStamp != stamp` falliva su stato iniziale (`0 != 0`).
 - Aggiornato `CactusAvatarTests.swift` per testare la sequenza esatta 1:1 con `CactusAvatarGateTest.kt`.
 
 ### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Risolti errori di compilazione CI per F13
