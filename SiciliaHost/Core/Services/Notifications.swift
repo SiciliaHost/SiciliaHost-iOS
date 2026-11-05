@@ -73,7 +73,7 @@ enum ExcelReminderScheduler {
 /// si sincronizza all'apertura dell'app, al ritorno in primo piano (al massimo una volta ogni 55 minuti) e quando iOS
 /// concede un giro in sfondo (`BGAppRefreshTask`, a discrezione del sistema: può essere molto più rado).
 enum AutoSync {
-    static let taskIdentifier = "com.siciliahost.manager.icalsync"
+    static let taskIdentifier = "com.siciliahost.cactushost.icalsync"
     static let minInterval: TimeInterval = 55 * 60
 
     private static func lastRunKey(_ uid: String) -> String { "ical.lastRunAt.\(uid)" }

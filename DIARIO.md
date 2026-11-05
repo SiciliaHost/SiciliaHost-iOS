@@ -94,7 +94,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **User-Agent OSM per iOS**: `SiciliaHostManager/1.0 (iOS; +https://siciliahost.com; info@siciliahost.com)` (`osmUserAgent`).
 - **Accesso Google + Apple (niente email)**: firestore.rules, storage.rules e `functions/src/auth/propertyAccess.ts` accettano come host solo `sign_in_provider == 'google.com'`; un account email/password verrebbe rifiutato da Firestore, Storage e Functions (per questo l'iOS non ha il login con email); Apple è stato aggiunto sui branch `feat/apple-signin-host` (non deployati).
 - Navigazione: un solo `NavigationStack(path:)` con l'enum `Route` (`Features/Navigation/Router.swift`); la schermata principale è la radice, le altre si impilano; le sezioni sono un `TabView` in stile pagina con la barra di vetro sopra. Il tour usa le preferenze di layout (`.tourTarget`) per sapere dove sono gli elementi.
-- Bundle ID: `com.siciliahost.manager` (scelto dall'utente il 2026-10-18; nome app «SiciliaHost Manager»).
+- Bundle ID definitivo: `com.siciliahost.cactushost` (scelto dall'utente il 2026-11-05). Nome app: «CactusHost: Assistente digitale e strumenti Case Vacanze» (display name: «CactusHost»). Apple Team ID: `4D6QBBJVG5`.
 
 ## Risposte dell'utente (2026-10-18)
 
@@ -128,6 +128,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Configurato Apple Developer Team ID e Bundle ID CactusHost
+- L'utente ha fornito l'Apple Developer Team ID `4D6QBBJVG5` e ha scelto il nome definitivo dell'app: «CactusHost: Assistente digitale e strumenti Case Vacanze» con display name «CactusHost» e Bundle ID `com.siciliahost.cactushost`.
+- In `project.yml`: impostato `DEVELOPMENT_TEAM: 4D6QBBJVG5`, `PRODUCT_BUNDLE_IDENTIFIER: com.siciliahost.cactushost`, `PRODUCT_NAME: CactusHost`, `CFBundleDisplayName: CactusHost`, `CFBundleURLTypes` con schemi `[cactushost, siciliahost]`, e `keychain-access-groups` con `4D6QBBJVG5.com.siciliahost.cactushost` e `com.siciliahost.cactushost`.
+- Aggiornato `Notifications.swift` con il nuovo identificatore `com.siciliahost.cactushost.icalsync` e `tools/ci_screenshots.sh` con `BUNDLE="com.siciliahost.cactushost"`.
 
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Risolto crash immediato all'avvio su Appetize.io
 - Causa crash: l'archivio per Appetize veniva preso dall'output di `xcodebuild test`, che conteneva `libXCTestBundleInject.dylib` e `SiciliaHostTests.xctest` iniettati, e la firma manuale `codesign --deep` con entitlements non espanse (`$(AppIdentifierPrefix)`) corrompeva le firme dei framework integrati, causando il crash immediato di `dyld` e `amfid` all'avvio standalone.

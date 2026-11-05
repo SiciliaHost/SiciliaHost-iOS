@@ -3,7 +3,7 @@
 # Uso: tools/ci_screenshots.sh <percorso SiciliaHost.app> <UDID del simulatore> <cartella di uscita>
 set -uo pipefail
 APP="$1"; UDID="$2"; OUT="$3"
-BUNDLE="com.siciliahost.manager"
+BUNDLE="com.siciliahost.cactushost"
 SCREENS="login intro onboarding home arrivals agenda inventory finance tour profile failed terms gallery"
 mkdir -p "$OUT"
 

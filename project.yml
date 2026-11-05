@@ -33,25 +33,27 @@ targets:
         product: FirebaseMessaging
       - package: GoogleSignIn
         product: GoogleSignIn
-    # Schemi URL: `siciliahost://invito/CODICE` e il ritorno del login Google (schema = REVERSED_CLIENT_ID di
-    # GoogleService-Info.plist, da mettere in GOOGLE_REVERSED_CLIENT_ID quando l'app iOS è registrata in Firebase).
+    # Schemi URL: `cactushost://invito/CODICE` / `siciliahost://invito/CODICE` e il ritorno del login Google
     info:
       path: Config/Info.plist
       properties:
         CFBundleURLTypes:
-          - CFBundleURLName: com.siciliahost.manager.invite
-            CFBundleURLSchemes: [siciliahost]
+          - CFBundleURLName: com.siciliahost.cactushost.invite
+            CFBundleURLSchemes: [cactushost, siciliahost]
           - CFBundleURLName: com.google.signin
             CFBundleURLSchemes: ["$(GOOGLE_REVERSED_CLIENT_ID)"]
         UILaunchScreen: {}
         # F10: notifiche push in sfondo e giro dei calendari iCal (BGAppRefreshTask).
         UIBackgroundModes: [fetch, remote-notification]
-        BGTaskSchedulerPermittedIdentifiers: [com.siciliahost.manager.icalsync]
+        BGTaskSchedulerPermittedIdentifiers: [com.siciliahost.cactushost.icalsync]
     # Link universali degli inviti (https://siciliahost.com/invito/CODICE): richiedono anche il file
-    # apple-app-site-association sul sito (repo Siciliahost.it) e un account Apple Developer.
+    # apple-app-site-association sul sito (repo Siciliahost.it) con l'ID dell'app (4D6QBBJVG5.com.siciliahost.cactushost).
     entitlements:
       path: Config/SiciliaHost.entitlements
       properties:
+        keychain-access-groups:
+          - 4D6QBBJVG5.com.siciliahost.cactushost
+          - com.siciliahost.cactushost
         com.apple.developer.associated-domains: ["applinks:siciliahost.com"]
         com.apple.developer.applesignin: [Default]
         # Push (APNs): serve la capability "Push Notifications" sull'App ID e la chiave APNs caricata su Firebase.
@@ -61,8 +63,9 @@ targets:
         - SiciliaHostTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.siciliahost.manager # PROVVISORIO: vedi DIARIO.md
-        PRODUCT_NAME: SiciliaHost
+        DEVELOPMENT_TEAM: 4D6QBBJVG5
+        PRODUCT_BUNDLE_IDENTIFIER: com.siciliahost.cactushost
+        PRODUCT_NAME: CactusHost
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.9"
@@ -71,7 +74,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1" # solo iPhone (iPad escluso per scelta)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        INFOPLIST_KEY_CFBundleDisplayName: SiciliaHost Manager
+        INFOPLIST_KEY_CFBundleDisplayName: CactusHost
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
@@ -89,5 +92,6 @@ targets:
       - target: SiciliaHost
     settings:
       base:
+        DEVELOPMENT_TEAM: 4D6QBBJVG5
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.9"
