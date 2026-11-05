@@ -52,7 +52,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **F12 (Messaggi): COMPILA e i test passano (2026-11-03, run 41709423673, ramo `feat/f12-messaggi`, non unito a `main`)** (`docs/funzioni/F12.md`). Nessun segnaposto di schermata rimasto. Il tab Case è `CasesView` (F9c), la creazione guidata `NewCaseWizardView` (F9d).
 - **F10 (sfondo, notifiche, sincronizzazioni): COMPILA e i test passano (2026-11-04, run 41809382057)** (`docs/funzioni/F10.md`): push FCM/APNs, notifiche locali, sync iCal con gli echi Booking (all'apertura, in primo piano e `BGAppRefreshTask`), "Sincronizza ora", promemoria Excel come notifica locale.
 - **Profilo 2026-10-30 (nome visualizzato, "Le mie case", accesso alla casa, privacy, notifiche) portato 2026-11-04: COMPILA e i test passano (run 41806457332)**: `Features/Profile/*`, `Core/Logic/ProfileLogic.swift`, `ProfileTests`.
-- **F13 (Assistente Cactus) COMPLETAMENTE SCRITTO**: tutti i 42 file Android censiti in `INVENTARIO.md` e `tools/gen_inventario.py` (totale 291 file Kotlin, 0 non censiti, 0 righe aperte su F13). Copre tutte le fasi F13a–F13f:
+- **F13 (Assistente Cactus) COMPILA IN CI E TUTTI I TEST PASSANO (2026-11-05, run 42033523783: 416 test totali, 0 falliti)**: tutti i 42 file Android censiti in `INVENTARIO.md` e `tools/gen_inventario.py` (totale 291 file Kotlin, 0 non censiti, 0 righe aperte su F13). Copre tutte le fasi F13a–F13f:
   - F13a (dati, modelli, parser, logica pura e testi): `Core/Models/AssistantModels.swift`, `Core/Models/AssistantWidgets.swift`, `Core/Logic/AssistantWidgetLogic.swift`, `Core/Logic/AssistantTexts.swift`, `Core/Services/AssistantService.swift`, test `AssistantTests.swift`, `AssistantWidgetTests.swift`.
   - F13b (controller e ViewModel): `Features/Assistant/AssistantController.swift`, `Features/Assistant/AssistantModel.swift`, test `AssistantModelTests.swift`.
   - F13c (componenti UI widget, proposte e consenso): `Features/Assistant/WidgetViews.swift`, `Features/Assistant/ProposalViews.swift`, `Features/Assistant/ConsentView.swift`.
@@ -63,9 +63,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Prossimi passi (in ordine)
 
-0. Eseguire push e verificare la compilazione in CI su GitHub Actions (macOS 15 runner) con esecuzione della suite test completa (inclusi i 7 nuovi file di test di F13).
-1. Provare l'overlay di Cactus con simulatore o dispositivo reale.
-2. Provare l'accesso con Apple (Functions con `apple.com` deployate il 2026-10-27? da verificare: vedi sezione Accesso con Apple), poi F11 (asset icona finale).
+0. ~~Eseguire push e verificare la compilazione in CI su GitHub Actions con esecuzione suite completa~~ — **FATTO: CI verde, 416 test passati, 0 falliti (run 42033523783)**.
+1. Test su iPhone reale: impostare la firma del codice (Apple Developer Account per TestFlight o Apple ID gratuito con Xcode su Mac collegato via USB).
+2. Provare l'accesso su dispositivo reale: login Google funziona con il backend attuale; per Sign in with Apple verificare deploy delle regole da `feat/apple-signin-host`.
+3. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
 
 ## Decisioni prese
 
