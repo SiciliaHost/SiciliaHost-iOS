@@ -129,6 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Build CI 42085057523 completato con successo (pacchetto pulito per Appetize)
+- CI run 42085057523 su macOS 15 eseguita con successo in 20m: 416 unit test passati (0 falliti), 24 screenshot generati.
+- Pacchetto `SiciliaHost-simulator.zip` generato da build pulita `xcodebuild build` con firma Ad-Hoc nativa Xcode (`CODE_SIGN_IDENTITY="-"`): eliminati tutti i framework e dylib di XCTest, firme Mach-O di tutti i bundle e framework perfettamente integre.
+- File scaricato in locale in `SiciliaHost-iOS/build/appetize/SiciliaHost-simulator.zip` (14.5 MB), pronto per Appetize.io.
+
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineato TEST_HOST e avviata CI con repo pubblica
 - Risolto errore XcodeGen su `TEST_HOST`: mantenuto il nome del binario target `SiciliaHost` per coerenza con il bundle dei test unitari `SiciliaHostTests`, lasciando `CFBundleDisplayName: CactusHost` e Bundle ID `com.siciliahost.cactushost`.
 - Repo resa pubblica dall'utente: minuti GitHub Actions sbloccati, gratuiti e illimitati su runner macOS 15.
