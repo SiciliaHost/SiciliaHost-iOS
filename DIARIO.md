@@ -128,7 +128,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Risolti errori di compilazione CI per F13 (In pausa)
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineata logica AvatarGate alle spec Android
+- In `CactusAvatarGate.swift`: allineata la logica di `begin()` esattamente alle spec Android (`CactusAvatarGate.kt`). Un singolo avvio fallito ritenta una seconda volta impostando `failedStarts = 1`; il secondo avvio fallito consecutivo spegne l'avatar 3D impostando `disabledStamp` e resettando `failedStarts = 0`.
+- Aggiornato `CactusAvatarTests.swift` per testare la sequenza esatta 1:1 con `CactusAvatarGateTest.kt`.
+
+### 2026-11-04 — Antigravity (locale, Windows senza Swift) — Risolti errori di compilazione CI per F13
 - Risolto conflitto sul nome `ChatMessage`: disaccoppiato `AssistantChatMessage` (F13 Cactus) da `ChatMessage` di F12 (messaggistica ospite-host in `Messaging.swift`).
 - Aggiunta conformità ad `Error` per `AmountError`.
 - Adeguati i livelli di accesso in `AssistantModel`, `AssistantController` e `CactusLiveLogic` per evitare errori `method/function/property cannot be declared public because its parameter/type uses an internal type`.

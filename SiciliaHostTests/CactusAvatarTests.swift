@@ -66,15 +66,15 @@ final class CactusAvatarTests: XCTestCase {
         XCTAssertEqual(store.read().failedStarts, 0)
 
         // Simula avvio interrotto (crash / abort nativo)
-        XCTAssertTrue(gate.begin())
-        // Prossimo avvio rileva initPending
-        XCTAssertFalse(gate.begin())
+        XCTAssertTrue(gate.begin()) // abort 1
+        // Prossimo avvio rileva initPending ma riprova una volta (failedStarts = 1)
+        XCTAssertTrue(gate.begin()) // riprova (1 fallito), abort 2
         XCTAssertEqual(store.read().failedStarts, 1)
 
         // Secondo crash consecutivo spegne l'avatar per questa versione
-        XCTAssertFalse(gate.begin())
-        XCTAssertEqual(store.read().failedStarts, 2)
+        XCTAssertFalse(gate.begin()) // 2 falliti di fila: spento
         XCTAssertEqual(store.read().disabledStamp, 100)
+        XCTAssertFalse(store.read().initPending)
 
         // Rifiutato finché l'app non viene aggiornata (appStamp cambia)
         XCTAssertFalse(gate.begin())

@@ -65,22 +65,17 @@ public final class AvatarGate: @unchecked Sendable {
     }
 
     public func begin() -> Bool {
-        let current = store.read()
-        let appStamp = appStampProvider()
-
-        if current.initPending {
-            let failed = current.failedStarts + 1
-            let disabled = failed >= maxFailedStarts ? appStamp : current.disabledStamp
-            _ = store.commit(state: GateState(initPending: false, disabledStamp: disabled, failedStarts: failed))
-            return false
-        }
-
-        guard avatarAllowed(isSupported: isSupported, initPending: false, disabledStamp: current.disabledStamp, appStamp: appStamp) else {
-            return false
-        }
-
-        // Segna avvio in corso
-        return store.commit(state: GateState(initPending: true, disabledStamp: current.disabledStamp, failedStarts: current.failedStarts))
+        let s = store.read()
+        let stamp = (s.initPending || s.disabledStamp != 0) ? appStampProvider() : 0
+        let failed = s.initPending ? s.failedStarts + 1 : s.failedStarts
+        let turnOff = failed >= maxFailedStarts
+        let allowed = !turnOff && avatarAllowed(isSupported: isSupported, initPending: false, disabledStamp: s.disabledStamp, appStamp: stamp)
+        let next = GateState(
+            initPending: allowed,
+            disabledStamp: disabledStampAfter(initPending: turnOff, disabledStamp: s.disabledStamp, appStamp: stamp),
+            failedStarts: turnOff ? 0 : failed
+        )
+        return store.commit(state: next) && allowed
     }
 
     public func initFinished() {
