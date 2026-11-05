@@ -129,10 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Risolto Keychain Error su simulatore e aggiunta modalità Demo
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Risolto Keychain Error su simulatore, aggiunta modalità Demo e verificato build CI 42054630038
 - In `project.yml`: aggiunti `keychain-access-groups` (`$(AppIdentifierPrefix)com.siciliahost.manager` e `com.siciliahost.manager`) alle entitlements dell'app, necessari a Firebase Auth e GoogleSignIn per accedere al portachiavi su iOS Simulator.
 - In `.github/workflows/ios.yml`: aggiunta firma ad-hoc con le entitlements (`codesign --force --sign - --entitlements "$ENTITLEMENTS" --deep "$APP"`) nel packaging per Appetize.io, eliminando l'errore `FIRAuthErrorCodeKeychainError` (-34018 / missing entitlement).
 - In `LoginView.swift`: aggiunto pulsante "Esplora con dati dimostrativi (Demo)" che apre direttamente `UIPreviewRoot` a tutto schermo, consentendo di provare e navigare tutta l'app istantaneamente su Appetize.io senza dover inserire credenziali Google reali in un browser cloud.
+- Verificato CI run 42054630038: 416 unit test eseguiti con successo (0 falliti), pacchetto firmato e generato `SiciliaHost-simulator.zip` (20.4 MB), scaricato in locale in `SiciliaHost-iOS/build/appetize/SiciliaHost-simulator.zip` pronto per il re-upload su Appetize.io.
 
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineata logica AvatarGate e artifact Appetize.io
 - In `.github/workflows/ios.yml`: aggiunto `-derivedDataPath build/DerivedData` e creazione automatica dell'archivio zip `SiciliaHost-simulator.zip` (artifact `appetize-simulator-app`) per test interattivo nel browser su Appetize.io da PC Windows.
