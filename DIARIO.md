@@ -129,6 +129,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Configurato rilascio automatico TestFlight con Fastlane
+- Aggiunti `fastlane/Appfile` e `fastlane/Fastfile` con corsia `:beta`: autenticazione tramite App Store Connect API Key, creazione portachiavi temporaneo su runner macOS, download/creazione automatica di certificato Apple Distribution e provisioning profile App Store per `com.siciliahost.cactushost`, compilazione dell'IPA con `build_app` e upload automatico a TestFlight (`upload_to_testflight`).
+- Aggiunto workflow `.github/workflows/testflight.yml` (on `workflow_dispatch`) per rilasciare su TestFlight direttamente da GitHub Actions.
+
 ### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Build CI 42085057523 completato con successo (pacchetto pulito per Appetize)
 - CI run 42085057523 su macOS 15 eseguita con successo in 20m: 416 unit test passati (0 falliti), 24 screenshot generati.
 - Pacchetto `SiciliaHost-simulator.zip` generato da build pulita `xcodebuild build` con firma Ad-Hoc nativa Xcode (`CODE_SIGN_IDENTITY="-"`): eliminati tutti i framework e dylib di XCTest, firme Mach-O di tutti i bundle e framework perfettamente integre.

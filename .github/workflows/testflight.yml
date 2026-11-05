@@ -1,0 +1,48 @@
+name: TestFlight
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: testflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testflight:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Strumenti
+        run: |
+          brew install xcodegen
+          xcodebuild -version
+          swift --version
+          fastlane --version
+
+      - name: Genera il progetto Xcode
+        run: xcodegen generate
+
+      - name: Cache dei pacchetti Swift (Firebase)
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: spm-${{ hashFiles('project.yml') }}
+
+      - name: Rilascia su TestFlight con Fastlane
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          FL_BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          fastlane beta
+
+      - name: Salva pacchetto IPA firmato
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cactushost-ipa
+          path: build/testflight/CactusHost.ipa
+          if-no-files-found: ignore
