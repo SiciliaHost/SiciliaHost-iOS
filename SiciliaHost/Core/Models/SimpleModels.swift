@@ -1,7 +1,8 @@
 import Foundation
 
-/// Credenziali del web service Alloggiati: stanno in `properties/{id}/private/alloggiati`, solo OWNER.
-struct AlloggiatiCredentials: Equatable, Sendable {
+/// Credenziali del web service Alloggiati: SOLO su questo telefono, nel portachiavi (`KeychainCredentialStore`), mai in
+/// Firestore. Il proprietario le comunica a mano ai collaboratori.
+struct AlloggiatiCredentials: Codable, Equatable, Sendable, CustomStringConvertible, CustomDebugStringConvertible {
     var utente = ""
     var password = ""
     var wsKey = ""
@@ -9,6 +10,10 @@ struct AlloggiatiCredentials: Equatable, Sendable {
     var isConfigured: Bool {
         !utente.trimmed.isEmpty && !password.trimmed.isEmpty && !wsKey.trimmed.isEmpty
     }
+
+    /// Mai i segreti nei log.
+    var description: String { "AlloggiatiCredentials(utente=\(utente), password=***, wsKey=***)" }
+    var debugDescription: String { description }
 }
 
 /// Rubrica marketing (import Excel Booking): il telefono è l'id del documento.

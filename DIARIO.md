@@ -61,12 +61,20 @@ e correggere gli errori (vedi Prossimi passi).
   - F13f (operatore dal vivo e avatar 3D): `Core/Logic/CactusLiveLogic.swift`, `Core/Logic/CactusPose.swift`, `Features/Assistant/CactusNodes.swift`, `Features/Assistant/CactusAvatarGate.swift`, `Features/Assistant/CactusAvatarEngine.swift` (SceneKit), `Features/Assistant/ReducedMotion.swift`, test `CactusLiveTests.swift`, `CactusPoseTests.swift`, `CactusAvatarTests.swift`.
   - `project.yml`: aggiunti permessi microfono e speech recognition.
 
+<!-- alloggiati-stato -->
+- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, NON unito, NON compilato)**: porta del codice Android finale (`0688569`). Lavoro in corso: vedi le voci del Registro del 2026-11-06 (Claude Opus 5.5).
+<!-- alloggiati-stato -->
+
 ## Prossimi passi (in ordine)
 
 0. ~~Eseguire push e verificare la compilazione in CI su GitHub Actions con esecuzione suite completa~~ — **FATTO: CI verde, 416 test passati, 0 falliti (run 42033523783)**.
 1. Test su iPhone reale: impostare la firma del codice (Apple Developer Account per TestFlight o Apple ID gratuito con Xcode su Mac collegato via USB).
 2. Provare l'accesso su dispositivo reale: login Google funziona con il backend attuale; per Sign in with Apple verificare deploy delle regole da `feat/apple-signin-host`.
 3. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
+
+<!-- alloggiati-prossimi -->
+- **Alloggiati sul telefono** (ramo `feat/alloggiati-sul-telefono`): completare la porta (voci del Registro 2026-11-06), poi compilare in CI e correggere.
+<!-- alloggiati-prossimi -->
 
 ## Decisioni prese
 
@@ -128,6 +136,13 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 1/5: logica pura
+- Ramo `feat/alloggiati-sul-telefono` (da `main` `d182cce`). Porta in Swift del codice Android FINALE (`Androidapp` `main`, `0688569`, dopo la revisione), non del piano iniziale.
+- Nuovi `Core/Alloggiati/AlloggiatiSoap.swift` (XML, `unesc`, `AlloggiatiError` con `.refused`/`.rejected`/`.uncertain` e classificazione severa di `parseEsito`, `requireSoapBody`), `Schedina.swift` (notti = giorni di calendario di Roma, date non valide → errore, caratteri di controllo → spazi, calendario gregoriano esplicito), `SendPlan.swift` (pending, `normalizeStaleLocks`, esiti, incerto, 30 giorni), `ReceiptDates.swift` (`CalendarDay`, ultimi 30 giorni escluso oggi), `CheckinMark.swift`.
+- Modelli: `GuestRecord.sendingAt` e `description` senza dati personali; `AlloggiatiCredentials` `Codable` con `description` mascherata.
+- Test `SiciliaHostTests/AlloggiatiTests.swift` (porta di AlloggiatiSoapTest, SchedinaTest, SendPlanTest, ReceiptDatesTest, CheckinMarkTest).
+- **NON compilato** (Windows): da verificare in CI o su Mac.
 
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Rimozione keychain-access-groups dagli entitlement
 - Fastlane run 42204091823: `update_code_signing_settings` ha agganciato correttamente il profilo `fa1bcfb9-5d06-410a-9dce-d7ce2560e894` e la firma manuale `Apple Distribution`.

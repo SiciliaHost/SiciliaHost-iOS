@@ -91,7 +91,8 @@ extension InventoryItem {
     }
 }
 
-/// Scheda alloggiato (Alloggiati Web). `sesso`: "1" = M, "2" = F; `dataNascita`: dd/MM/yyyy.
+/// Scheda alloggiato (Alloggiati Web): vive SOLO sul telefono (`GuestRecordStore`), mai in Firestore; i dati dei documenti
+/// vanno direttamente alla Polizia di Stato. `sesso`: "1" = M, "2" = F; `dataNascita`: dd/MM/yyyy.
 struct GuestRecord: Identifiable, Codable, Equatable, Sendable {
     var id = ""
     var reservationId = ""
@@ -111,6 +112,19 @@ struct GuestRecord: Identifiable, Codable, Equatable, Sendable {
     var schedInaSent = false
     var sendTimestamp: Int64?
     var sendError: String?
+    /// Inizio di un invio in corso (blocca un secondo invio per 2 minuti), `nil` fuori dall'invio. Millisecondi.
+    var sendingAt: Int64?
+}
+
+extension GuestRecord: CustomStringConvertible, CustomDebugStringConvertible {
+    /// Niente nomi, date o documenti nei log (come `toString()` dell'Android).
+    var description: String {
+        "GuestRecord(id=\(id), reservationId=\(reservationId), propertyId=\(propertyId), schedInaSent=\(schedInaSent), "
+            + "sendTimestamp=\(String(describing: sendTimestamp)), sendError=\(String(describing: sendError)), "
+            + "sendingAt=\(String(describing: sendingAt)))"
+    }
+
+    var debugDescription: String { description }
 }
 
 extension GuestRecord {
@@ -134,5 +148,6 @@ extension GuestRecord {
         schedInaSent = c.value(.schedInaSent, false)
         sendTimestamp = c.optional(.sendTimestamp)
         sendError = c.optional(.sendError)
+        sendingAt = c.optional(.sendingAt)
     }
 }
