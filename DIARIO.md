@@ -129,6 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Fix conformità TestFlight, aps-environment e produce Fastlane
+- In `project.yml`: impostato `aps-environment: production` per allineare gli entitlement con il provisioning profile di distribuzione App Store / TestFlight; aggiunto `ITSAppUsesNonExemptEncryption: false` (e flag Info.plist) per evitare il blocco per conformità crittografica su TestFlight.
+- In `fastlane/Fastfile`: aggiunto step `produce` protetto da rescue per garantire l'esistenza della scheda app su App Store Connect; impostato `clean: false` per accelerare la compilazione con pacchetti SPM già risolti.
+- In `.github/workflows/testflight.yml`: esportati i timeout di Fastlane a livello di job.
+
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Provisioning profile TestFlight generato e fix timeout showBuildSettings
 - Fastlane run 42193042163 ha validato con successo `get_certificates` (certificato Apple Distribution `5QSPNLUQQJ`) e `get_provisioning_profile` generato da Apple per `com.siciliahost.cactushost` (`73eb1b85-4232-46ba-8ab3-986446799fd6`).
 - In `.github/workflows/testflight.yml`: aggiunto pre-step `xcodebuild -resolvePackageDependencies` per risolverle prima del build, e impostato `FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120` e `FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 10` per evitare il timeout di showBuildSettings durante la risoluzione SPM.

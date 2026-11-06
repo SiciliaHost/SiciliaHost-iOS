@@ -11,6 +11,19 @@ platform :ios do
       is_key_content_base64: false
     )
 
+    # Assicura che la scheda App esista su App Store Connect
+    begin
+      produce(
+        api_key: api_key,
+        app_identifier: "com.siciliahost.cactushost",
+        app_name: "CactusHost",
+        language: "Italian",
+        sku: "cactushost_ios"
+      )
+    rescue => ex
+      UI.message("produce note: #{ex.message}")
+    end
+
     # Crea portachiavi temporaneo per la CI sul runner macOS
     keychain_name = "ci_keychain"
     keychain_password = "ci_keychain_password_123"
@@ -45,7 +58,7 @@ platform :ios do
       export_method: "app-store",
       output_directory: "build/testflight",
       output_name: "CactusHost.ipa",
-      clean: true,
+      clean: false,
       xcargs: "CURRENT_PROJECT_VERSION=#{build_number}"
     )
 
