@@ -1,5 +1,6 @@
 import AuthenticationServices
 import FirebaseAuth
+import FirebaseCore
 import FirebaseFunctions
 import GoogleSignIn
 import Observation
@@ -86,6 +87,8 @@ final class AccountDeletionModel {
                 // Va fatto prima di cancellare l'utente: dopo il token Firebase non vale più.
                 try await Auth.auth().revokeToken(withAuthorizationCode: code)
             }
+            // Token con il login appena rifatto (`auth_time` recente), come fa il sito.
+            _ = try await user.getIDTokenResult(forcingRefresh: true)
             _ = try await Functions.functions().httpsCallable("deleteMyAccount").call([String: Any]())
             return true
         } catch {
@@ -106,6 +109,12 @@ final class AccountDeletionModel {
 
     /// `false` se l'utente annulla.
     private func reauthenticateWithGoogle(_ user: User) async throws -> Bool {
+        // Come `AuthService.signInWithGoogle`: senza configurazione (app riaperta con la sessione nel Keychain) GoogleSignIn
+        // solleva un'eccezione Objective-C che Swift non cattura, e l'app si chiude.
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            throw AuthService.SignInError(message: "Configurazione Google mancante (GoogleService-Info.plist)")
+        }
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         guard let presenter = Self.topViewController() else { throw AuthService.SignInError(message: "Impossibile aprire l'accesso con Google") }
         do {
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: presenter)

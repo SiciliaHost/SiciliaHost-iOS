@@ -60,13 +60,15 @@ e correggere gli errori (vedi Prossimi passi).
   - F13e (overlay Cactus neon, avatar e integrazione shell): `Features/Assistant/CactusOverlayView.swift`, `Features/Assistant/AssistantOverlay.swift`, `Core/Logic/CactusOverlayLogic.swift`, integrazione in `SiciliaNavBar` (`AssistantPill`), `MainGateView` (`AssistantOverlayHost`, `FloatingAssistantButton`), test `CactusOverlayLogicTests.swift`.
   - F13f (operatore dal vivo e avatar 3D): `Core/Logic/CactusLiveLogic.swift`, `Core/Logic/CactusPose.swift`, `Features/Assistant/CactusNodes.swift`, `Features/Assistant/CactusAvatarGate.swift`, `Features/Assistant/CactusAvatarEngine.swift` (SceneKit), `Features/Assistant/ReducedMotion.swift`, test `CactusLiveTests.swift`, `CactusPoseTests.swift`, `CactusAvatarTests.swift`.
   - `project.yml`: aggiunti permessi microfono e speech recognition.
+- **Elimina account / Segnala un problema / Crashlytics (2026-11-06, ramo `feat/elimina-account-segnala`): scritti, NON compilati** (vedi Registro). Richiedono il deploy di `deleteMyAccount` dal ramo `feat/elimina-account-aasa` del sito.
 
 ## Prossimi passi (in ordine)
 
 0. ~~Eseguire push e verificare la compilazione in CI su GitHub Actions con esecuzione suite completa~~ — **FATTO: CI verde, 416 test passati, 0 falliti (run 42033523783)**.
 1. Test su iPhone reale: impostare la firma del codice (Apple Developer Account per TestFlight o Apple ID gratuito con Xcode su Mac collegato via USB).
 2. Provare l'accesso su dispositivo reale: login Google funziona con il backend attuale; per Sign in with Apple verificare deploy delle regole da `feat/apple-signin-host`.
-3. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
+3. Compilare in CI il ramo `feat/elimina-account-segnala` (Elimina account con revoca del token Apple, Segnala un problema, Crashlytics) e provarlo su iPhone con un account di prova (non quello admin: il server lo rifiuta).
+4. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
 
 ## Decisioni prese
 
@@ -134,6 +136,7 @@ e correggere gli errori (vedi Prossimi passi).
 - «Elimina account» (App Store 5.1.1(v)): se l'utente è OWNER di una casa si ferma subito con il messaggio; altrimenti nuovo accesso con lo stesso provider (Google: `GIDSignIn` + `reauthenticate`; Apple: `ASAuthorizationController` senza pulsante + `reauthenticate`, poi **`Auth.auth().revokeToken(withAuthorizationCode:)`**, richiesto da Apple), quindi la callable `deleteMyAccount` e uscita (`onLogout`). Server: `deleteMyAccount` del sito (ramo `feat/elimina-account-aasa`) rifiuta gli OWNER (`details.reason = owns-properties`), toglie l'utente dalle case dove è collaboratore e cancella `users`, `guestProfiles`, `hostPaymentDetails`, `hostContactDetails`, `assistantConsents`. **Funziona solo dopo il deploy di quella Function.**
 - Crashlytics: prodotto `FirebaseCrashlytics` in `project.yml` + script di caricamento dSYM (solo Release, non blocca la build se lo script non c'è).
 - Test `SiciliaHostTests/AccountDeletionTests.swift`.
+- Il nuovo accesso Google imposta `GIDConfiguration` come `AuthService` (senza, dopo un riavvio l'app andrebbe in crash) e forza il rinnovo del token prima della callable.
 - **NON compilato** (Windows): serve la CI. Non provato su iPhone: rifare l'accesso Apple senza pulsante, la revoca del token, l'apertura di Mail.
 
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Fix conformità TestFlight, aps-environment e produce Fastlane
