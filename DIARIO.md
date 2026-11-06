@@ -129,6 +129,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Provisioning profile TestFlight generato e fix timeout showBuildSettings
+- Fastlane run 42193042163 ha validato con successo `get_certificates` (certificato Apple Distribution `5QSPNLUQQJ`) e `get_provisioning_profile` generato da Apple per `com.siciliahost.cactushost` (`73eb1b85-4232-46ba-8ab3-986446799fd6`).
+- In `.github/workflows/testflight.yml`: aggiunto pre-step `xcodebuild -resolvePackageDependencies` per risolverle prima del build, e impostato `FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120` e `FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 10` per evitare il timeout di showBuildSettings durante la risoluzione SPM.
+
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Aggiornato GoogleService-Info.plist e rilascio TestFlight
 - L'utente ha inserito il nuovo `GoogleService-Info.plist` generato da Firebase per il bundle ID `com.siciliahost.cactushost` (Client ID `246601493975-ei3a7g7okohrjjluq3kg22ukd7u8prcb`).
 - In `project.yml`: aggiornato `GOOGLE_REVERSED_CLIENT_ID` con il nuovo client ID inverso.
