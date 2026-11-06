@@ -58,7 +58,7 @@ struct UIPreviewRoot: View {
             IntroScreen(onDone: {})
         case "onboarding":
             AppScreen {
-                OnboardingView(isBusy: false, error: nil, onCreateHouse: {}, onInviteCode: { _ in }, onDismissError: {}, onLogout: {})
+                OnboardingView(isBusy: false, error: nil, onCreateHouse: {}, onInviteCode: { _ in }, onDismissError: {}, onLogout: {}, showsAccountActions: false)
             }
         case "home":
             AppScreen { MainTabView(scope: UIPreview.scope, router: AppRouter(), onSignOut: { onDismiss?() }) }
@@ -93,7 +93,7 @@ struct UIPreviewRoot: View {
                 }
         case "profile":
             AppScreen {
-                ProfileView(roleLabel: "PROPRIETARIO", scope: UIPreview.scope, onBack: {}, onHouse: { _ in }, onPrivacy: {}, onReplayTour: {}, onLogout: {})
+                ProfileView(roleLabel: "PROPRIETARIO", scope: UIPreview.scope, onBack: {}, onHouse: { _ in }, onPrivacy: {}, onReplayTour: {}, onLogout: {}, showsAccountActions: false)
             }
         case "failed":
             AppScreen {

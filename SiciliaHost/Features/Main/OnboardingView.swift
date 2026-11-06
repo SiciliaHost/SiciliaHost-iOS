@@ -9,6 +9,8 @@ struct OnboardingView: View {
     let onInviteCode: (String) -> Void
     let onDismissError: () -> Void
     let onLogout: () -> Void
+    /// Anche chi non ha ancora case deve poter eliminare l'account (App Store 5.1.1(v)); falso nell'anteprima demo.
+    var showsAccountActions = true
 
     @State private var showInvite = false
     @State private var text = ""
@@ -50,6 +52,10 @@ struct OnboardingView: View {
                         showInvite = true
                     }
                     Button("Esci", action: onLogout).buttonStyle(.appText)
+                    if showsAccountActions {
+                        AccountActionsSection(scope: nil, onDeleted: onLogout)
+                            .padding(.top, 8)
+                    }
                 }
             }
             .frame(maxWidth: 460)

@@ -129,6 +129,13 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Claude Opus 5.5 (locale, Windows senza Swift) — Elimina account, Segnala un problema, Crashlytics (ramo `feat/elimina-account-segnala`, NON compilato)
+- Nuovo `Features/Profile/AccountDeletion.swift`: `AccountDeletionLogic` (pura), `AccountDeletionModel`, `AccountActionsSection` (in fondo al Profilo e nella schermata senza case `OnboardingView`; nascosta nell'anteprima demo con `showsAccountActions: false`), `SupportMail` (mailto a info@siciliahost.com con versione, build, modello e iOS).
+- «Elimina account» (App Store 5.1.1(v)): se l'utente è OWNER di una casa si ferma subito con il messaggio; altrimenti nuovo accesso con lo stesso provider (Google: `GIDSignIn` + `reauthenticate`; Apple: `ASAuthorizationController` senza pulsante + `reauthenticate`, poi **`Auth.auth().revokeToken(withAuthorizationCode:)`**, richiesto da Apple), quindi la callable `deleteMyAccount` e uscita (`onLogout`). Server: `deleteMyAccount` del sito (ramo `feat/elimina-account-aasa`) rifiuta gli OWNER (`details.reason = owns-properties`), toglie l'utente dalle case dove è collaboratore e cancella `users`, `guestProfiles`, `hostPaymentDetails`, `hostContactDetails`, `assistantConsents`. **Funziona solo dopo il deploy di quella Function.**
+- Crashlytics: prodotto `FirebaseCrashlytics` in `project.yml` + script di caricamento dSYM (solo Release, non blocca la build se lo script non c'è).
+- Test `SiciliaHostTests/AccountDeletionTests.swift`.
+- **NON compilato** (Windows): serve la CI. Non provato su iPhone: rifare l'accesso Apple senza pulsante, la revoca del token, l'apertura di Mail.
+
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Fix conformità TestFlight, aps-environment e produce Fastlane
 - In `project.yml`: impostato `aps-environment: production` per allineare gli entitlement con il provisioning profile di distribuzione App Store / TestFlight; aggiunto `ITSAppUsesNonExemptEncryption: false` (e flag Info.plist) per evitare il blocco per conformità crittografica su TestFlight.
 - In `fastlane/Fastfile`: aggiunto step `produce` protetto da rescue per garantire l'esistenza della scheda app su App Store Connect; impostato `clean: false` per accelerare la compilazione con pacchetti SPM già risolti.
