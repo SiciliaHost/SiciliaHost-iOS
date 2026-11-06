@@ -129,8 +129,14 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
-### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Allineato percorso keychain per Fastlane get_certificates
-- In `fastlane/Fastfile`: impostato il percorso assoluto `~/Library/Keychains/ci_keychain-db` per `keychain_path` in `get_certificates`, risolvendo l'errore `Keychain not found at path .../ci_keychain`.
+### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Aggiornato GoogleService-Info.plist e rilascio TestFlight
+- L'utente ha inserito il nuovo `GoogleService-Info.plist` generato da Firebase per il bundle ID `com.siciliahost.cactushost` (Client ID `246601493975-ei3a7g7okohrjjluq3kg22ukd7u8prcb`).
+- In `project.yml`: aggiornato `GOOGLE_REVERSED_CLIENT_ID` con il nuovo client ID inverso.
+- In `fastlane/Fastfile`: corretto parametro `get_provisioning_profile`. Pronto per rilascio TestFlight.
+
+### 2026-11-05 — Antigravity (locale, Windows senza Swift) — Connessione Apple Store Connect validata e corretto get_provisioning_profile
+- La connessione con App Store Connect API e la generazione automatica del certificato Apple Distribution (`4M3QW25R4U`) tramite Fastlane `get_certificates` sono riuscite con successo in 2 secondi.
+- In `fastlane/Fastfile`: rimosso parametro non valido `type: "appstore"` da `get_provisioning_profile` (il profilo App Store è il default di sigh).
 - Aggiunti `fastlane/Appfile` e `fastlane/Fastfile` con corsia `:beta`: autenticazione tramite App Store Connect API Key, creazione portachiavi temporaneo su runner macOS, download/creazione automatica di certificato Apple Distribution e provisioning profile App Store per `com.siciliahost.cactushost`, compilazione dell'IPA con `build_app` e upload automatico a TestFlight (`upload_to_testflight`).
 - Aggiunto workflow `.github/workflows/testflight.yml` (on `workflow_dispatch`) per rilasciare su TestFlight direttamente da GitHub Actions.
 

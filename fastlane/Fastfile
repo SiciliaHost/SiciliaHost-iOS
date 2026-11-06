@@ -30,11 +30,10 @@ platform :ios do
       keychain_password: keychain_password
     )
 
-    # Scarica o genera il provisioning profile per TestFlight
+    # Scarica o genera il provisioning profile per TestFlight (default: App Store)
     get_provisioning_profile(
       api_key: api_key,
-      app_identifier: "com.siciliahost.cactushost",
-      type: "appstore"
+      app_identifier: "com.siciliahost.cactushost"
     )
 
     build_number = ENV["FL_BUILD_NUMBER"] || "1"
