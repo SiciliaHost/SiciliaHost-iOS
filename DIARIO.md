@@ -129,6 +129,12 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Gestione limite certificati di distribuzione e scheda App Connect
+- Fastlane run 42198307670 ha evidenziato che la pre-risoluzione SPM ha risolto il timeout di showBuildSettings, ma `cert` (`get_certificates`) è andato in errore perché il runner non conservava la chiave privata dei certificati precedenti e Apple limita a 2 i certificati di distribuzione contemporanei.
+- In `fastlane/Fastfile`:
+  - Rimosso `produce` (incompatibile con API Key) e sostituito con `Spaceship::ConnectAPI::App.find/create`.
+  - Aggiunta rotazione automatica dei certificati: se l'account ha raggiunto il limite di certificati di distribuzione Apple (>= 2), revoca automaticamente quello più vecchio (orfano privo di chiave privata sul runner effimero) per liberare lo slot di emissione.
+
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Fix conformità TestFlight, aps-environment e produce Fastlane
 - In `project.yml`: impostato `aps-environment: production` per allineare gli entitlement con il provisioning profile di distribuzione App Store / TestFlight; aggiunto `ITSAppUsesNonExemptEncryption: false` (e flag Info.plist) per evitare il blocco per conformità crittografica su TestFlight.
 - In `fastlane/Fastfile`: aggiunto step `produce` protetto da rescue per garantire l'esistenza della scheda app su App Store Connect; impostato `clean: false` per accelerare la compilazione con pacchetti SPM già risolti.

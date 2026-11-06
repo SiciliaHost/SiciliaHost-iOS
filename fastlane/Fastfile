@@ -11,17 +11,24 @@ platform :ios do
       is_key_content_base64: false
     )
 
-    # Assicura che la scheda App esista su App Store Connect
+    # Verifica o crea la scheda app su App Store Connect
     begin
-      produce(
-        api_key: api_key,
-        app_identifier: "com.siciliahost.cactushost",
-        app_name: "CactusHost",
-        language: "Italian",
-        sku: "cactushost_ios"
-      )
+      app = Spaceship::ConnectAPI::App.find("com.siciliahost.cactushost")
+      if app
+        UI.message("Scheda app trovata su App Store Connect: #{app.name} (ID: #{app.id})")
+      else
+        UI.message("Creazione nuova scheda app su App Store Connect...")
+        app = Spaceship::ConnectAPI::App.create(
+          name: "CactusHost",
+          version_string: "1.0",
+          sku: "cactushost_ios",
+          primary_locale: "it-IT",
+          bundle_id: "com.siciliahost.cactushost"
+        )
+        UI.message("Scheda app creata con successo: #{app.name} (ID: #{app.id})")
+      end
     rescue => ex
-      UI.message("produce note: #{ex.message}")
+      UI.message("Nota verifica scheda app: #{ex.message}")
     end
 
     # Crea portachiavi temporaneo per la CI sul runner macOS
@@ -35,6 +42,22 @@ platform :ios do
       unlock: true,
       timeout: 3600
     )
+
+    # Gestione certificati di distribuzione: se il limite Apple (2) è raggiunto,
+    # revoca il certificato più vecchio (orfano senza chiave privata sulla CI) per liberare lo slot
+    begin
+      all_certs = Spaceship::ConnectAPI::Certificate.all
+      dist_certs = all_certs.select { |c| c.certificate_type.to_s.include?("DISTRIBUTION") }
+      UI.message("Trovati #{dist_certs.count} certificati di distribuzione su Apple Developer.")
+      if dist_certs.count >= 2
+        oldest = dist_certs.sort_by { |c| c.expiration_date.to_s }.first
+        UI.message("Revoca del certificato più vecchio #{oldest.id} (#{oldest.name}, scadenza #{oldest.expiration_date}) per liberare lo slot...")
+        oldest.delete!
+        UI.message("Certificato #{oldest.id} revocato con successo.")
+      end
+    rescue => ex
+      UI.message("Nota pulizia certificati: #{ex.message}")
+    end
 
     # Scarica o genera il certificato Apple Distribution nel portachiavi
     get_certificates(
