@@ -12,19 +12,20 @@ enum ReceiptFiles {
     }
 
     /// Scrive la ricevuta (sostituendo quella di prima) e ne restituisce il percorso.
-    static func write(_ pdf: Data, directory: URL = directory) throws -> URL {
+    static func write(_ pdf: Data, directory: URL = ReceiptFiles.directory) throws -> URL {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let url = directory.appendingPathComponent(fileName)
         try pdf.write(to: url, options: [.atomic, .completeFileProtection])
         return url
     }
 
-    static func clear(directory: URL = directory) {
+    static func clear(directory: URL = ReceiptFiles.directory) {
         try? FileManager.default.removeItem(at: directory)
     }
 
     /// Cancella le ricevute più vecchie di `maxAge`.
-    static func purgeOlderThan(_ maxAge: TimeInterval = maxAge, now: Date = Date(), directory: URL = directory) {
+    static func purgeOlderThan(_ maxAge: TimeInterval = ReceiptFiles.maxAge, now: Date = Date(),
+                               directory: URL = ReceiptFiles.directory) {
         let fm = FileManager.default
         let files = (try? fm.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
         for url in files {

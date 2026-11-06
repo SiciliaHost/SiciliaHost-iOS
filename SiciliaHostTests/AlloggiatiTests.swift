@@ -282,10 +282,10 @@ final class AlloggiatiTests: XCTestCase {
     // MARK: Segno «check-in inviato»
 
     func testCheckinMark() {
-        XCTAssertEqual(CheckinMark.parse(["sentAt": NSNumber(value: 1000), "guests": NSNumber(value: 3), "by": "u1"]),
+        XCTAssertEqual(CheckinMark.parse(["sentAt": NSNumber(value: 1000), "guests": NSNumber(value: 3), "by": "u1"] as [String: Any]),
                        CheckinMark(sentAt: 1000, guests: 3, by: "u1"))
         XCTAssertNil(CheckinMark.parse(nil))
-        XCTAssertNil(CheckinMark.parse(["guests": NSNumber(value: 3)]))
+        XCTAssertNil(CheckinMark.parse(["guests": NSNumber(value: 3)] as [String: Any]))
         XCTAssertNil(CheckinMark.parse("x"))
     }
 

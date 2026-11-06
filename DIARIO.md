@@ -62,7 +62,7 @@ e correggere gli errori (vedi Prossimi passi).
   - `project.yml`: aggiunti permessi microfono e speech recognition.
 
 <!-- alloggiati-stato -->
-- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 5 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
+- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 6 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
 <!-- alloggiati-stato -->
 
 ## Prossimi passi (in ordine)
@@ -141,6 +141,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 6/6: correzioni dalla revisione
+- `CheckinModel.performLoad` ora ripulisce anche lui (ricevute > 1 giorno, schede inviate da più di 30 giorni), come chiesto oltre al `.task` di `RootView`: un'app rimasta in memoria per giorni non le tiene.
+- `testCheckinMark`: dizionari con valori misti tipizzati `as [String: Any]` (altrimenti non compila). `ReceiptFiles`: valori predefiniti con il nome completo (`ReceiptFiles.directory`), senza ombre di nome.
+- Rischi noti, non corretti: il token dell'`actor` può essere chiesto due volte in parallelo (l'Android usa un `Mutex`; al peggio un rifiuto certo, mai un doppio invio); `NSLock` nel `FakeTransport` asincrono dei test può dare un avviso. **NON compilato.**
 
 ### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 5/5: Home, Agenda, uscita, Profilo, privacy
 - «Check-in inviato» (`Features/Checkin/CheckinSentLabel.swift`) negli arrivi della Home (`ArrivalRow`) e nelle righe dell'Agenda (`AgendaReservationRow`): `HomeModel`/`AgendaModel` leggono `getReservationsWithCheckin` (una lettura per casa, il segno non entra in `Reservation`); `UIPreview` aggiornato. Il pannello di dettaglio del Fold dell'Android non esiste su iPhone.

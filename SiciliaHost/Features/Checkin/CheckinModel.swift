@@ -150,6 +150,10 @@ final class CheckinModel {
         isLoading = true
         error = nil
         defer { isLoading = false }
+        // Come il lavoro giornaliero dell'Android: un'app rimasta in memoria per giorni non tiene schede scadute né
+        // ricevute vecchie.
+        ReceiptFiles.purgeOlderThan()
+        store.purgeExpired(now: Self.now())
         // Prima il disco (subito), poi la rete: le schede cancellate spariscono senza attendere Firestore.
         if let records = try? readRecords() { guestRecords = records }
         do {
