@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Check-in di una prenotazione (`CheckinScreen.kt`): elenco degli ospiti registrati, "Scansiona documento", modifica ed
+/// Check-in di una prenotazione (`CheckinScreen.kt`): avvisi (credenziali, già inviato, esito incerto, schede vecchie),
+/// elenco degli ospiti registrati sul telefono, "Scansiona documento", modifica (non per le schede già inviate) ed
 /// eliminazione di una scheda, "Testa e invia schedine".
 struct CheckinView: View {
     let model: CheckinModel
@@ -15,6 +16,7 @@ struct CheckinView: View {
         VStack(spacing: 0) {
             // Nome e date su una riga sola.
             CompactTopBar(title: CheckinLogic.headerTitle(model.reservation), onBack: onBack)
+            CheckinNotices(model: model)
             if let error = model.error { ErrorBanner(text: error) { model.error = nil } }
             ZStack(alignment: .bottomTrailing) {
                 content
@@ -39,6 +41,9 @@ struct CheckinView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        // A ogni ingresso (anche al ritorno dal modulo o dall'invio): il modello può essere riusato dopo un'uscita
+        // dall'account o la cancellazione delle schede.
+        .task { await model.load() }
         .confirmationDialog("Elimina ospite", isPresented: Binding(
             get: { toDelete != nil }, set: { if !$0 { toDelete = nil } }
         ), titleVisibility: .visible, presenting: toDelete) { record in
@@ -51,7 +56,8 @@ struct CheckinView: View {
 
     @ViewBuilder
     private var content: some View {
-        if model.isLoading {
+        // Lo spinner a tutto schermo solo al primo caricamento: ai ritorni la lista resta.
+        if model.isLoading && model.guestRecords.isEmpty {
             ProgressView().tint(Theme.primary).frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if model.guestRecords.isEmpty {
             VStack(spacing: 8) {
@@ -97,9 +103,12 @@ private struct GuestRecordRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            Button(action: onEdit) { Image(systemName: "pencil") }
-                .buttonStyle(.appIcon)
-                .accessibilityLabel("Modifica")
+            // Una scheda già acquisita dalla Polizia non si modifica: il servizio non la aggiornerebbe.
+            if !record.schedInaSent {
+                Button(action: onEdit) { Image(systemName: "pencil") }
+                    .buttonStyle(.appIcon)
+                    .accessibilityLabel("Modifica")
+            }
             Button(action: onDelete) { Image(systemName: "trash") }
                 .buttonStyle(AppIconButtonStyle(color: Theme.error))
                 .accessibilityLabel("Elimina")
@@ -131,7 +140,8 @@ struct ErrorBanner: View {
 }
 
 /// Invio delle schedine (`CheckinSendScreen.kt`): esito per ospite, "Testa correttezza", poi (solo con tutto corretto)
-/// "Invia alla Polizia di Stato" con conferma; dopo l'invio "Scarica ricevuta PDF".
+/// "Invia alla Polizia di Stato" con conferma (con gli avvisi «già inviata» ed «esito incerto»). La ricevuta di oggi si
+/// scarica da domani con «Ricevuta» nella schermata del check-in.
 struct CheckinSendView: View {
     let model: CheckinModel
     let onBack: () -> Void
@@ -139,7 +149,6 @@ struct CheckinSendView: View {
     @State private var testResult: ElencoSchedineEsito?
     @State private var sendDone = false
     @State private var showConfirm = false
-    @State private var receiptURL: URL?
 
     var body: some View {
         let pending = model.pendingRecords
@@ -184,13 +193,10 @@ struct CheckinSendView: View {
                         .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .appCard(container: Theme.primaryContainer)
-                        Button {
-                            Task { await openReceipt() }
-                        } label: {
-                            Label("Scarica ricevuta PDF", systemImage: "arrow.down")
-                        }
-                        .buttonStyle(.appOutlined)
-                        .frame(maxWidth: .infinity)
+                        // Il servizio non dà la ricevuta del giorno corrente.
+                        Text("La ricevuta di oggi si scarica da domani: «Ricevuta» nella schermata del check-in.")
+                            .appStyle(.bodySmall)
+                            .foregroundStyle(Theme.onSurfaceVariant)
                     }
                     if let error = model.error {
                         Text(error)
@@ -219,10 +225,7 @@ struct CheckinSendView: View {
             }
             Button("Annulla", role: .cancel) {}
         } message: {
-            Text("Stai per inviare \(pending.count) schedine alla Polizia di Stato. L'operazione non è reversibile.")
-        }
-        .sheet(item: Binding(get: { receiptURL.map(IdentifiedURL.init) }, set: { receiptURL = $0?.url })) { item in
-            ReceiptSheet(url: item.url)
+            Text(confirmText(count: pending.count))
         }
     }
 
@@ -255,26 +258,20 @@ struct CheckinSendView: View {
         .appCard(container: container)
     }
 
-    private func openReceipt() async {
-        guard let pdf = await model.downloadReceipt() else { return }
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ricevuta_\(millisFromDate(Date())).pdf")
-        do {
-            try pdf.write(to: url)
-            receiptURL = url
-        } catch {
-            model.error = "Non riesco a salvare la ricevuta sul telefono."
+    private func confirmText(count: Int) -> String {
+        var parts = ["Stai per inviare \(count) schedine alla Polizia di Stato. L'operazione non è reversibile."]
+        if let mark = model.alreadySent {
+            parts.append("Questa prenotazione risulta già inviata (\(mark.guests) ospiti): il servizio accetta anche schede doppie.")
         }
+        if model.hasUncertainOutcome {
+            parts.append("L'ultimo invio ha un esito incerto: controlla prima la ricevuta sul portale.")
+        }
+        return parts.joined(separator: "\n\n")
     }
 }
 
-private struct IdentifiedURL: Identifiable {
-    let url: URL
-    var id: String { url.absoluteString }
-}
-
 /// Anteprima della ricevuta PDF con condivisione (salva in File, stampa, invia).
-private struct ReceiptSheet: View {
+struct ReceiptSheet: View {
     let url: URL
     @Environment(\.dismiss) private var dismiss
 

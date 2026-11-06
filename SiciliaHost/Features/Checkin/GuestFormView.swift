@@ -14,6 +14,7 @@ struct GuestFormView: View {
     @State private var statoNascitaText = ""
     @State private var comuneNascitaText = ""
     @State private var luogoRilascioText = ""
+    @State private var saveError: String?
     private let mrz: MrzData?
     private let existing: GuestRecord?
 
@@ -37,6 +38,14 @@ struct GuestFormView: View {
             if let error = model.error { ErrorBanner(text: error) { model.error = nil } }
             ScrollView {
                 VStack(spacing: Dimens.itemSpacing) {
+                    if model.needsCredentials {
+                        // Senza credenziali le tabelle (tipi, luoghi, documenti) non si scaricano: i menù resterebbero vuoti.
+                        Text("Inserisci prima le credenziali Alloggiati dalla schermata del check-in")
+                            .appStyle(.bodySmall).foregroundStyle(Theme.onSecondaryContainer)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .appCard(container: Theme.secondaryContainer)
+                    }
                     if mrz != nil && !checkDigitsOk {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Theme.onErrorContainer)
@@ -93,6 +102,10 @@ struct GuestFormView: View {
                         .frame(maxWidth: .infinity)
                         .disabled(!CheckinLogic.isValid(values, isItalian: isItalian) || model.isSaving)
                         .padding(.top, 8)
+                    if let saveError {
+                        Text(saveError).appStyle(.bodySmall).foregroundStyle(Theme.error)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
                 .padding(.horizontal, Dimens.screenPadding)
                 .padding(.vertical, Dimens.itemSpacing)
@@ -137,7 +150,16 @@ struct GuestFormView: View {
             from: values, isItalian: isItalian, existing: existing,
             reservationId: model.reservationId, propertyId: model.propertyId
         )
-        Task { if await model.save(record) { onDone() } }
+        saveError = nil
+        Task {
+            // Si torna indietro solo se la scheda è davvero salvata; altrimenti il motivo resta qui.
+            if await model.save(record) {
+                onDone()
+            } else {
+                saveError = model.error
+                model.error = nil // mostrato qui, non anche nelle altre schermate
+            }
+        }
     }
 }
 

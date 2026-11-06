@@ -1,8 +1,8 @@
 import Foundation
 
-/// Tabelle di codifica Alloggiati (tipi, documenti, luoghi), in cache sul telefono per 30 giorni. Il download passa
-/// dal server (`fetchTable`, vedi `HostFunctionsService.getAlloggiatiTable`): le credenziali del servizio non
-/// arrivano mai qui. Sono tabelle pubbliche uguali per tutte le case, quindi la cache non dipende dalla casa.
+/// Tabelle di codifica Alloggiati (tipi, documenti, luoghi), in cache sul telefono per 30 giorni. Il download (`fetchTable`)
+/// va direttamente al servizio della Polizia con le credenziali del portachiavi di questo telefono (vedi `CheckinModel`).
+/// Sono tabelle pubbliche uguali per tutte le case, quindi la cache non dipende dalla casa.
 actor LookupService {
     private let ttl: TimeInterval = 30 * 24 * 3600
     private let directory: URL

@@ -67,10 +67,9 @@ enum CheckinLogic {
         return base && (!isItalian || (!v.comuneNascitaCode.trimmed.isEmpty && v.provinciaNascita.count == 2))
     }
 
-    /// La scheda da salvare. Comune e provincia solo per gli italiani. **Differenza voluta dall'Android**: modificando una
-    /// scheda esistente si conservano lo stato d'invio (`schedInaSent`, `sendTimestamp`, `sendError`); l'Android li azzera,
-    /// così una scheda già acquisita dalla Polizia tornerebbe "da inviare" (doppio invio) e si perderebbe l'avviso
-    /// "Esito incerto" che il server scrive (vedi CLAUDE.md del sito, fase 4c).
+    /// La scheda da salvare. Comune e provincia solo per gli italiani. Modificando una scheda esistente si conserva lo stato
+    /// d'invio; `CheckinModel.save` lo rilegge comunque dal disco (come `saveGuestRecord` dell'Android dal 2026-11-06) e
+    /// rifiuta le schede già inviate o in invio.
     static func record(
         from v: GuestFormValues, isItalian: Bool, existing: GuestRecord?, reservationId: String, propertyId: String
     ) -> GuestRecord {
