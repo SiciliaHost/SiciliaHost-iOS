@@ -31,6 +31,10 @@ targets:
         product: FirebaseStorage
       - package: Firebase
         product: FirebaseMessaging
+      # Rapporti dei crash (si attiva da sola con FirebaseApp.configure()). Va dichiarata nel questionario privacy
+      # di App Store Connect: "Dati di diagnostica / Dati sugli arresti anomali", non collegati all'identità, non per tracciamento.
+      - package: Firebase
+        product: FirebaseCrashlytics
       - package: GoogleSignIn
         product: GoogleSignIn
     # Schemi URL: `cactushost://invito/CODICE` / `siciliahost://invito/CODICE` e il ritorno del login Google
@@ -56,6 +60,22 @@ targets:
         com.apple.developer.applesignin: [Default]
         # Push (APNs): serve la capability "Push Notifications" sull'App ID e la chiave APNs caricata su Firebase.
         aps-environment: production
+    # Carica i simboli (dSYM) su Crashlytics, così gli stack trace dei crash sono leggibili. Lo script è dentro il pacchetto
+    # firebase-ios-sdk scaricato da SPM; in Debug non serve (niente dSYM).
+    postBuildScripts:
+      - name: Crashlytics dSYM
+        basedOnDependencyAnalysis: false
+        script: |
+          RUN="${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+          if [ "${CONFIGURATION}" = "Release" ]; then
+            if [ -x "$RUN" ]; then "$RUN"; else echo "warning: script Crashlytics non trovato ($RUN): dSYM non caricati"; fi
+          fi
+        inputFiles:
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist
+          - $(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist
+          - $(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)
     scheme:
       testTargets:
         - SiciliaHostTests

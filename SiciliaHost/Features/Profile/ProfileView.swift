@@ -12,6 +12,8 @@ struct ProfileView: View {
     let onPrivacy: () -> Void
     let onReplayTour: () -> Void
     let onLogout: () -> Void
+    /// Falso nell'anteprima con dati dimostrativi: lì non c'è un account da eliminare.
+    var showsAccountActions = true
 
     @State private var model = ProfileModel()
     @State private var editingName = false
@@ -80,6 +82,11 @@ struct ProfileView: View {
                     }
                     .buttonStyle(.appOutlined)
                     .disabled(leaving)
+
+                    if showsAccountActions {
+                        section("Account")
+                        AccountActionsSection(scope: scope, onDeleted: onLogout)
+                    }
                 }
                 .frame(maxWidth: 400, alignment: .leading)
                 .padding(Dimens.screenPadding)

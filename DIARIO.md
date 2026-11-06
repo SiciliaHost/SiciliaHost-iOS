@@ -60,6 +60,7 @@ e correggere gli errori (vedi Prossimi passi).
   - F13e (overlay Cactus neon, avatar e integrazione shell): `Features/Assistant/CactusOverlayView.swift`, `Features/Assistant/AssistantOverlay.swift`, `Core/Logic/CactusOverlayLogic.swift`, integrazione in `SiciliaNavBar` (`AssistantPill`), `MainGateView` (`AssistantOverlayHost`, `FloatingAssistantButton`), test `CactusOverlayLogicTests.swift`.
   - F13f (operatore dal vivo e avatar 3D): `Core/Logic/CactusLiveLogic.swift`, `Core/Logic/CactusPose.swift`, `Features/Assistant/CactusNodes.swift`, `Features/Assistant/CactusAvatarGate.swift`, `Features/Assistant/CactusAvatarEngine.swift` (SceneKit), `Features/Assistant/ReducedMotion.swift`, test `CactusLiveTests.swift`, `CactusPoseTests.swift`, `CactusAvatarTests.swift`.
   - `project.yml`: aggiunti permessi microfono e speech recognition.
+- **Elimina account / Segnala un problema / Crashlytics (2026-11-06, ramo `feat/elimina-account-segnala`): scritti, NON compilati** (vedi Registro). Richiedono il deploy di `deleteMyAccount` dal ramo `feat/elimina-account-aasa` del sito.
 
 <!-- alloggiati-stato -->
 - **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 7 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
@@ -70,7 +71,8 @@ e correggere gli errori (vedi Prossimi passi).
 0. ~~Eseguire push e verificare la compilazione in CI su GitHub Actions con esecuzione suite completa~~ — **FATTO: CI verde, 416 test passati, 0 falliti (run 42033523783)**.
 1. Test su iPhone reale: impostare la firma del codice (Apple Developer Account per TestFlight o Apple ID gratuito con Xcode su Mac collegato via USB).
 2. Provare l'accesso su dispositivo reale: login Google funziona con il backend attuale; per Sign in with Apple verificare deploy delle regole da `feat/apple-signin-host`.
-3. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
+3. Compilare in CI il ramo `feat/elimina-account-segnala` (Elimina account con revoca del token Apple, Segnala un problema, Crashlytics) e provarlo su iPhone con un account di prova (non quello admin: il server lo rifiuta).
+4. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
 
 <!-- alloggiati-prossimi -->
 - **Alloggiati sul telefono** (ramo `feat/alloggiati-sul-telefono`):
@@ -142,6 +144,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Unione `feat/ios-unione`
+- Uniti `feat/alloggiati-sul-telefono` (check-in sul telefono) e `feat/elimina-account-segnala` (Elimina account, Segnala un problema, Crashlytics); conflitto solo nel DIARIO (tenute tutte le voci).
+- `AccountDeletionModel.delete`: dopo `deleteMyAccount` cancella anche schede del check-in e ricevuta (`GuestRecordStore.shared.clear()`, `ReceiptFiles.clear()`), come l'Android.
+- **NON compilato** da Windows: CI avviata a mano su questo ramo; unire in `main` solo con la CI verde.
+
 ### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 7/7: correzioni dalla revisione del coordinatore
 - Schede e ricevuta ora con protezione `completeFileProtectionUntilFirstUserAuthentication` (come `filesDir` dell'Android) invece di `complete`: bloccare il telefono durante un invio non trasforma più un esito noto in «esito incerto». Il backup resta quello di sistema (scelta del titolare).
 - `CheckinModel.submit`: l'invio vero, dal blocco sul disco fino all'esito salvato, gira dentro `beginBackgroundTask`/`endBackgroundTask` (`BackgroundTaskBox`, chiusa in un `defer`; allo scadere il gestore chiude soltanto l'attività).
@@ -203,6 +210,13 @@ e correggere gli errori (vedi Prossimi passi).
 - In `fastlane/Fastfile`:
   - Rimosso `produce` (incompatibile con API Key) e sostituito con `Spaceship::ConnectAPI::App.find/create`.
   - Aggiunta rotazione automatica dei certificati: se l'account ha raggiunto il limite di certificati di distribuzione Apple (>= 2), revoca automaticamente quello più vecchio (orfano privo di chiave privata sul runner effimero) per liberare lo slot di emissione.
+### 2026-11-06 — Claude Opus 5.5 (locale, Windows senza Swift) — Elimina account, Segnala un problema, Crashlytics (ramo `feat/elimina-account-segnala`, NON compilato)
+- Nuovo `Features/Profile/AccountDeletion.swift`: `AccountDeletionLogic` (pura), `AccountDeletionModel`, `AccountActionsSection` (in fondo al Profilo e nella schermata senza case `OnboardingView`; nascosta nell'anteprima demo con `showsAccountActions: false`), `SupportMail` (mailto a info@siciliahost.com con versione, build, modello e iOS).
+- «Elimina account» (App Store 5.1.1(v)): se l'utente è OWNER di una casa si ferma subito con il messaggio; altrimenti nuovo accesso con lo stesso provider (Google: `GIDSignIn` + `reauthenticate`; Apple: `ASAuthorizationController` senza pulsante + `reauthenticate`, poi **`Auth.auth().revokeToken(withAuthorizationCode:)`**, richiesto da Apple), quindi la callable `deleteMyAccount` e uscita (`onLogout`). Server: `deleteMyAccount` del sito (ramo `feat/elimina-account-aasa`) rifiuta gli OWNER (`details.reason = owns-properties`), toglie l'utente dalle case dove è collaboratore e cancella `users`, `guestProfiles`, `hostPaymentDetails`, `hostContactDetails`, `assistantConsents`. **Funziona solo dopo il deploy di quella Function.**
+- Crashlytics: prodotto `FirebaseCrashlytics` in `project.yml` + script di caricamento dSYM (solo Release, non blocca la build se lo script non c'è).
+- Test `SiciliaHostTests/AccountDeletionTests.swift`.
+- Il nuovo accesso Google imposta `GIDConfiguration` come `AuthService` (senza, dopo un riavvio l'app andrebbe in crash) e forza il rinnovo del token prima della callable.
+- **NON compilato** (Windows): serve la CI. Non provato su iPhone: rifare l'accesso Apple senza pulsante, la revoca del token, l'apertura di Mail.
 
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Fix conformità TestFlight, aps-environment e produce Fastlane
 - In `project.yml`: impostato `aps-environment: production` per allineare gli entitlement con il provisioning profile di distribuzione App Store / TestFlight; aggiunto `ITSAppUsesNonExemptEncryption: false` (e flag Info.plist) per evitare il blocco per conformità crittografica su TestFlight.
