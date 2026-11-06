@@ -4,6 +4,7 @@ import SwiftUI
 /// dell'Android in `MainActivity`).
 struct RootView: View {
     @State private var auth = AuthService()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -27,6 +28,9 @@ struct RootView: View {
         // Al posto di GuestRecordPurgeWorker (niente WorkManager su iOS): schede inviate da più di 30 giorni, ricevute
         // più vecchie di un giorno, credenziali rimaste da un'installazione precedente.
         .task { CheckinHousekeeping.onAppStart() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { CheckinHousekeeping.onAppStart() }
+        }
         .onOpenURL { url in
             if AuthService.handle(url: url) { return }
             if let code = InviteLink.extractCode(url.absoluteString) { PendingInvite.shared.set(code) }

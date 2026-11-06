@@ -15,7 +15,7 @@ enum ReceiptFiles {
     static func write(_ pdf: Data, directory: URL = ReceiptFiles.directory) throws -> URL {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let url = directory.appendingPathComponent(fileName)
-        try pdf.write(to: url, options: [.atomic, .completeFileProtection])
+        try pdf.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         return url
     }
 

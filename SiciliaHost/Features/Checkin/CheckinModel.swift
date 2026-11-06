@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 /// Testi fissi del check-in (fuori dalla classe `@MainActor`, così li usano anche le funzioni non isolate).
 enum CheckinTexts {
@@ -318,6 +319,11 @@ final class CheckinModel {
             return nil
         }
         let ids = pending.map(\.id)
+        // Dal blocco sul disco fino all'esito salvato l'app chiede a iOS un po' di tempo in background: andare alla Home
+        // durante l'invio non lascia le schede «in invio» con un esito che invece era noto.
+        let background = BackgroundTaskBox()
+        if send { background.begin("alloggiati-send") }
+        defer { background.end() }
         if send {
             do {
                 try store.replaceAll(propertyId: propertyId, reservationId: reservationId, checkOut: res.checkOut,
@@ -447,6 +453,24 @@ final class CheckinModel {
             self.error = "Ricevuta non scaricata: \(refusal ? describe(error) : CheckinTexts.unreachable)"
             return nil
         }
+    }
+}
+
+/// Un'attività in background di UIKit, chiusa una volta sola (alla fine dell'invio o allo scadere del tempo concesso).
+@MainActor
+final class BackgroundTaskBox {
+    private var id: UIBackgroundTaskIdentifier = .invalid
+
+    func begin(_ name: String) {
+        id = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
+            MainActor.assumeIsolated { self?.end() }
+        }
+    }
+
+    func end() {
+        guard id != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(id)
+        id = .invalid
     }
 }
 

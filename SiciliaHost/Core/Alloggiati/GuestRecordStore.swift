@@ -5,7 +5,7 @@ import Foundation
 enum GuestRecordStoreError: LocalizedError, Equatable {
     /// Il file non si decodifica: messo da parte (`.corrupt`) e contato come «schede non inviate».
     case corrupt
-    /// Il file esiste ma non si legge (es. telefono bloccato con la protezione `complete`): lasciato com'è.
+    /// Il file esiste ma non si legge (es. telefono appena acceso e mai sbloccato): lasciato com'è.
     case unreadable
 
     static let corruptMessage = "Archivio delle schede danneggiato"
@@ -21,7 +21,7 @@ enum GuestRecordStoreError: LocalizedError, Equatable {
 /// Schede ospite del check-in, SOLO su questo telefono (porta di `GuestRecordStore.kt`): un file JSON per prenotazione in
 /// `Application Support/guest_records/`. Il nome del file è un hash di casa + prenotazione (gli id iCal contengono caratteri
 /// non ammessi nei nomi di file). La cartella è nel backup iCloud (cifrato da Apple); i file hanno la protezione
-/// `complete` (illeggibili a telefono bloccato).
+/// `completeUntilFirstUserAuthentication` (illeggibili solo prima del primo sblocco dopo l'accensione).
 final class GuestRecordStore: @unchecked Sendable {
     static let shared = GuestRecordStore(directory: defaultDirectory)
 
@@ -32,17 +32,24 @@ final class GuestRecordStore: @unchecked Sendable {
 
     // Un solo blocco per cartella, anche se le istanze sono più d'una. NSLock non è rientrante: ogni metodo pubblico lo
     // prende una volta e gli helper `…Locked` lo presuppongono.
-    private static let registryLock = NSLock()
-    private static var locks: [String: NSLock] = [:]
+    private final class LockRegistry: @unchecked Sendable {
+        private let guardLock = NSLock()
+        private var locks: [String: NSLock] = [:]
+
+        func lock(for key: String) -> NSLock {
+            guardLock.withLock {
+                if let existing = locks[key] { return existing }
+                let created = NSLock()
+                locks[key] = created
+                return created
+            }
+        }
+    }
+
+    private static let registry = LockRegistry()
 
     private static func lock(for directory: URL) -> NSLock {
-        let key = directory.standardizedFileURL.resolvingSymlinksInPath().path
-        registryLock.lock()
-        defer { registryLock.unlock() }
-        if let existing = locks[key] { return existing }
-        let created = NSLock()
-        locks[key] = created
-        return created
+        registry.lock(for: directory.standardizedFileURL.resolvingSymlinksInPath().path)
     }
 
     private let directory: URL
@@ -88,7 +95,8 @@ final class GuestRecordStore: @unchecked Sendable {
         }
     }
 
-    /// Scrittura atomica (`.atomic` scrive in un file temporaneo univoco e lo sostituisce) con protezione `complete`.
+    /// Scrittura atomica (`.atomic` scrive in un file temporaneo univoco e lo sostituisce). Protezione «fino al primo
+    /// sblocco» (come `filesDir` dell'Android): bloccare il telefono durante un invio non rende illeggibile l'esito.
     private func writeLocked(_ c: StoredCheckin) throws {
         let target = fileURL(c.propertyId, c.reservationId)
         if c.records.isEmpty {
@@ -97,7 +105,7 @@ final class GuestRecordStore: @unchecked Sendable {
         }
         try fm.createDirectory(at: directory, withIntermediateDirectories: true)
         let data = try JSONEncoder().encode(c)
-        try data.write(to: target, options: [.atomic, .completeFileProtection])
+        try data.write(to: target, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
     }
 
     private func filesLocked(_ suffix: String) -> [URL] {

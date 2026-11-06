@@ -343,17 +343,13 @@ final class AlloggiatiTests: XCTestCase {
 
         init(_ responses: [String]) { self.responses = responses }
 
-        var bodies: [String] {
-            lock.lock()
-            defer { lock.unlock() }
-            return sent
-        }
+        var bodies: [String] { lock.withLock { sent } }
 
         func post(_ body: String) async throws -> String {
-            lock.lock()
-            defer { lock.unlock() }
-            sent.append(body)
-            return responses.removeFirst()
+            lock.withLock {
+                sent.append(body)
+                return responses.removeFirst()
+            }
         }
     }
 

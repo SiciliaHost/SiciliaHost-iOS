@@ -5,21 +5,37 @@ import Foundation
 enum RomeTime {
     static let zone = TimeZone(identifier: "Europe/Rome")!
 
-    static var calendar: Calendar {
+    /// `Calendar` è un valore: la copia condivisa si legge da più thread senza problemi.
+    static let calendar: Calendar = {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = zone
         cal.locale = Locale(identifier: "it_IT")
         return cal
-    }
+    }()
 
     static func date(_ epochMs: Int64) -> Date { Date(timeIntervalSince1970: TimeInterval(epochMs) / 1000) }
 
-    static func format(_ pattern: String, _ epochMs: Int64) -> String {
+    private static func makeFormatter(_ pattern: String) -> DateFormatter {
         let f = DateFormatter()
         f.calendar = calendar
         f.locale = Locale(identifier: "it_IT")
         f.timeZone = zone
         f.dateFormat = pattern
+        return f
+    }
+
+    // I due formati della schedina, creati una volta: `DateFormatter` è sicuro tra thread per la sola formattazione
+    // (iOS 7+) e qui non si cambia mai dopo la creazione.
+    private static let italianFormatter = makeFormatter("dd/MM/yyyy")
+    private static let isoFormatter = makeFormatter("yyyy-MM-dd")
+
+    static func format(_ pattern: String, _ epochMs: Int64) -> String {
+        let f: DateFormatter
+        switch pattern {
+        case "dd/MM/yyyy": f = italianFormatter
+        case "yyyy-MM-dd": f = isoFormatter
+        default: f = makeFormatter(pattern)
+        }
         return f.string(from: date(epochMs))
     }
 }

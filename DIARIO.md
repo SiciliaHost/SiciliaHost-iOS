@@ -62,7 +62,7 @@ e correggere gli errori (vedi Prossimi passi).
   - `project.yml`: aggiunti permessi microfono e speech recognition.
 
 <!-- alloggiati-stato -->
-- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 6 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
+- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 7 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
 <!-- alloggiati-stato -->
 
 ## Prossimi passi (in ordine)
@@ -141,6 +141,13 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 7/7: correzioni dalla revisione del coordinatore
+- Schede e ricevuta ora con protezione `completeFileProtectionUntilFirstUserAuthentication` (come `filesDir` dell'Android) invece di `complete`: bloccare il telefono durante un invio non trasforma più un esito noto in «esito incerto». Il backup resta quello di sistema (scelta del titolare).
+- `CheckinModel.submit`: l'invio vero, dal blocco sul disco fino all'esito salvato, gira dentro `beginBackgroundTask`/`endBackgroundTask` (`BackgroundTaskBox`, chiusa in un `defer`; allo scadere il gestore chiude soltanto l'attività).
+- `RootView`: `CheckinHousekeeping.onAppStart()` anche quando la scena torna `.active`, non solo all'avvio a freddo.
+- `GuestRecordStore`: registro dei blocchi per cartella in una scatola con il suo `NSLock` (niente `static var` mutabile). `RomeTime`: calendario e i due `DateFormatter` della schedina creati una volta (`static let`). Test: `NSLock.withLock` nel `FakeTransport` asincrono.
+- **NON compilato.**
 
 ### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 6/6: correzioni dalla revisione
 - `CheckinModel.performLoad` ora ripulisce anche lui (ricevute > 1 giorno, schede inviate da più di 30 giorni), come chiesto oltre al `.task` di `RootView`: un'app rimasta in memoria per giorni non le tiene.
