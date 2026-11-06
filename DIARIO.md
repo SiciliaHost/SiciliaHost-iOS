@@ -129,6 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Rimozione keychain-access-groups dagli entitlement
+- Fastlane run 42204091823: `update_code_signing_settings` ha agganciato correttamente il profilo `fa1bcfb9-5d06-410a-9dce-d7ce2560e894` e la firma manuale `Apple Distribution`.
+- L'archivio Xcode è fallito per mismatch sull'entitlement `keychain-access-groups` (non previsto per app singola senza App Groups e non configurato sull'App ID nel portale Apple).
+- In `project.yml`: rimosso `keychain-access-groups` dagli entitlement, ripristinando l'accesso privato nativo del portachiavi di sistema.
+
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Firma manuale archivio e provisioning profile TestFlight
 - Fastlane run 42201676946 ha confermato il successo completo di scheda App Connect (`CactusHost: AI per CaseVacanze`, ID 6831282219), rotazione certificati (revocato orfano 4M3QW25R4U e generato nuovo 9XKG66L8U6 con chiave privata nel portachiavi) e download del profilo TestFlight `fa1bcfb9-5d06-410a-9dce-d7ce2560e894`.
 - L'archivio Xcode è fallito perché il progetto cercava un profilo di sviluppo per la firma automatica.
