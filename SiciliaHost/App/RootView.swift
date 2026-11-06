@@ -24,6 +24,9 @@ struct RootView: View {
         }
         // Link `https://siciliahost.com/invito/CODICE` o `siciliahost://invito/CODICE`: il codice resta in memoria finché
         // l'utente non lo gestisce. Il ritorno del browser del login Google passa da qui.
+        // Al posto di GuestRecordPurgeWorker (niente WorkManager su iOS): schede inviate da più di 30 giorni, ricevute
+        // più vecchie di un giorno, credenziali rimaste da un'installazione precedente.
+        .task { CheckinHousekeeping.onAppStart() }
         .onOpenURL { url in
             if AuthService.handle(url: url) { return }
             if let code = InviteLink.extractCode(url.absoluteString) { PendingInvite.shared.set(code) }

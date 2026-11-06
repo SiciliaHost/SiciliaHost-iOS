@@ -91,7 +91,15 @@ final class AuthService {
     /// Esce da Firebase e anche dall'account Google ricordato dal dispositivo: senza, il prossimo "Accedi con Google"
     /// rientra in silenzio con lo stesso account e non permette di cambiarlo. Svuota la sessione di accesso condivisa
     /// (un altro account non deve ereditare le case del precedente).
+    ///
+    /// Check-in Alloggiati (come `AuthRepository.logout` dell'Android): le credenziali sono di chi era entrato e si
+    /// cancellano sempre, con i token in memoria e la ricevuta; le schede si cancellano solo se sono tutte inviate (un
+    /// archivio illeggibile conta come «schede non inviate»). L'uscita confermata dal Profilo le cancella prima da sé.
     func signOut() throws {
+        KeychainCredentialStore().clear()
+        ReceiptFiles.clear()
+        Task { await AlloggiatiClient.shared.clearTokens() }
+        if !GuestRecordStore.shared.hasUnsent() { try? GuestRecordStore.shared.clear() }
         GIDSignIn.sharedInstance.signOut()
         try Auth.auth().signOut()
         Task { await AccessSession.shared.invalidate() }

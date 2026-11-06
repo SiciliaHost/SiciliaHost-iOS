@@ -62,7 +62,7 @@ e correggere gli errori (vedi Prossimi passi).
   - `project.yml`: aggiunti permessi microfono e speech recognition.
 
 <!-- alloggiati-stato -->
-- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, NON unito, NON compilato)**: porta del codice Android finale (`0688569`). Lavoro in corso: vedi le voci del Registro del 2026-11-06 (Claude Opus 5.5).
+- **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 5 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
 <!-- alloggiati-stato -->
 
 ## Prossimi passi (in ordine)
@@ -73,7 +73,12 @@ e correggere gli errori (vedi Prossimi passi).
 3. F11: asset icona definitivo (`AppIcon.appiconset`) e preparazione per App Store.
 
 <!-- alloggiati-prossimi -->
-- **Alloggiati sul telefono** (ramo `feat/alloggiati-sul-telefono`): completare la porta (voci del Registro 2026-11-06), poi compilare in CI e correggere.
+- **Alloggiati sul telefono** (ramo `feat/alloggiati-sul-telefono`):
+  1. Spingere il ramo (lo autorizza il titolare) e far girare la CI; correggere gli errori di compilazione (rischi principali: isolamento `@MainActor`/`nonisolated` in `CheckinModel`, chiusure generiche in `GuestRecordStore.withLock`, `DatePicker` con `\.timeZone`/`\.calendar`).
+  2. Eliminazione dell'account (ramo `feat/elimina-account-segnala`, non qui): dopo `deleteMyAccount` chiamare `try? GuestRecordStore.shared.clear()` e `ReceiptFiles.clear()` (come `AccountDeletion.kt`), poi l'uscita.
+  3. Regole Firestore dell'Android (`c198061`, `0688569`: `guest_records` e credenziali chiusi, forma di `checkin` con `guests >= 0`): deploy non verificato; `markCheckinSent` è best effort, ma senza le regole nuove il segno potrebbe essere rifiutato.
+  4. Prova reale su iPhone (credenziali, «Testa correttezza», ricevuta di un giorno passato; MAI «Invia» per prova): la fa il titolare.
+  5. Aggiornare `tools/gen_inventario.py` al pacchetto `com/siciliahost/cactushost` e la baseline Android a `0688569`.
 <!-- alloggiati-prossimi -->
 
 ## Decisioni prese
@@ -136,6 +141,13 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 5/5: Home, Agenda, uscita, Profilo, privacy
+- «Check-in inviato» (`Features/Checkin/CheckinSentLabel.swift`) negli arrivi della Home (`ArrivalRow`) e nelle righe dell'Agenda (`AgendaReservationRow`): `HomeModel`/`AgendaModel` leggono `getReservationsWithCheckin` (una lettura per casa, il segno non entra in `Reservation`); `UIPreview` aggiornato. Il pannello di dettaglio del Fold dell'Android non esiste su iPhone.
+- Uscita (`AuthService.signOut`): credenziali del portachiavi, ricevuta e token sempre via; schede solo se nessuna è non inviata (archivio illeggibile = non inviate). Profilo: «Esci» chiede conferma se ci sono schede mai inviate («Esci e cancella» le cancella tutte), nuova riga «Schede del check-in su questo telefono» con conferma. All'apertura (`RootView` `.task`): `CheckinHousekeeping.onAppStart` (schede scadute, ricevute > 1 giorno, portachiavi di un'installazione precedente).
+- Privacy (`ProfileLogic.privacySections`): stessi testi di `PrivacyContent.kt`, test `testCheckinDataIsDescribedAsPhoneOnly`.
+- `docs/INVENTARIO.md`: righe nuove a mano per i file Android nuovi (`data/alloggiati/*`, 4 di `ui/checkin/`, `sync/GuestRecordPurgeWorker.kt`, 8 test) e `CredentialsLogic` → n/a. `tools/gen_inventario.py` NON lanciato: ha ancora `PKG = com/example/casevacanzeapp`, mentre l'Android ora è `com/siciliahost/cactushost` (da aggiornare a parte).
+- **NIENTE compilato né provato** (Windows, nessun Mac): tutto il ramo va costruito in CI prima di unirlo. Non spinto.
 
 ### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 4/5: via la strada del server
 - Tolti `submitAlloggiati`, `getAlloggiatiTable`, `getAlloggiatiReceipt` (`CloudFunctionsServices`) e i loro parser `parseEsito`/`parseCsvField`/`parseReceipt` (`CallableParsers`, con i test in `CallableParsersTests`).

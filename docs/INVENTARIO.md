@@ -18,6 +18,15 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `data/access/AccessSession.kt` | 39 | `Core/Access/AccessSession.swift` | scritto |
 | `data/alloggiati/AlloggiatiModels.kt` | 15 | `Core/Models/SimpleModels.swift` | scritto |
 | `data/alloggiati/LookupRepository.kt` | 54 | `Core/Services/LookupService.swift` | scritto |
+| `data/alloggiati/AlloggiatiClient.kt` | 137 | `Core/Alloggiati/AlloggiatiClient.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/AlloggiatiSoap.kt` | 89 | `Core/Alloggiati/AlloggiatiSoap.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/CheckinMark.kt` | 13 | `Core/Alloggiati/CheckinMark.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/CredentialStore.kt` | 105 | `Core/Alloggiati/CredentialStore.swift` (portachiavi invece del Keystore) | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/GuestRecordStore.kt` | 137 | `Core/Alloggiati/GuestRecordStore.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/ReceiptDates.kt` | 32 | `Core/Alloggiati/ReceiptDates.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/ReceiptFiles.kt` | 27 | `Core/Alloggiati/ReceiptFiles.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/Schedina.kt` | 60 | `Core/Alloggiati/Schedina.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `data/alloggiati/SendPlan.kt` | 69 | `Core/Alloggiati/SendPlan.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
 | `data/model/AlloggiatiCredentials.kt` | 11 | `Core/Models/SimpleModels.swift` | scritto |
 | `data/model/Contact.kt` | 10 | `Core/Models/SimpleModels.swift` | scritto |
 | `data/model/Expense.kt` | 13 | `Core/Models/OtherModels.swift` | scritto |
@@ -42,6 +51,14 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `data/repository/ListingRepository.kt` | 63 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift` | scritto |
 | `data/repository/PriceRepository.kt` | 108 | `Core/Services/CloudFunctionsServices.swift, CallableParsers.swift` | scritto |
 | `data/repository/SiteContentRepository.kt` | 64 | `Core/Services/SiteContentService.swift, CloudErrors.swift` | scritto |
+| 🧪 `data/alloggiati/AlloggiatiClientTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/AlloggiatiSoapTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/CheckinMarkTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/CredentialCodecTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/GuestRecordStoreTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/ReceiptDatesTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/SchedinaTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| 🧪 `data/alloggiati/SendPlanTest.kt` | — | `SiciliaHostTests/AlloggiatiTests.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
 | 🧪 `data/access/AccessScopeListingTest.kt` | 50 | `SiciliaHostTests/ModelsTests.swift` | scritto |
 | 🧪 `data/access/AccessScopeTest.kt` | 146 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
 | 🧪 `data/access/SuperAdminTest.kt` | 17 | `SiciliaHostTests/AccessScopeTests.swift` | scritto |
@@ -207,10 +224,14 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 
 | Android | Righe | iOS | Stato |
 |---|---|---|---|
-| `ui/checkin/CheckinScreen.kt` | 208 | `Features/Checkin/CheckinView.swift` | compilato |
-| `ui/checkin/CheckinSendScreen.kt` | 216 | `Features/Checkin/CheckinView.swift` (`CheckinSendView`) | compilato+test |
-| `ui/checkin/CheckinViewModel.kt` | 158 | `Features/Checkin/CheckinModel.swift`, `Core/Logic/CheckinLogic.swift` | compilato+test |
-| `ui/checkin/GuestFormScreen.kt` | 359 | `Features/Checkin/GuestFormView.swift`, `Core/Logic/CheckinLogic.swift` | compilato+test |
+| `ui/checkin/CheckinScreen.kt` | 220 | `Features/Checkin/CheckinView.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/CheckinSendScreen.kt` | 202 | `Features/Checkin/CheckinView.swift` (`CheckinSendView`) | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/CheckinViewModel.kt` | 444 | `Features/Checkin/CheckinModel.swift`, `Core/Logic/CheckinLogic.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/GuestFormScreen.kt` | 385 | `Features/Checkin/GuestFormView.swift`, `Core/Logic/CheckinLogic.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/CheckinSentLabel.kt` | 25 | `Features/Checkin/CheckinSentLabel.swift` (Home `ArrivalRow`, Agenda `AgendaReservationRow`; il pannello di dettaglio del Fold non esiste su iPhone: n/a) | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/CredentialsDialog.kt` | 139 | `Features/Checkin/CheckinNotices.swift` (`CheckinNotices`, `CredentialsSheet`) | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/ReceiptDialog.kt` | 59 | `Features/Checkin/CheckinNotices.swift` (`ReceiptDateSheet`, `DatePicker` nel fuso di Roma) | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
+| `ui/checkin/ReceiptOpener.kt` | 29 | `Core/Alloggiati/ReceiptFiles.swift` + `ReceiptSheet` (PDFKit) in `CheckinView.swift` | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) |
 | `ui/checkin/MrzScannerScreen.kt` | 280 | `Features/Checkin/MrzScannerView.swift` | compilato |
 
 ## F9 — Case, sito, posizione, membri e inviti
@@ -237,7 +258,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/members/MembersLogic.kt` | 38 | `Core/Logic/MembersLogic.swift` | compilato+test |
 | `ui/members/MembersScreen.kt` | 279 | `Features/Members/MembersView.swift` | compilato |
 | `ui/members/MembersViewModel.kt` | 205 | `Features/Members/MembersView.swift` (`MembersModel`) | compilato |
-| `ui/property/CredentialsLogic.kt` | 12 | `Core/Logic/CaseLogic.swift` (`CaseSaveLogic.credentialsToSave`) | compilato+test |
+| `ui/property/CredentialsLogic.kt` | 12 | — (cancellato su Android il 2026-11-06; tolto anche su iOS) | n/a |
 | `ui/property/PropertyManagementViewModel.kt` | 321 | `Features/Cases/CasesModel.swift` (credenziali, import Excel); sync iCal → F10 | parziale→F10 |
 | `ui/site/SiteContentViewModel.kt` | 174 | `Features/Cases/CasesModel.swift` (`SiteContentModel`) | compilato |
 | `ui/site/SiteDraft.kt` | 265 | `Core/Logic/SiteDraftLogic.swift` | compilato+test |
@@ -266,7 +287,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | 🧪 `ui/invite/PendingInviteTest.kt` | 24 | `SiciliaHostTests/OnboardingTests.swift` | scritto |
 | 🧪 `ui/members/InviteFormTest.kt` | 104 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
 | 🧪 `ui/members/MembersLogicTest.kt` | 71 | `SiciliaHostTests/MembersTests.swift` | compilato, verde |
-| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 | `SiciliaHostTests/CaseLogicTests.swift` | compilato, verde |
+| 🧪 `ui/property/CredentialsLogicTest.kt` | 33 | — (cancellato su Android il 2026-11-06; tolto anche su iOS) | n/a |
 | 🧪 `ui/property/PropertyManagementViewModelTest.kt` | 28 | `SiciliaHostTests/CaseLogicTests.swift` (`SiteTrackTests`) | compilato, verde |
 | 🧪 `ui/site/SiteDraftSaverTest.kt` | 46 | `SiciliaHostTests/CaseLogicTests.swift` (andata e ritorno `Codable`) | compilato, verde |
 | 🧪 `ui/site/SiteDraftTest.kt` | 389 | `SiciliaHostTests/SiteDraftTests.swift` | compilato, verde |
@@ -302,6 +323,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `services/MyFirebaseMessagingService.kt` | 38 | `App/AppDelegate.swift, Core/Services/Notifications.swift (PushToken)` | compilato, test ok |
 | `sync/BookingExcelReminderWorker.kt` | 49 | `Core/Logic/ExcelReminder.swift, Core/Services/Notifications.swift (ExcelReminderScheduler)` | compilato (notifica locale pianificata, non un lavoro periodico) |
 | `sync/ICalSyncWorker.kt` | 251 | `Core/Logic/ICalSync.swift (parte pura: parseEvents, buildSyncPlan, safeErrorReason)` | compilato (`Core/Services/ICalSyncService.swift`, giro in `AutoSync`; echi Booking portati) |
+| `sync/GuestRecordPurgeWorker.kt` | 30 | `Core/Alloggiati/ReceiptFiles.swift` (`CheckinHousekeeping.onAppStart`, chiamato da `RootView`) | scritto (2026-11-06, Android `0688569`, sul telefono; non compilato) (all'apertura dell'app, niente WorkManager) |
 | 🧪 `sync/ICalSyncWorkerTest.kt` | 171 | `SiciliaHostTests/LogicTests.swift, BackgroundSyncTests.swift (echi)` | compilato, test ok |
 | `services/NotificationChannels.kt` | 29 | n/a | iOS non ha canali di notifica: si regola tutto dalle impostazioni di sistema (Profilo → Notifiche) |
 

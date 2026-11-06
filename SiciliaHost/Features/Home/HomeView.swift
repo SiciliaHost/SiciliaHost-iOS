@@ -9,15 +9,19 @@ final class HomeModel {
     private(set) var arrivalsToday: [Reservation] = []
     private(set) var pendingReview: [Reservation] = []
     private(set) var properties: [Property] = []
+    /// Prenotazioni il cui check-in è già stato inviato (segno `checkin`, da qualunque telefono).
+    private(set) var checkinSentIds: Set<String> = []
     private(set) var isLoading = false
     var isCreatingGuest = false
     var actionError: String?
 
-    private let fetch: ([String]) async throws -> [Reservation]
+    private let fetch: ([String]) async throws -> ReservationsWithCheckin
     private let create: (Reservation) async throws -> Reservation
 
     init(
-        fetch: @escaping ([String]) async throws -> [Reservation] = { try await FirestoreService().getReservations(propertyIds: $0) },
+        fetch: @escaping ([String]) async throws -> ReservationsWithCheckin = {
+            try await FirestoreService().getReservationsWithCheckin(propertyIds: $0)
+        },
         create: @escaping (Reservation) async throws -> Reservation = { try await FirestoreService().addReservation($0) }
     ) {
         self.fetch = fetch
@@ -31,12 +35,15 @@ final class HomeModel {
         isLoading = true
         defer { isLoading = false }
         do {
-            let all = try await fetch(operable.map(\.id))
+            let loaded = try await fetch(operable.map(\.id))
+            let all = loaded.reservations
             arrivalsToday = AgendaLogic.arrivalsToday(all, now: millisFromDate(Date()))
             pendingReview = AgendaLogic.pendingReview(all)
+            checkinSentIds = loaded.checkinSentIds
         } catch {
             arrivalsToday = []
             pendingReview = []
+            checkinSentIds = []
         }
     }
 
@@ -171,7 +178,9 @@ struct HomeView: View {
         } else {
             VStack(spacing: Dimens.itemSpacing) {
                 ForEach(model.arrivalsToday) { res in
-                    Button { onCheckin(res.id, res.propertyId) } label: { ArrivalRow(reservation: res) }
+                    Button { onCheckin(res.id, res.propertyId) } label: {
+                        ArrivalRow(reservation: res, checkinSent: model.checkinSentIds.contains(res.id))
+                    }
                         .buttonStyle(.plain)
                 }
             }
@@ -262,6 +271,7 @@ private struct TourTargetIf: ViewModifier {
 /// Riga di un arrivo: barretta verde (= arrivo), nome, "PIATTAFORMA · esce gg/mm".
 struct ArrivalRow: View {
     let reservation: Reservation
+    var checkinSent = false
 
     var body: some View {
         HStack(spacing: Dimens.cardPadding) {
@@ -271,6 +281,7 @@ struct ArrivalRow: View {
                     .appStyle(.titleSmall).foregroundStyle(Theme.onSurface).lineLimit(2)
                 Text("\(reservation.platform) · esce \(dayMonth(reservation.checkOut))")
                     .appStyle(.bodySmall).foregroundStyle(Theme.onSurfaceVariant).lineLimit(2)
+                if checkinSent { CheckinSentLabel() }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "chevron.right")

@@ -17,6 +17,9 @@ struct ProfileView: View {
     @State private var editingName = false
     @State private var notificationsDenied = false
     @State private var leaving = false
+    @State private var confirmLogout = false
+    @State private var confirmClearRecords = false
+    @State private var clearFailed = false
     @Environment(\.openURL) private var openURL
 
     private var email: String { Auth.auth().currentUser?.email ?? "Account sconosciuto" }
@@ -57,6 +60,10 @@ struct ProfileView: View {
 
                     section("Privacy e sicurezza")
                     NavRow(title: "Come proteggiamo i tuoi dati", subtitle: nil, action: onPrivacy)
+                    NavRow(title: "Schede del check-in su questo telefono",
+                           subtitle: "Le schede degli ospiti restano solo qui. Tocca per cancellarle tutte.") {
+                        confirmClearRecords = true
+                    }
 
                     Text("SiciliaHost \(appVersion)")
                         .appStyle(.labelSmall).foregroundStyle(Theme.onSurfaceVariant)
@@ -64,8 +71,12 @@ struct ProfileView: View {
 
                     Button("Esci") {
                         guard !leaving else { return }
-                        leaving = true
-                        onLogout()
+                        // Nel dubbio (archivio illeggibile) si chiede conferma: uscendo le schede si cancellano.
+                        if GuestRecordStore.shared.hasUnsent() {
+                            confirmLogout = true
+                        } else {
+                            logout()
+                        }
                     }
                     .buttonStyle(.appOutlined)
                     .disabled(leaving)
@@ -81,9 +92,41 @@ struct ProfileView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task { await refreshNotificationState() }
         }
+        .confirmationDialog("Schede non inviate", isPresented: $confirmLogout, titleVisibility: .visible) {
+            Button("Esci e cancella", role: .destructive) { logout() }
+            Button("Annulla", role: .cancel) {}
+        } message: {
+            Text("Su questo telefono ci sono schede del check-in mai inviate. Uscendo verranno cancellate.")
+        }
+        .confirmationDialog("Cancellare le schede?", isPresented: $confirmClearRecords, titleVisibility: .visible) {
+            Button("Cancella", role: .destructive) {
+                ReceiptFiles.clear()
+                do {
+                    try GuestRecordStore.shared.clear()
+                } catch {
+                    clearFailed = true
+                }
+            }
+            Button("Annulla", role: .cancel) {}
+        } message: {
+            Text("Cancelliamo da questo telefono tutte le schede del check-in, anche quelle mai inviate. Le credenziali restano.")
+        }
+        .alert("Non sono riuscito a cancellare le schede. Riprova.", isPresented: $clearFailed) {
+            Button("OK", role: .cancel) {}
+        }
         .sheet(isPresented: $editingName, onDismiss: { model.error = nil }) {
             EditNameSheet(model: model) { editingName = false }
         }
+    }
+
+    /// Uscita confermata (o senza schede da inviare): le schede del check-in si cancellano tutte, poi si esce
+    /// (`signOutDiscardingAssistant(wipeUnsentCheckin = true)` dell'Android).
+    private func logout() {
+        guard !leaving else { return }
+        leaving = true
+        ReceiptFiles.clear()
+        try? GuestRecordStore.shared.clear()
+        onLogout()
     }
 
     private var header: some View {

@@ -76,4 +76,13 @@ final class ProfileTests: XCTestCase {
         let location = privacySections.first { $0.title == "Posizione delle case" }?.body ?? ""
         XCTAssertTrue(location.contains("pin") && location.contains("mai l'indirizzo"))
     }
+
+    // Specifica: PrivacyContentTest.checkinDataIsDescribedAsPhoneOnly (dal 2026-11-06 niente server per il check-in).
+    func testCheckinDataIsDescribedAsPhoneOnly() {
+        let guests = privacySections.first { $0.title == "Dati degli ospiti" }?.body ?? ""
+        let credentials = privacySections.first { $0.title == "Credenziali Alloggiati" }?.body ?? ""
+        XCTAssertTrue(guests.contains("solo sul telefono"))
+        XCTAssertTrue(credentials.contains("solo sul telefono"))
+        XCTAssertFalse(privacySections.contains { $0.body.contains("nostri server: i collaboratori") })
+    }
 }

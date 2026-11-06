@@ -65,12 +65,12 @@ struct UIPreviewRoot: View {
         case "arrivals":
             AppScreen {
                 HomeView(scope: UIPreview.scope, onProfile: {},
-                         model: HomeModel(fetch: { _ in UIPreview.reservations }, create: { $0 }))
+                         model: HomeModel(fetch: { _ in ReservationsWithCheckin(reservations: UIPreview.reservations) }, create: { $0 }))
             }
         case "agenda":
             AppScreen {
                 AgendaView(scope: UIPreview.scope, canEditPrices: true,
-                           model: AgendaModel(fetch: { _ in UIPreview.reservations }))
+                           model: AgendaModel(fetch: { _ in ReservationsWithCheckin(reservations: UIPreview.reservations) }))
             }
         case "inventory":
             AppScreen {

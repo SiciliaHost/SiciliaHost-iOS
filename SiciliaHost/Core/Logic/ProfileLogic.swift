@@ -83,15 +83,15 @@ let privacySections: [PrivacySection] = [
     PrivacySection(title: "Il tuo accesso", body: "Entri con il tuo account Google o con Apple."),
     PrivacySection(
         title: "Chi vede i tuoi dati",
-        body: "I dati di una casa sono visibili ai suoi membri e agli amministratori di SiciliaHost. Le regole del database rifiutano l'accesso ai dati di case di cui non fai parte. Un collaboratore può gestire prenotazioni, inventario e dati degli ospiti (documenti compresi) della casa; il proprietario può concedergli in più Finanze, Prezzi e calendario e Contenuti del sito."
+        body: "I dati di una casa sono visibili ai suoi membri e agli amministratori di SiciliaHost. Le regole del database rifiutano l'accesso ai dati di case di cui non fai parte. Un collaboratore può gestire prenotazioni e inventario della casa; il proprietario può concedergli in più Finanze, Prezzi e calendario e Contenuti del sito."
     ),
     PrivacySection(
         title: "Credenziali Alloggiati",
-        body: "Utente, password e chiave del servizio Alloggiati Web stanno in un'area riservata al proprietario della casa. L'invio delle schedine parte dai nostri server: i collaboratori possono inviare, ma non leggere le credenziali."
+        body: "Utente, password e chiave del servizio Alloggiati Web restano solo sul telefono di chi fa il check-in, cifrate. SiciliaHost non le riceve: il proprietario le comunica a mano ai collaboratori."
     ),
     PrivacySection(
         title: "Dati degli ospiti",
-        body: "I dati dei documenti servono per il check-in con la Questura (Alloggiati Web). Nel pannello web il numero del documento è mostrato mascherato."
+        body: "Le schede del check-in (anche i dati dei documenti) restano solo sul telefono che le compila e vanno direttamente alla Polizia di Stato (Alloggiati Web), senza passare dai nostri server. Si cancellano dal telefono 30 giorni dopo l'invio, all'uscita dall'account o quando vuoi dal Profilo."
     ),
     PrivacySection(
         title: "Posizione delle case",

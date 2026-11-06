@@ -50,7 +50,7 @@ enum ReceiptDates {
 
     /// Il giorno dell'ultimo invio, se la ricevuta c'è già; altrimenti ieri.
     static func defaultDate(today: CalendarDay, lastSentAt: Int64?) -> CalendarDay {
-        if let sent = lastSentAt.map(CalendarDay.rome), isSelectable(sent, today: today) { return sent }
+        if let ms = lastSentAt, case let sent = CalendarDay.rome(ms), isSelectable(sent, today: today) { return sent }
         return today.adding(days: -1)
     }
 

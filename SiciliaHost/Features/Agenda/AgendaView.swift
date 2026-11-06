@@ -7,11 +7,15 @@ import SwiftUI
 final class AgendaModel {
     private(set) var reservations: [Reservation] = []
     private(set) var propertyNames: [String: String] = [:]
+    /// Prenotazioni il cui check-in è già stato inviato (segno `checkin`).
+    private(set) var checkinSentIds: Set<String> = []
     private(set) var isLoading = false
 
-    private let fetch: ([String]) async throws -> [Reservation]
+    private let fetch: ([String]) async throws -> ReservationsWithCheckin
 
-    init(fetch: @escaping ([String]) async throws -> [Reservation] = { try await FirestoreService().getReservations(propertyIds: $0) }) {
+    init(fetch: @escaping ([String]) async throws -> ReservationsWithCheckin = {
+        try await FirestoreService().getReservationsWithCheckin(propertyIds: $0)
+    }) {
         self.fetch = fetch
     }
 
@@ -20,7 +24,9 @@ final class AgendaModel {
         isLoading = true
         defer { isLoading = false }
         do {
-            reservations = try await fetch(operable.map(\.id))
+            let loaded = try await fetch(operable.map(\.id))
+            reservations = loaded.reservations
+            checkinSentIds = loaded.checkinSentIds
             propertyNames = Dictionary(operable.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
         } catch {
             // Come l'Android: in caso d'errore resta quel che c'era.
@@ -186,7 +192,8 @@ struct AgendaView: View {
                         AgendaReservationRow(
                             reservation: res,
                             isCheckIn: AgendaLogic.isSameDay(res.checkIn, millisFromDate(selectedDay), calendar: calendar),
-                            propertyName: model.propertyNames[res.propertyId] ?? res.propertyId
+                            propertyName: model.propertyNames[res.propertyId] ?? res.propertyId,
+                            checkinSent: model.checkinSentIds.contains(res.id)
                         )
                     }
                     .buttonStyle(.plain)
@@ -235,6 +242,7 @@ struct AgendaReservationRow: View {
     let reservation: Reservation
     let isCheckIn: Bool
     let propertyName: String
+    var checkinSent = false
 
     var body: some View {
         let accent = isCheckIn ? Theme.primary : Theme.error
@@ -245,6 +253,7 @@ struct AgendaReservationRow: View {
                     .appStyle(.titleSmall).foregroundStyle(Theme.onSurface).lineLimit(2)
                 Text(AgendaLogic.rowSubtitle(reservation, propertyName: propertyName))
                     .appStyle(.bodySmall).foregroundStyle(Theme.onSurfaceVariant).lineLimit(2)
+                if checkinSent { CheckinSentLabel() }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Text(isCheckIn ? "ENTRA" : "ESCE")
