@@ -129,6 +129,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Firma manuale archivio e provisioning profile TestFlight
+- Fastlane run 42201676946 ha confermato il successo completo di scheda App Connect (`CactusHost: AI per CaseVacanze`, ID 6831282219), rotazione certificati (revocato orfano 4M3QW25R4U e generato nuovo 9XKG66L8U6 con chiave privata nel portachiavi) e download del profilo TestFlight `fa1bcfb9-5d06-410a-9dce-d7ce2560e894`.
+- L'archivio Xcode è fallito perché il progetto cercava un profilo di sviluppo per la firma automatica.
+- In `fastlane/Fastfile`: aggiunto `update_code_signing_settings` per impostare firma manuale, identità `Apple Distribution`, Team `4D6QBBJVG5` e il profilo `ENV["SIGH_NAME"]` sul target `SiciliaHost`. In `build_app`, configurato `export_options` con `signingStyle: manual` e il profilo App Store scaricato.
+
 ### 2026-11-06 — Antigravity (locale, Windows senza Swift) — Gestione limite certificati di distribuzione e scheda App Connect
 - Fastlane run 42198307670 ha evidenziato che la pre-risoluzione SPM ha risolto il timeout di showBuildSettings, ma `cert` (`get_certificates`) è andato in errore perché il runner non conservava la chiave privata dei certificati precedenti e Apple limita a 2 i certificati di distribuzione contemporanei.
 - In `fastlane/Fastfile`:

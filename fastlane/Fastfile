@@ -72,6 +72,18 @@ platform :ios do
       app_identifier: "com.siciliahost.cactushost"
     )
 
+    # Configura il progetto Xcode per la firma manuale con il profilo appena scaricato
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "SiciliaHost.xcodeproj",
+      team_id: "4D6QBBJVG5",
+      bundle_identifier: "com.siciliahost.cactushost",
+      code_sign_identity: "Apple Distribution",
+      profile_name: ENV["SIGH_NAME"],
+      profile_uuid: ENV["SIGH_UUID"],
+      targets: ["SiciliaHost"]
+    )
+
     build_number = ENV["FL_BUILD_NUMBER"] || "1"
 
     # Compila ed esporta il pacchetto .ipa firmato per App Store / TestFlight
@@ -82,6 +94,13 @@ platform :ios do
       output_directory: "build/testflight",
       output_name: "CactusHost.ipa",
       clean: false,
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.siciliahost.cactushost" => ENV["SIGH_NAME"]
+        }
+      },
       xcargs: "CURRENT_PROJECT_VERSION=#{build_number}"
     )
 
