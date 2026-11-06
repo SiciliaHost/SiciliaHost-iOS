@@ -137,6 +137,14 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 2/5: client, schede su file, portachiavi
+- `Core/Alloggiati/AlloggiatiClient.swift`: `actor` con token in memoria 10 minuti (chiave = tutte le credenziali), `invalidate`, `clearTokens`, Test/Send/Tabella/Ricevuta, Base64 non valido = «Ricevuta non leggibile». `URLSessionSoapTransport`: gli errori per cui la richiesta non è partita (niente rete, host, TLS) si rilanciano; gli altri (tempo scaduto, connessione persa) e le risposte senza busta SOAP sono «esito incerto». Differenza dall'Android: `URLSession` non separa scrittura e lettura, si decide dal codice di `URLError`.
+- `GuestRecordStore.swift`: un file JSON per prenotazione in `Application Support/guest_records` (nel backup iCloud), protezione `complete`, un blocco per cartella, file rovinati spostati in `.corrupt` e contati come «non inviate», file illeggibili (telefono bloccato) NON spostati ma contati come non inviate, `save` con checkOut 0 tiene quello noto. La scrittura usa `.atomic` (file temporaneo univoco del sistema): niente `.tmp` da ripulire.
+- `CredentialStore.swift`: portachiavi `AfterFirstUnlockThisDeviceOnly`, servizio `com.siciliahost.cactushost.alloggiati`, senza gruppo d'accesso; si cancella una voce solo se i dati non si decodificano. In più rispetto all'Android: `clearIfFreshInstall` (il portachiavi iOS sopravvive alla disinstallazione).
+- `ReceiptFiles.swift`: un solo `Caches/ricevute/ricevuta.pdf`; `CheckinHousekeeping.onAppStart` (al posto di `GuestRecordPurgeWorker`).
+- `FirestoreService`: `getCheckinMark`, `markCheckinSent` (solo `checkin {sentAt, guests, by}`), `getReservationsWithCheckin`.
+- Test aggiunti in `AlloggiatiTests` (porta di AlloggiatiClientTest e GuestRecordStoreTest; niente test sul portachiavi: in CI dà -34018). **NON compilato.**
+
 ### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Check-in Alloggiati sul telefono, 1/5: logica pura
 - Ramo `feat/alloggiati-sul-telefono` (da `main` `d182cce`). Porta in Swift del codice Android FINALE (`Androidapp` `main`, `0688569`, dopo la revisione), non del piano iniziale.
 - Nuovi `Core/Alloggiati/AlloggiatiSoap.swift` (XML, `unesc`, `AlloggiatiError` con `.refused`/`.rejected`/`.uncertain` e classificazione severa di `parseEsito`, `requireSoapBody`), `Schedina.swift` (notti = giorni di calendario di Roma, date non valide → errore, caratteri di controllo → spazi, calendario gregoriano esplicito), `SendPlan.swift` (pending, `normalizeStaleLocks`, esiti, incerto, 30 giorni), `ReceiptDates.swift` (`CalendarDay`, ultimi 30 giorni escluso oggi), `CheckinMark.swift`.

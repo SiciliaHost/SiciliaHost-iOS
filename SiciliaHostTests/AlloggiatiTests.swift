@@ -333,4 +333,262 @@ final class AlloggiatiTests: XCTestCase {
         XCTAssertEqual(d(2026, 3, 29).adding(days: -1), d(2026, 3, 28))
         XCTAssertEqual(d(2026, 3, 1).adding(days: -1), d(2026, 2, 28))
     }
+
+    // MARK: Client
+
+    private final class FakeTransport: SoapTransport, @unchecked Sendable {
+        private let lock = NSLock()
+        private var responses: [String]
+        private var sent: [String] = []
+
+        init(_ responses: [String]) { self.responses = responses }
+
+        var bodies: [String] {
+            lock.lock()
+            defer { lock.unlock() }
+            return sent
+        }
+
+        func post(_ body: String) async throws -> String {
+            lock.lock()
+            defer { lock.unlock() }
+            sent.append(body)
+            return responses.removeFirst()
+        }
+    }
+
+    /// Orologio finto: una closure `@Sendable` non può catturare una `var` locale.
+    private final class FakeClock: @unchecked Sendable {
+        var now: Int64 = 0
+    }
+
+    private let creds = AlloggiatiCredentials(utente: "utente", password: "pa<ss", wsKey: "key")
+    private let tokenOk = "<R><esito>true</esito><token>TK</token></R>"
+
+    func testTokenIsCachedForTenMinutesAndEscaped() async throws {
+        let clock = FakeClock()
+        let t = FakeTransport([tokenOk, tokenOk])
+        let client = AlloggiatiClient(transport: t, clock: { clock.now })
+        let first = try await client.token(creds)
+        let second = try await client.token(creds)
+        XCTAssertEqual(first, "TK")
+        XCTAssertEqual(second, "TK")
+        XCTAssertEqual(t.bodies.count, 1)
+        XCTAssertTrue(t.bodies[0].contains("<all:Password>pa&lt;ss</all:Password>"))
+        clock.now += 10 * 60 * 1000 + 1
+        _ = try await client.token(creds)
+        XCTAssertEqual(t.bodies.count, 2)
+    }
+
+    func testChangedCredentialsDoNotReuseTheToken() async throws {
+        let t = FakeTransport([tokenOk, tokenOk])
+        let client = AlloggiatiClient(transport: t, clock: { 0 })
+        _ = try await client.token(creds)
+        var other = creds
+        other.password = "altra"
+        _ = try await client.token(other)
+        XCTAssertEqual(t.bodies.count, 2)
+    }
+
+    func testRefusedTokenIsARefusal() async {
+        let client = AlloggiatiClient(
+            transport: FakeTransport(["<R><esito>false</esito><ErroreDes>Credenziali errate</ErroreDes></R>"]), clock: { 0 }
+        )
+        do {
+            _ = try await client.token(creds)
+            XCTFail("doveva fallire")
+        } catch let e as AlloggiatiError {
+            XCTAssertEqual(e.kind, .refused)
+            XCTAssertEqual(e.message, "Credenziali errate")
+        } catch {
+            XCTFail("errore inatteso \(error)")
+        }
+    }
+
+    func testTestAndSendUseTheApartmentMethods() async throws {
+        let ok = "<R><esito>true</esito><SchedineValide>1</SchedineValide><EsitoOperazioneServizio><esito>true</esito></EsitoOperazioneServizio></R>"
+        let t = FakeTransport([ok, ok])
+        let client = AlloggiatiClient(transport: t, clock: { 0 })
+        let tested = try await client.test(utente: "u", token: "TK", idAppartamento: 42, rows: ["RIGA"])
+        XCTAssertEqual(tested.schedineValide, 1)
+        _ = try await client.send(utente: "u", token: "TK", idAppartamento: 42, rows: ["RIGA"])
+        XCTAssertTrue(t.bodies[0].contains("<all:GestioneAppartamenti_Test>"))
+        XCTAssertTrue(t.bodies[0].contains(
+            "<all:ElencoSchedine><all:string>RIGA</all:string></all:ElencoSchedine><all:IdAppartamento>42</all:IdAppartamento>"
+        ))
+        XCTAssertTrue(t.bodies[1].contains("<all:GestioneAppartamenti_Send>"))
+    }
+
+    func testTableAndReceipt() async throws {
+        let t = FakeTransport([
+            "<R><esito>true</esito><CSV>a;b\n1;2</CSV></R>",
+            "<R><esito>true</esito><PDF>JVBERg==</PDF></R>",
+            "<R><esito>false</esito></R>",
+            "<R><esito>true</esito><PDF>A</PDF></R>",
+        ])
+        let client = AlloggiatiClient(transport: t, clock: { 0 })
+        let csv = try await client.table(utente: "u", token: "TK", tipo: "Luoghi")
+        XCTAssertEqual(csv, "a;b\n1;2")
+        let pdf = try await client.receipt(utente: "u", token: "TK", dateIso: "2026-08-14")
+        XCTAssertEqual(Array(pdf), [0x25, 0x50, 0x44, 0x46])
+        XCTAssertTrue(t.bodies[1].contains("<all:Data>2026-08-14T00:00:00</all:Data>"))
+        do {
+            _ = try await client.receipt(utente: "u", token: "TK", dateIso: "2026-08-15")
+            XCTFail("doveva fallire")
+        } catch let e as AlloggiatiError {
+            XCTAssertEqual(e.message, "Ricevuta non disponibile")
+        }
+        do {
+            _ = try await client.receipt(utente: "u", token: "TK", dateIso: "2026-08-16")
+            XCTFail("doveva fallire")
+        } catch let e as AlloggiatiError {
+            XCTAssertEqual(e.message, "Ricevuta non leggibile")
+        }
+    }
+
+    func testInvalidateAndClearForceANewToken() async throws {
+        let t = FakeTransport([tokenOk, tokenOk, tokenOk])
+        let client = AlloggiatiClient(transport: t, clock: { 0 })
+        _ = try await client.token(creds)
+        await client.invalidate(creds)
+        _ = try await client.token(creds)
+        XCTAssertEqual(t.bodies.count, 2)
+        await client.clearTokens()
+        _ = try await client.token(creds)
+        XCTAssertEqual(t.bodies.count, 3)
+    }
+
+    func testTransportErrorsBeforeSendingAreNotUncertain() {
+        XCTAssertTrue(URLSessionSoapTransport.requestNeverSent(URLError(.notConnectedToInternet)))
+        XCTAssertTrue(URLSessionSoapTransport.requestNeverSent(URLError(.cannotFindHost)))
+        XCTAssertFalse(URLSessionSoapTransport.requestNeverSent(URLError(.timedOut)))
+        XCTAssertFalse(URLSessionSoapTransport.requestNeverSent(URLError(.networkConnectionLost)))
+    }
+
+    // MARK: Schede su file
+
+    private func tempDir() -> URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("guest_records")
+    }
+
+    private func store(_ dir: URL) -> GuestRecordStore {
+        var n = 0
+        return GuestRecordStore(directory: dir, newId: {
+            n += 1
+            return "id\(n)"
+        })
+    }
+
+    func testSaveAssignsAnIdAndKeepsOrder() throws {
+        let s = store(tempDir())
+        let a = try s.save(GuestRecord(reservationId: "r", propertyId: "p", nome: "A"), checkOut: 10)
+        try s.save(GuestRecord(reservationId: "r", propertyId: "p", nome: "B"), checkOut: 10)
+        XCTAssertEqual(a.id, "id1")
+        XCTAssertEqual(try s.list(propertyId: "p", reservationId: "r").map(\.nome), ["A", "B"])
+        var edited = a
+        edited.nome = "A2"
+        try s.save(edited, checkOut: 10)
+        XCTAssertEqual(try s.list(propertyId: "p", reservationId: "r").map(\.nome), ["A2", "B"])
+        XCTAssertEqual(s.all().map(\.checkOut), [10])
+    }
+
+    func testReservationsAreSeparateEvenWithStrangeIds() throws {
+        let s = store(tempDir())
+        try s.save(GuestRecord(reservationId: "abc@airbnb.com/1", propertyId: "p"), checkOut: 0)
+        try s.save(GuestRecord(reservationId: "r2", propertyId: "p"), checkOut: 0)
+        XCTAssertEqual(try s.list(propertyId: "p", reservationId: "abc@airbnb.com/1").count, 1)
+        XCTAssertEqual(try s.list(propertyId: "p", reservationId: "r2").count, 1)
+        XCTAssertEqual(try s.list(propertyId: "q", reservationId: "r2").count, 0)
+    }
+
+    func testDeleteAndReplaceAll() throws {
+        let s = store(tempDir())
+        let a = try s.save(GuestRecord(reservationId: "r", propertyId: "p"), checkOut: 0)
+        try s.save(GuestRecord(reservationId: "r", propertyId: "p"), checkOut: 0)
+        try s.delete(propertyId: "p", reservationId: "r", id: a.id)
+        XCTAssertEqual(try s.list(propertyId: "p", reservationId: "r").count, 1)
+        try s.replaceAll(propertyId: "p", reservationId: "r", checkOut: 0, records: [])
+        XCTAssertTrue(s.all().isEmpty)
+    }
+
+    func testUnsentAndClear() throws {
+        let s = store(tempDir())
+        XCTAssertFalse(s.hasUnsent())
+        try s.save(GuestRecord(reservationId: "r", propertyId: "p"), checkOut: 0)
+        XCTAssertTrue(s.hasUnsent())
+        try s.clear()
+        XCTAssertTrue(s.all().isEmpty)
+        XCTAssertFalse(s.hasUnsent())
+    }
+
+    func testPurgeRemovesOnlyExpiredReservations() throws {
+        let s = store(tempDir())
+        let now = 100 * day
+        try s.save(GuestRecord(reservationId: "old", propertyId: "p", schedInaSent: true, sendTimestamp: now - 31 * day), checkOut: 0)
+        try s.save(GuestRecord(reservationId: "new", propertyId: "p", schedInaSent: true, sendTimestamp: now - day), checkOut: 0)
+        XCTAssertEqual(s.purgeExpired(now: now), 1)
+        XCTAssertEqual(s.all().map(\.reservationId), ["new"])
+    }
+
+    func testTwoInstancesOnTheSameDirDoNotLoseRecords() throws {
+        let dir = tempDir()
+        let a = GuestRecordStore(directory: dir)
+        let b = GuestRecordStore(directory: dir)
+        DispatchQueue.concurrentPerform(iterations: 50) { i in
+            _ = try? (i % 2 == 0 ? a : b).save(GuestRecord(reservationId: "r", propertyId: "p", nome: "\(i)"), checkOut: 5)
+        }
+        XCTAssertEqual(try a.list(propertyId: "p", reservationId: "r").count, 50)
+    }
+
+    func testCorruptFileIsKeptAsideAndSaveThrows() throws {
+        let dir = tempDir()
+        let s = GuestRecordStore(directory: dir, newId: { "x" })
+        let first = try s.save(GuestRecord(reservationId: "r", propertyId: "p"), checkOut: 0)
+        let files = try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)
+        let json = try XCTUnwrap(files.first { $0.pathExtension == "json" })
+        try Data("{non json".utf8).write(to: json)
+        var edited = first
+        edited.nome = "N"
+        XCTAssertThrowsError(try s.save(edited, checkOut: 0)) { error in
+            XCTAssertEqual(error as? GuestRecordStoreError, .corrupt)
+            XCTAssertEqual(error.localizedDescription, "Archivio delle schede danneggiato")
+        }
+        let aside = try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)
+            .filter { $0.lastPathComponent.hasSuffix(".corrupt") }
+        XCTAssertEqual(aside.count, 1)
+        XCTAssertEqual(try String(contentsOf: aside[0], encoding: .utf8), "{non json")
+        XCTAssertTrue(s.hasUnsent())
+        XCTAssertTrue(s.all().isEmpty)
+        try s.clear()
+        XCTAssertFalse(s.hasUnsent())
+    }
+
+    func testSaveWithZeroKeepsTheKnownCheckOut() throws {
+        let s = store(tempDir())
+        try s.save(GuestRecord(reservationId: "r", propertyId: "p"), checkOut: 777)
+        try s.save(GuestRecord(reservationId: "r", propertyId: "p"), checkOut: 0)
+        XCTAssertEqual(try s.get(propertyId: "p", reservationId: "r")?.checkOut, 777)
+    }
+
+    func testStoredCheckinWithoutOptionalFieldsDecodes() throws {
+        let json = #"{"propertyId":"p","reservationId":"r","records":[{"id":"a","schedInaSent":true}]}"#
+        let c = try JSONDecoder().decode(StoredCheckin.self, from: Data(json.utf8))
+        XCTAssertEqual(c.checkOut, 0)
+        XCTAssertEqual(c.records.map(\.id), ["a"])
+        XCTAssertNil(c.records[0].sendingAt)
+    }
+
+    // MARK: Ricevute
+
+    func testReceiptFilesAreOverwrittenAndPurged() throws {
+        let dir = tempDir()
+        let url = try ReceiptFiles.write(Data([1]), directory: dir)
+        _ = try ReceiptFiles.write(Data([2, 3]), directory: dir)
+        XCTAssertEqual(try Data(contentsOf: url), Data([2, 3]))
+        ReceiptFiles.purgeOlderThan(60, now: Date(), directory: dir)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+        ReceiptFiles.purgeOlderThan(60, now: Date().addingTimeInterval(120), directory: dir)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+        ReceiptFiles.clear(directory: dir)
+    }
 }

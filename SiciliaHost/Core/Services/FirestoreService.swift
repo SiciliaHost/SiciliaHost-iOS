@@ -1,3 +1,4 @@
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 import Foundation
@@ -189,6 +190,22 @@ struct FirestoreService: @unchecked Sendable {
         }
     }
 
+    /// Come `getReservations(propertyIds:)`, più gli id delle prenotazioni con il segno `checkin` (check-in inviato). Il
+    /// segno si legge a parte e non è un campo di `Reservation`: un salvataggio della prenotazione non lo riscrive mai.
+    func getReservationsWithCheckin(propertyIds: [String]) async throws -> ReservationsWithCheckin {
+        let rows: [ReservationWithMark] = try await fanOut(propertyIds) { id in
+            let snapshot = try await db.collection("reservations").whereField("propertyId", isEqualTo: id).getDocuments()
+            return snapshot.documents.compactMap { doc -> ReservationWithMark? in
+                guard let reservation: Reservation = decode(doc) else { return nil }
+                return ReservationWithMark(reservation: reservation, sent: CheckinMark.parse(doc.data()["checkin"]) != nil)
+            }
+        }
+        return ReservationsWithCheckin(
+            reservations: rows.map(\.reservation),
+            checkinSentIds: Set(rows.filter(\.sent).map(\.reservation.id))
+        )
+    }
+
     func getExpenses(propertyIds: [String]) async throws -> [Expense] {
         try await fanOut(propertyIds) { id in
             decodeAll(try await db.collection("expenses").whereField("propertyId", isEqualTo: id).getDocuments())
@@ -336,6 +353,19 @@ struct FirestoreService: @unchecked Sendable {
         return snapshot.exists ? decode(snapshot) : nil
     }
 
+    /// Il segno «check-in inviato» della prenotazione (vedi `CheckinMark`), o nil.
+    func getCheckinMark(_ reservationId: String) async throws -> CheckinMark? {
+        let snapshot = try await db.collection("reservations").document(reservationId).getDocument()
+        return CheckinMark.parse(snapshot.data()?["checkin"])
+    }
+
+    /// Scrive solo il campo `checkin`: nessun dato degli ospiti.
+    func markCheckinSent(_ reservationId: String, guests: Int, now: Int64) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { throw CheckinMarkError.notSignedIn }
+        try await db.collection("reservations").document(reservationId)
+            .updateData(["checkin": ["sentAt": now, "guests": max(0, guests), "by": uid] as [String: Any]])
+    }
+
     /// Elimina la prenotazione e, se `withExpenses`, le spese collegate (es. i 20 € biancheria) in un unico batch.
     /// Le spese si leggono e si cancellano solo con il permesso sulle finanze (proprietario): per un collaboratore
     /// si passa `withExpenses = false`, e le spese rimaste senza prenotazione le elimina la schermata Finanze.
@@ -480,4 +510,21 @@ struct FirestoreService: @unchecked Sendable {
 struct BookingImportCounts: Equatable, Sendable {
     let confirmed: Int
     let cancelled: Int
+}
+
+/// Una prenotazione e se ha il segno `checkin`.
+struct ReservationWithMark: Sendable {
+    let reservation: Reservation
+    let sent: Bool
+}
+
+/// Le prenotazioni di più case con gli id di quelle già inviate ad Alloggiati (Home, Agenda).
+struct ReservationsWithCheckin: Sendable {
+    var reservations: [Reservation] = []
+    var checkinSentIds: Set<String> = []
+}
+
+enum CheckinMarkError: LocalizedError {
+    case notSignedIn
+    var errorDescription: String? { "Nessun utente connesso" }
 }
