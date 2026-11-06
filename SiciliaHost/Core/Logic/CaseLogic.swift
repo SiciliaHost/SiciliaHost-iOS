@@ -123,13 +123,6 @@ enum CaseSaveLogic {
         case (nil, nil): return ""
         }
     }
-
-    /// Cosa scrivere nel documento riservato delle credenziali al salvataggio. nil = non toccarlo: o l'utente non è
-    /// proprietario (le regole negherebbero la scrittura), o le credenziali non si sono potute leggere e il modulo era
-    /// vuoto per errore (salvarlo sovrascriverebbe quelle vere con stringhe vuote).
-    static func credentialsToSave(loaded: AlloggiatiCredentials?, isOwner: Bool) -> AlloggiatiCredentials? {
-        isOwner ? loaded : nil
-    }
 }
 
 // MARK: Eliminazione della casa

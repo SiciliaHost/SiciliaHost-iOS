@@ -14,8 +14,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testAppFieldsNeverIncludeMembershipOrCredentials() {
-        let fields = Property(id: "p1", name: "Casa", members: ["a": "OWNER"], memberUids: ["a"], createdBy: "a",
-                              alloggiatiConfigured: true).appFields
+        let fields = Property(id: "p1", name: "Casa", members: ["a": "OWNER"], memberUids: ["a"], createdBy: "a").appFields
         for key in ["members", "memberUids", "createdBy", "alloggiatiConfigured", "wsUtente", "wsPassword", "wsKey", "permissions"] {
             XCTAssertNil(fields[key], "\(key) non deve essere scritto dai salvataggi della scheda")
         }

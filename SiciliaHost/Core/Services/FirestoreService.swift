@@ -13,7 +13,6 @@ extension Reservation: FirestoreDocument {}
 extension Expense: FirestoreDocument {}
 extension RecurringExpense: FirestoreDocument {}
 extension InventoryItem: FirestoreDocument {}
-extension GuestRecord: FirestoreDocument {}
 extension UserProfile: FirestoreDocument {}
 
 /// Equivalente di `DatabaseRepository.kt`. Collezioni condivise con l'Android e col sito: non cambiare
@@ -122,12 +121,10 @@ struct FirestoreService: @unchecked Sendable {
         created.members = [ownerUid: "OWNER"]
         created.memberUids = [ownerUid]
         created.createdBy = ownerUid
-        created.alloggiatiConfigured = false
         var data = created.appFields
         data["members"] = created.members
         data["memberUids"] = created.memberUids
         data["createdBy"] = ownerUid
-        data["alloggiatiConfigured"] = false
         try await ref.setData(data)
         return created
     }
@@ -155,31 +152,6 @@ struct FirestoreService: @unchecked Sendable {
             result[id] = BookingImportCounts(confirmed: confirmed, cancelled: cancelled)
         }
         return result
-    }
-
-    // MARK: Credenziali Alloggiati (solo OWNER, vedi firestore.rules)
-
-    func getAlloggiatiCredentials(_ propertyId: String) async throws -> AlloggiatiCredentials {
-        let doc = try await db.collection("properties").document(propertyId)
-            .collection("private").document("alloggiati").getDocument()
-        let data = doc.data() ?? [:]
-        return AlloggiatiCredentials(
-            utente: data["wsUtente"] as? String ?? "",
-            password: data["wsPassword"] as? String ?? "",
-            wsKey: data["wsKey"] as? String ?? ""
-        )
-    }
-
-    /// Scrive le credenziali e il flag `alloggiatiConfigured` della casa nello stesso batch.
-    func saveAlloggiatiCredentials(_ propertyId: String, credentials: AlloggiatiCredentials) async throws {
-        let propertyRef = db.collection("properties").document(propertyId)
-        let batch = db.batch()
-        batch.setData(
-            ["wsUtente": credentials.utente, "wsPassword": credentials.password, "wsKey": credentials.wsKey],
-            forDocument: propertyRef.collection("private").document("alloggiati")
-        )
-        batch.updateData(["alloggiatiConfigured": credentials.isConfigured], forDocument: propertyRef)
-        try await batch.commit()
     }
 
     // MARK: Elenchi per più case (una query per casa, vedi fanOut)
@@ -467,42 +439,6 @@ struct FirestoreService: @unchecked Sendable {
         } catch {
             return nil
         }
-    }
-
-    // MARK: Ospiti (Alloggiati)
-
-    /// `propertyId` obbligatorio: le regole lo usano per decidere l'accesso e rifiutano la query senza.
-    func getGuestRecords(propertyId: String, reservationId: String) async throws -> [GuestRecord] {
-        decodeAll(try await db.collection("guest_records")
-            .whereField("propertyId", isEqualTo: propertyId)
-            .whereField("reservationId", isEqualTo: reservationId)
-            .getDocuments())
-    }
-
-    func saveGuestRecord(_ record: GuestRecord) async throws -> GuestRecord {
-        if record.id.isEmpty {
-            let ref = db.collection("guest_records").document()
-            var created = record
-            created.id = ref.documentID
-            try await ref.setData(created.firestoreData)
-            return created
-        }
-        // Merge: i campi che scrive solo il server (es. `sendingAt` durante un invio) restano. L'Android fa un `set`
-        // completo e li cancella; qui no (vedi CLAUDE.md del sito, fase 4c).
-        try await db.collection("guest_records").document(record.id).setData(record.firestoreData, merge: true)
-        return record
-    }
-
-    func deleteGuestRecord(_ id: String) async throws {
-        try await db.collection("guest_records").document(id).delete()
-    }
-
-    func markGuestRecordSent(_ id: String, error: String? = nil) async throws {
-        try await db.collection("guest_records").document(id).updateData([
-            "schedInaSent": error == nil,
-            "sendTimestamp": Int64(Date().timeIntervalSince1970 * 1000),
-            "sendError": orNull(error),
-        ])
     }
 }
 

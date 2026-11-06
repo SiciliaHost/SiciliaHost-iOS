@@ -79,31 +79,6 @@ func parseTransferResult(_ data: Any?) -> TransferResult {
 
 func parseClaimed(_ data: Any?) -> [String] { strings(dict(data)?["claimed"]) }
 
-// MARK: Alloggiati
-
-func parseEsito(_ data: Any?) -> ElencoSchedineEsito {
-    guard let map = dict(data) else { return ElencoSchedineEsito(schedineValide: 0, dettaglio: []) }
-    let details = ((map["dettaglio"] as? [Any]) ?? []).compactMap { item -> EsitoSingolo? in
-        guard let m = dict(item) else { return nil }
-        return EsitoSingolo(
-            esito: m["esito"] as? Bool ?? false,
-            errorCod: m["errorCod"] as? String ?? "",
-            errorDes: m["errorDes"] as? String ?? "",
-            erroreDettaglio: m["erroreDettaglio"] as? String ?? ""
-        )
-    }
-    return ElencoSchedineEsito(schedineValide: int(map["schedineValide"]) ?? 0, dettaglio: details)
-}
-
-/// Il CSV di una tabella Alloggiati (`{ csv: "..." }`), o stringa vuota.
-func parseCsvField(_ data: Any?) -> String { dict(data)?["csv"] as? String ?? "" }
-
-/// Il PDF della ricevuta (`{ pdfBase64: "..." }`), o nil se assente, vuoto o non valido.
-func parseReceipt(_ data: Any?) -> Data? {
-    guard let b64 = dict(data)?["pdfBase64"] as? String, !b64.trimmed.isEmpty else { return nil }
-    return Data(base64Encoded: b64)
-}
-
 // MARK: Annunci e host
 
 /// Legge `{ hosts: [{uid,email,displayName,propertyCount,pendingCount,propertyNames}] }` ignorando le righe malformate.

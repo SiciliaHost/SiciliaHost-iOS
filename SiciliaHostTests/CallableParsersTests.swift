@@ -121,37 +121,6 @@ final class CallableParsersTests: XCTestCase {
         XCTAssertTrue(parseClaimed(nil).isEmpty)
     }
 
-    // MARK: Alloggiati
-
-    func testParseEsitoReadsValidCountAndPerRowDetails() {
-        let esito = parseEsito([
-            "schedineValide": 1,
-            "dettaglio": [
-                ["esito": true, "errorCod": "", "errorDes": "", "erroreDettaglio": ""] as [String: Any],
-                ["esito": false, "errorCod": "12", "errorDes": "Documento non valido", "erroreDettaglio": "numero"],
-            ] as [Any],
-        ] as [String: Any])
-        XCTAssertEqual(esito.schedineValide, 1)
-        XCTAssertEqual(esito.dettaglio.count, 2)
-        XCTAssertTrue(esito.dettaglio[0].esito)
-        XCTAssertFalse(esito.dettaglio[1].esito)
-        XCTAssertEqual(esito.dettaglio[1].errorDes, "Documento non valido")
-    }
-
-    func testParseEsitoOfGarbageIsEmpty() {
-        let esito = parseEsito(nil)
-        XCTAssertEqual(esito.schedineValide, 0)
-        XCTAssertTrue(esito.dettaglio.isEmpty)
-    }
-
-    func testParseCsvAndReceipt() {
-        XCTAssertEqual(parseCsvField(["csv": "a;b\n1;2"]), "a;b\n1;2")
-        XCTAssertEqual(parseCsvField(nil), "")
-        XCTAssertEqual(parseReceipt(["pdfBase64": "JVBERg=="]), Data([0x25, 0x50, 0x44, 0x46]))
-        XCTAssertNil(parseReceipt(["pdfBase64": ""]))
-        XCTAssertNil(parseReceipt(nil))
-    }
-
     func testDescribeHostErrorIsReadableInItalian() {
         XCTAssertEqual(describeHostError(code: "UNAVAILABLE", message: "x"), "Connessione assente o lenta: riprova")
         XCTAssertEqual(describeHostError(code: "PERMISSION_DENIED", message: "No access to this property"), "Non hai i permessi per questa operazione")

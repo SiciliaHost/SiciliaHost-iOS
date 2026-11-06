@@ -51,7 +51,6 @@ struct Property: Identifiable, Codable, Equatable, Sendable {
     var memberUids: [String] = []
     var createdBy: String?
     var permissions: [String: [String]] = [:]
-    var alloggiatiConfigured = false
 
     func roleOf(_ uid: String) -> PropertyRole? { PropertyRole.parse(members[uid]) }
 
@@ -62,7 +61,7 @@ struct Property: Identifiable, Codable, Equatable, Sendable {
     }
 
     /// I soli campi che l'app possiede, per i salvataggi con merge. NON include appartenenza,
-    /// `alloggiatiConfigured` né credenziali. I campi nulli restano nella mappa (come `NSNull`):
+    /// credenziali (che stanno solo sul telefono). I campi nulli restano nella mappa (come `NSNull`):
     /// svuotare un campo nel form lo cancella.
     var appFields: [String: Any] {
         return [
@@ -111,6 +110,5 @@ extension Property {
         memberUids = c.value(.memberUids, [])
         createdBy = c.optional(.createdBy)
         permissions = c.value(.permissions, [:])
-        alloggiatiConfigured = c.value(.alloggiatiConfigured, false)
     }
 }

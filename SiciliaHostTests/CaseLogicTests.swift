@@ -129,14 +129,6 @@ final class CaseLogicTests: XCTestCase {
         XCTAssertEqual(CaseSaveLogic.partialFailureMessage(appFailed: "a", siteFailed: "b"), "Salvataggio non riuscito: a / b")
     }
 
-    func testCredentialsToSave() {
-        let creds = AlloggiatiCredentials(utente: "u", password: "p", wsKey: "k")
-        XCTAssertEqual(CaseSaveLogic.credentialsToSave(loaded: creds, isOwner: true), creds)
-        XCTAssertNil(CaseSaveLogic.credentialsToSave(loaded: creds, isOwner: false))
-        XCTAssertNil(CaseSaveLogic.credentialsToSave(loaded: nil, isOwner: true))
-        XCTAssertEqual(CaseSaveLogic.credentialsToSave(loaded: AlloggiatiCredentials(), isOwner: true), AlloggiatiCredentials())
-    }
-
     // MARK: DeleteCaseTest
 
     func testDeleteConfirmation() {

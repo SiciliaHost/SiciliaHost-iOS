@@ -79,27 +79,6 @@ struct HostFunctionsService: InviteAPI {
         parseClaimed(try await call("claimPendingTransfers", [:]))
     }
 
-    /// `send` = false → solo controllo (operazione Test del servizio), nulla viene segnato come inviato.
-    func submitAlloggiati(propertyId: String, reservationId: String, send: Bool) async throws -> ElencoSchedineEsito {
-        parseEsito(try await call("submitAlloggiati", [
-            "propertyId": propertyId, "reservationId": reservationId, "mode": send ? "send" : "test",
-        ]))
-    }
-
-    func getAlloggiatiTable(propertyId: String, tipo: String) async throws -> String {
-        parseCsvField(try await call("getAlloggiatiTable", ["propertyId": propertyId, "tipo": tipo]))
-    }
-
-    /// `date` nel formato `yyyy-MM-dd`; senza data il server usa oggi.
-    func getAlloggiatiReceipt(propertyId: String, date: String? = nil) async throws -> Data {
-        var payload: [String: Any?] = ["propertyId": propertyId]
-        if let date { payload["date"] = date }
-        guard let pdf = parseReceipt(try await call("getAlloggiatiReceipt", payload)) else {
-            throw ServiceError(message: "Ricevuta non disponibile")
-        }
-        return pdf
-    }
-
     private func call(_ name: String, _ payload: [String: Any?]) async throws -> Any? {
         try await callCloud(functions, name, payload)
     }

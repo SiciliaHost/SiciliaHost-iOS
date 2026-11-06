@@ -76,31 +76,6 @@ extension InventoryItem {
     }
 }
 
-extension GuestRecord {
-    var firestoreData: [String: Any] {
-        [
-            "id": id,
-            "reservationId": reservationId,
-            "propertyId": propertyId,
-            "tipoAlloggiato": tipoAlloggiato,
-            "cognome": cognome,
-            "nome": nome,
-            "sesso": sesso,
-            "dataNascita": dataNascita,
-            "comuneNascitaCode": orNull(comuneNascitaCode),
-            "provinciaNascita": orNull(provinciaNascita),
-            "statoNascitaCode": statoNascitaCode,
-            "cittadinanzaCode": cittadinanzaCode,
-            "tipoDocumentoCode": tipoDocumentoCode,
-            "numeroDocumento": numeroDocumento,
-            "luogoRilascioCode": luogoRilascioCode,
-            "schedInaSent": schedInaSent,
-            "sendTimestamp": orNull(sendTimestamp),
-            "sendError": orNull(sendError),
-        ]
-    }
-}
-
 extension Contact {
     var firestoreData: [String: Any] {
         ["phone": phone, "name": name, "address": address, "country": country,

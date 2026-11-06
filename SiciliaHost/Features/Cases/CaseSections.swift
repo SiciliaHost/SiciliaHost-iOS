@@ -196,12 +196,11 @@ struct OrariRegoleSection: View {
     }
 }
 
-// MARK: Gestione (iCal, commissione, Alloggiati, membri)
+// MARK: Gestione (iCal, commissione, ID Appartamento Alloggiati, membri)
 
 struct GestioneSection: View {
     let property: Property
     @Binding var draft: AppFieldsDraft
-    @Binding var creds: CredsState
     let isOwner: Bool
     let isSuperAdmin: Bool
     @Binding var importMessage: String?
@@ -249,41 +248,13 @@ struct GestioneSection: View {
                 .padding(.top, 6)
         }
 
-        SubsectionTitle(text: "Credenziali Alloggiati Web")
-        switch creds {
-        case .loading:
-            ProgressView()
-        case .unavailable:
-            SectionNote(text: "Non disponibili (non sei il proprietario di questa casa, oppure non si sono potute leggere). Riprova più tardi.")
-            // L'ID Appartamento non è un segreto (sta sul documento della casa): resta modificabile.
-            AppTextField(label: "ID Appartamento", text: $draft.idAppartamento, keyboard: .numberPad)
-        case let .ready(c):
-            FieldPair {
-                AppTextField(label: "Utente", text: credsBinding(c, \.utente), capitalization: .never)
-            } b: {
-                SecureCredentialField(label: "Password", text: credsBinding(c, \.password))
-            }
-            FieldPair {
-                SecureCredentialField(label: "WsKey", text: credsBinding(c, \.wsKey))
-            } b: {
-                AppTextField(label: "ID Appartamento", text: $draft.idAppartamento, keyboard: .numberPad)
-            }
-        }
-    }
-
-    /// Le credenziali restano solo in memoria (mai salvate sul telefono): sono segreti.
-    private func credsBinding(_ current: AlloggiatiCredentials, _ field: WritableKeyPath<AlloggiatiCredentials, String>) -> Binding<String> {
-        Binding(
-            get: { creds.value?[keyPath: field] ?? current[keyPath: field] },
-            set: { newValue in
-                var updated = creds.value ?? current
-                updated[keyPath: field] = newValue
-                creds = .ready(updated)
-            }
-        )
+        SubsectionTitle(text: "Alloggiati Web")
+        SectionNote(text: "Utente, password e WsKey non si salvano qui: chi fa il check-in li inserisce sul proprio telefono, dalla schermata del check-in. Restano solo sul telefono e SiciliaHost non li riceve.")
+        AppTextField(label: "ID Appartamento", text: $draft.idAppartamento, keyboard: .numberPad)
     }
 }
 
+/// Campo segreto (password, WsKey): lo usa il foglio delle credenziali del check-in.
 struct SecureCredentialField: View {
     let label: String
     @Binding var text: String

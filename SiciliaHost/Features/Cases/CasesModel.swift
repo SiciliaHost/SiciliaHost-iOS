@@ -242,28 +242,7 @@ final class CasesModel {
         return ok
     }
 
-    // MARK: Gestione (credenziali Alloggiati, import Excel Booking)
-
-    /// Le credenziali Alloggiati della casa, o nil se non sono disponibili (non proprietario, errore di lettura).
-    func loadCredentials(_ propertyId: String) async -> AlloggiatiCredentials? {
-        guard let scope = try? await AccessSession.shared.scope(),
-              let property = scope.properties.first(where: { $0.id == propertyId }), scope.isOwner(property) else { return nil }
-        return try? await db.getAlloggiatiCredentials(propertyId)
-    }
-
-    /// Scrive le credenziali solo se l'utente è proprietario (le regole negherebbero la scrittura). Vero se salvate.
-    func saveCredentials(_ propertyId: String, _ credentials: AlloggiatiCredentials) async -> Bool {
-        guard let scope = try? await AccessSession.shared.scope(),
-              let property = scope.properties.first(where: { $0.id == propertyId }),
-              let toSave = CaseSaveLogic.credentialsToSave(loaded: credentials, isOwner: scope.isOwner(property)) else { return false }
-        do {
-            try await db.saveAlloggiatiCredentials(propertyId, credentials: toSave)
-            return true
-        } catch {
-            actionError = "Credenziali non salvate: \(error.localizedDescription)"
-            return false
-        }
-    }
+    // MARK: Gestione (import Excel Booking)
 
     /// "Sincronizza ora" (`syncNow` dell'Android): un giro immediato per ogni URL iCal salvato, con l'esito per l'utente.
     func syncNow(_ propertyId: String) async -> String {

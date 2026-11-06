@@ -1,17 +1,5 @@
 import SwiftUI
 
-/// Stato di lettura delle credenziali Alloggiati: "non disponibili" non va confuso con "vuote".
-enum CredsState: Equatable {
-    case loading
-    case ready(AlloggiatiCredentials)
-    case unavailable
-
-    var value: AlloggiatiCredentials? {
-        if case let .ready(c) = self { return c }
-        return nil
-    }
-}
-
 /// Editor a schermo intero aperto da "Contenuti della pagina".
 enum CaseSubEditor { case services, details }
 
@@ -28,8 +16,6 @@ struct CaseDetailView: View {
     @State private var siteModel = SiteContentModel()
     @State private var appDraft: AppFieldsDraft
     @State private var siteDraft: SiteDraft
-    @State private var credsOriginal: AlloggiatiCredentials?
-    @State private var creds: CredsState = .loading
     @State private var expanded: Set<CaseSection> = [.stato, .informazioni]
     @State private var sub: CaseSubEditor?
     @State private var showLeave = false
@@ -93,17 +79,11 @@ struct CaseDetailView: View {
         return current
     }
 
-    private var credsChanged: Bool {
-        guard let now = creds.value else { return false }
-        return now != credsOriginal
-    }
-
     private func dirty(_ item: CaseItem) -> Bool {
-        appDraft != appOriginal(item) || siteCurrent(item) != siteOriginal(item) || credsChanged
+        appDraft != appOriginal(item) || siteCurrent(item) != siteOriginal(item)
     }
 
     private func save(_ item: CaseItem) async -> Bool {
-        let credsToSave = creds.value
         let icalChanged = appDraft.icalUrlAirbnb.trimmed != appOriginal(item).icalUrlAirbnb.trimmed
             || appDraft.icalUrlBooking.trimmed != appOriginal(item).icalUrlBooking.trimmed
         let ok = await model.saveCase(
@@ -112,9 +92,6 @@ struct CaseDetailView: View {
             photos: (siteModel.content(id) ?? item.site).photos
         )
         guard ok else { return false }
-        if item.canManage, credsChanged, let credsToSave {
-            if await model.saveCredentials(id, credsToSave) { credsOriginal = credsToSave }
-        }
         // URL iCal cambiati: sincronizzazione subito (l'Android ne accoda una e pianifica quella oraria), così non si
         // aspetta il giro successivo per vedere le prime prenotazioni; i promemoria Excel si ripianificano da soli.
         if icalChanged {
@@ -220,7 +197,6 @@ struct CaseDetailView: View {
             model.clearMessages()
             await siteModel.load()
         }
-        .task(id: item.canManage) { await loadCredentials(canManage: item.canManage) }
         // Ogni foto cambiata ricarica anche l'elenco Case.
         .onChange(of: siteModel.photoBusy) { was, now in
             if was && !now { Task { await model.load() } }
@@ -264,23 +240,12 @@ struct CaseDetailView: View {
             Button("Scarta", role: .destructive) { onBack() }
             Button("Continua a modificare", role: .cancel) {}
         } message: {
-            Text("Puoi salvarle come bozza, scartarle o continuare a modificare."
-                + (credsChanged ? "\nLe credenziali Alloggiati non salvate andranno perse." : ""))
+            Text("Puoi salvarle come bozza, scartarle o continuare a modificare.")
         }
     }
 
     private func toggle(_ section: CaseSection) {
         if expanded.contains(section) { expanded.remove(section) } else { expanded.insert(section) }
-    }
-
-    private func loadCredentials(canManage: Bool) async {
-        guard canManage else {
-            creds = .unavailable
-            return
-        }
-        let loaded = await model.loadCredentials(id)
-        credsOriginal = loaded
-        creds = loaded.map(CredsState.ready) ?? .unavailable
     }
 
     @ViewBuilder
@@ -311,7 +276,7 @@ struct CaseDetailView: View {
             OrariRegoleSection(draft: $appDraft, enabled: appEnabled)
         case .gestione:
             GestioneSection(
-                property: item.property, draft: $appDraft, creds: $creds,
+                property: item.property, draft: $appDraft,
                 isOwner: scope.isOwner(item.property), isSuperAdmin: scope.isSuperAdmin,
                 importMessage: $importMessage,
                 onImport: { data in
