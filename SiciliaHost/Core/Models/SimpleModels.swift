@@ -16,14 +16,28 @@ struct AlloggiatiCredentials: Codable, Equatable, Sendable, CustomStringConverti
     var debugDescription: String { description }
 }
 
-/// Rubrica marketing (import Excel Booking): il telefono è l'id del documento.
-struct Contact: Equatable, Sendable {
+/// Rubrica marketing (import Excel Booking): solo sul telefono del proprietario (`FinanceData.contacts`), mai su
+/// Firestore. Stesso telefono nella stessa casa = stesso contatto.
+struct Contact: Codable, Equatable, Sendable {
     var phone = ""
     var name = ""
     var address = ""
     var country = ""
     var propertyId = ""
     var source = "BOOKING_XLS_IMPORT"
+}
+
+// Nell'extension e non nel corpo della struct, per non perdere l'inizializzatore memberwise.
+extension Contact {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        phone = c.value(.phone, "")
+        name = c.value(.name, "")
+        address = c.value(.address, "")
+        country = c.value(.country, "")
+        propertyId = c.value(.propertyId, "")
+        source = c.value(.source, "BOOKING_XLS_IMPORT")
+    }
 }
 
 /// Una casa dell'invito con i permessi extra concessi (vuoto = solo gestione base).

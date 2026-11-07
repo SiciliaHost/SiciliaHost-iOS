@@ -65,6 +65,9 @@ e correggere gli errori (vedi Prossimi passi).
 <!-- alloggiati-stato -->
 - **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 7 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
 <!-- alloggiati-stato -->
+<!-- finanze-stato -->
+- **Finanze e contatti Excel sul telefono (2026-11-07, ramo `feat/finanze-sul-telefono`, NON spinto, NON compilato)**: piano `Siciliahost.it/docs/superpowers/plans/2026-11-06-finanze-sul-telefono-ios.md`. Fatto: Task 1 (`Core/Finance/FinanceModels.swift`, `FinanceOps.swift`, `FinanceStore.swift`, `Contact: Codable`, test `FinanceLocalTests`). **Il target non compila finché non è completato il Task 9** (come su Android).
+<!-- finanze-stato -->
 
 ## Prossimi passi (in ordine)
 
@@ -82,6 +85,9 @@ e correggere gli errori (vedi Prossimi passi).
   4. Prova reale su iPhone (credenziali, «Testa correttezza», ricevuta di un giorno passato; MAI «Invia» per prova): la fa il titolare.
   5. Aggiornare `tools/gen_inventario.py` al pacchetto `com/siciliahost/cactushost` e la baseline Android a `0688569`.
 <!-- alloggiati-prossimi -->
+<!-- finanze-prossimi -->
+- **Finanze sul telefono** (ramo `feat/finanze-sul-telefono`): completare i Task 2-10 del piano, poi spingere (lo autorizza il titolare) e far girare la CI.
+<!-- finanze-prossimi -->
 
 ## Decisioni prese
 
@@ -143,6 +149,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-07 — Claude Sonnet 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze sul telefono, Task 1: archivio locale
+- `FinanceStore` (actor, un file JSON per utente in `Application Support/finance/<uid>/`, registro di istanze), `FinanceData`/`ReservationMoney`/`FinReservation`/`joinMoney`, mutatori puri, `Contact` ora `Codable` con decoder tollerante.
+- `FinReservation.netOwner` usa `FinancialCalculator.netOwner`, che arriva col Task 2: il Task 1 da solo non compila.
+- **NON compilato.**
 
 ### 2026-11-06 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-alloggiati`, Windows senza Swift) — Unione `feat/ios-unione`
 - Uniti `feat/alloggiati-sul-telefono` (check-in sul telefono) e `feat/elimina-account-segnala` (Elimina account, Segnala un problema, Crashlytics); conflitto solo nel DIARIO (tenute tutte le voci).
