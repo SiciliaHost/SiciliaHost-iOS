@@ -5,6 +5,33 @@ protocol SiteAmountsSource: Sendable {
     func amounts(propertyIds: [String]) async throws -> [SiteBookingAmount]
 }
 
+/// `getSiteBookingAmounts` accetta al massimo 20 case per chiamata (e rifiuta tutto se una non è del chiamante).
+let siteAmountsChunkSize = 20
+
+/// Importi del sito per `ids`, chiesti a gruppi da `chunkSize` case, un gruppo alla volta, risultati uniti.
+/// Un gruppo che fallisce (il sito può non essere aggiornato) viene ignorato: gli altri restano validi.
+/// Solo l'annullamento del task sale.
+func siteAmountsInChunks(_ ids: [String], chunkSize: Int = siteAmountsChunkSize,
+                         fetch: ([String]) async throws -> [SiteBookingAmount]) async throws -> [SiteBookingAmount] {
+    var seen = Set<String>()
+    let unique = ids.filter { seen.insert($0).inserted }
+    let size = max(1, chunkSize)
+    var out: [SiteBookingAmount] = []
+    var start = 0
+    while start < unique.count {
+        let chunk = Array(unique[start..<min(start + size, unique.count)])
+        start += size
+        do {
+            out += try await fetch(chunk)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            continue   // gruppo saltato
+        }
+    }
+    return out
+}
+
 /// Tutto ciò che la schermata Finanze mostra in un dato istante.
 struct FinanceSnapshot {
     var reservations: [FinReservation] = []
@@ -43,7 +70,7 @@ struct FinanceRepository {
         let loaded = try await loadReservations(ids)
         let reservations = loaded.reservations
         let cleanOrphans = !loaded.fromCache
-        let siteAmounts = (try? await site.amounts(propertyIds: ids)) ?? []   // il sito può non essere ancora aggiornato
+        let siteAmounts = (try? await siteAmountsInChunks(ids) { try await site.amounts(propertyIds: $0) }) ?? []   // a gruppi da 20; il sito può non essere ancora aggiornato
         let current = now()
         let idSet = Set(ids)
         let data = try await store.update {

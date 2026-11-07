@@ -150,6 +150,11 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-07 — Claude Sonnet 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze: importi del sito a gruppi da 20 case
+- `getSiteBookingAmounts` accetta al massimo 20 `propertyIds` e rifiuta tutto se una casa non è del chiamante; prima `FinanceRepository.load` la chiamava con tutte le case e ignorava l'errore (`try?`), quindi con più di 20 case gli importi del sito sparivano in silenzio.
+- `Core/Finance/FinanceRepository.swift`: funzione pura `siteAmountsInChunks(_:chunkSize:fetch:)` (gruppi da 20, uno alla volta, risultati uniti, id duplicati tolti; un gruppo che fallisce è saltato e gli altri restano validi; solo `CancellationError` sale). `load` la usa con `site.amounts`.
+- Test in `SiciliaHostTests/FinanceLocalTests.swift` (`SiteAmountsChunkTests`, con l'attore `RecordingSite`): 45 id → chiamate da 20/20/5; un gruppo che lancia non cancella gli altri. Specchio dell'Android (`siteAmountsInChunks`). NON compilato: da verificare in CI.
+
 ### 2026-11-07 — Claude Opus 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze sul telefono, Task 10: eliminazione account, testi, documentazione
 - `Features/Profile/AccountDeletion.swift` (l'eliminazione è qui, non in `AuthService`): uid preso prima di `deleteMyAccount`, poi `await FinanceStore.forUser(uid).wipe()` accanto alla pulizia delle schede del check-in, prima dell'uscita. Il logout normale NON cancella le finanze.
 - Testi: interruttore «Gestita in commissione (il super-admin può aiutarti nella gestione)» (scrive sempre `isManagedOnCommission`); trasferimento di proprietà «Il nuovo proprietario avrà scheda e inviti…» + «Le finanze restano sul tuo telefono: il nuovo proprietario parte da zero.»; consenso dell'assistente e benvenuto allineati all'Android (`AssistantTexts.kt`: «Non vede importi, spese o dati finanziari: restano solo sul tuo telefono»; la voce resta «Apple»); commento `needsReview` in `Palette.swift`.

@@ -209,6 +209,42 @@ final class FinanceReconcileTests: XCTestCase {
     }
 }
 
+/// Registra le chiamate al sito (per verificare i gruppi da 20); le case in `failing` fanno fallire il loro gruppo.
+private actor RecordingSite: SiteAmountsSource {
+    private(set) var calls: [[String]] = []
+    let failing: Set<String>
+
+    init(failing: Set<String> = []) { self.failing = failing }
+
+    func amounts(propertyIds: [String]) async throws -> [SiteBookingAmount] {
+        calls.append(propertyIds)
+        if propertyIds.contains(where: { failing.contains($0) }) { throw URLError(.badServerResponse) }
+        return propertyIds.map { SiteBookingAmount(reservationId: "r-\($0)", propertyId: $0, totalPrice: 10) }
+    }
+}
+
+final class SiteAmountsChunkTests: XCTestCase {
+    private let ids = (1...45).map { "p\($0)" }
+
+    func testSiteAmountsAreRequestedInGroupsOfTwenty() async throws {
+        let site = RecordingSite()
+        let out = try await siteAmountsInChunks(ids) { try await site.amounts(propertyIds: $0) }
+        let calls = await site.calls
+        XCTAssertEqual(calls.map(\.count), [20, 20, 5])
+        XCTAssertEqual(calls.flatMap { $0 }, ids)
+        XCTAssertEqual(out.count, 45)
+    }
+
+    func testAFailingSiteGroupDoesNotDropTheOthers() async throws {
+        let site = RecordingSite(failing: ["p21"])
+        let out = try await siteAmountsInChunks(ids) { try await site.amounts(propertyIds: $0) }
+        XCTAssertEqual(out.count, 25)
+        XCTAssertFalse(out.contains { $0.propertyId == "p21" || $0.propertyId == "p40" })
+        XCTAssertTrue(out.contains { $0.propertyId == "p1" })
+        XCTAssertTrue(out.contains { $0.propertyId == "p45" })
+    }
+}
+
 private struct FakeSite: SiteAmountsSource {
     var rows: [SiteBookingAmount] = []
     var fails = false
