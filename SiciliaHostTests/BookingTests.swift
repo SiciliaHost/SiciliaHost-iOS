@@ -9,11 +9,12 @@ final class BookingTests: XCTestCase {
     private func res(
         _ inDate: Int64, _ nights: Int, gross: Double? = nil, platform: String = "BOOKING", adults: Int = 2, children: Int = 0,
         bookedDaysBefore: Int? = nil, country: String? = nil, commission: Double? = nil, property: String = "p1", grossIsNil: Bool = false
-    ) -> Reservation {
-        Reservation(
+    ) -> FinReservation {
+        FinReservation(
             id: "r\(inDate)\(property)", propertyId: property, checkIn: inDate, checkOut: inDate + Int64(nights) * day,
-            platform: platform, grossAmount: grossIsNil ? nil : (gross ?? 100.0 * Double(nights)), adults: adults, children: children,
-            bookedAt: bookedDaysBefore.map { inDate - Int64($0) * day }, guestCountry: country, commissionAmount: commission
+            platform: platform, adults: adults, children: children, guestCountry: country,
+            grossAmount: grossIsNil ? nil : (gross ?? 100.0 * Double(nights)), commissionAmount: commission,
+            bookedAt: bookedDaysBefore.map { inDate - Int64($0) * day }
         )
     }
 

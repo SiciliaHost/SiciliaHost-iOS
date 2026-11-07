@@ -24,7 +24,7 @@ enum FinanceInsights {
     static func compute(
         stats: BookingStats.Summary,
         expensesByCategory: [ExpenseCategory: Double],
-        revenue: Double,
+        netRevenue: Double,
         upcomingMonths: [BookingStats.MonthOccupancy] = []
     ) -> [Insight] {
         var out: [Insight] = []
@@ -148,10 +148,10 @@ enum FinanceInsights {
                     ))
                 }
             }
-            if revenue > 0 && totalExpenses / revenue > 0.5 {
+            if netRevenue > 0 && totalExpenses / netRevenue > 0.5 {
                 out.append(Insight(
                     title: "Spese alte rispetto agli incassi",
-                    text: "Le spese sono il \(pct(totalExpenses / revenue)) delle entrate nette del periodo.",
+                    text: "Le spese sono il \(pct(totalExpenses / netRevenue)) delle entrate nette del periodo.",
                     priority: 60
                 ))
             }

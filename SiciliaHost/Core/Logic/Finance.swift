@@ -120,24 +120,23 @@ enum FinancePeriod: CaseIterable, Sendable {
 
 // MARK: Aggregazioni
 
-/// Aggregazioni pure per la schermata Finanze. Gli importi sono ricalcolati con `FinancialCalculator` invece di
-/// leggere i campi salvati sulla prenotazione: quelli diventano vecchi quando cambia il regime di commissione.
+/// Aggregazioni pure per la schermata Finanze. I netti arrivano da `FinReservation.netOwner` (sempre ricalcolati,
+/// mai letti da un campo salvato). Le prenotazioni senza lordo valgono 0.
 enum FinanceStats {
     struct Totals: Equatable {
         let gross: Double
         let netOwner: Double
-        let adminRevenue: Double
         let expenses: Double
-        var balance: Double { adminRevenue - expenses }
+        var balance: Double { netOwner - expenses }
     }
 
     struct PropertyStats: Equatable {
         let property: Property
         let reservationCount: Int
         let gross: Double
-        let adminRevenue: Double
+        let netOwner: Double
         let expenses: Double
-        var balance: Double { adminRevenue - expenses }
+        var balance: Double { netOwner - expenses }
     }
 
     struct MonthStats: Equatable {
@@ -151,41 +150,38 @@ enum FinanceStats {
         let gross: Double
     }
 
-    static func totals(reservations: [Reservation], expenses: [Expense], properties: [Property]) -> Totals {
-        var gross = 0.0, netOwner = 0.0, adminRevenue = 0.0
-        for res in reservations {
-            guard let amount = res.grossAmount else { continue }
-            let calc = calculate(res, amount, properties)
-            gross += amount
-            netOwner += calc.netAmountOwner
-            adminRevenue += calc.netAmountAdmin
-        }
-        return Totals(gross: gross, netOwner: netOwner, adminRevenue: adminRevenue, expenses: expenses.reduce(0) { $0 + $1.amount })
+    static func totals(reservations: [FinReservation], expenses: [Expense]) -> Totals {
+        Totals(
+            gross: reservations.reduce(0) { $0 + ($1.grossAmount ?? 0) },
+            netOwner: reservations.reduce(0) { $0 + ($1.netOwner ?? 0) },
+            expenses: expenses.reduce(0) { $0 + $1.amount }
+        )
     }
 
-    static func perProperty(reservations: [Reservation], expenses: [Expense], properties: [Property]) -> [PropertyStats] {
+    static func perProperty(reservations: [FinReservation], expenses: [Expense], properties: [Property]) -> [PropertyStats] {
         let stats = properties.map { prop -> PropertyStats in
             let own = reservations.filter { $0.propertyId == prop.id }
-            let gross = own.reduce(0) { $0 + ($1.grossAmount ?? 0) }
-            let adminRevenue = own.reduce(0) { sum, res in
-                sum + (res.grossAmount.map { calculate(res, $0, properties).netAmountAdmin } ?? 0)
-            }
-            let spent = expenses.filter { $0.propertyId == prop.id }.reduce(0) { $0 + $1.amount }
-            return PropertyStats(property: prop, reservationCount: own.count, gross: gross, adminRevenue: adminRevenue, expenses: spent)
+            return PropertyStats(
+                property: prop,
+                reservationCount: own.count,
+                gross: own.reduce(0) { $0 + ($1.grossAmount ?? 0) },
+                netOwner: own.reduce(0) { $0 + ($1.netOwner ?? 0) },
+                expenses: expenses.filter { $0.propertyId == prop.id }.reduce(0) { $0 + $1.amount }
+            )
         }
         return stableSortedDescending(stats, by: \.balance)
     }
 
-    /// Entrate (netto admin per mese di check-in) e uscite (per timestamp) negli ultimi `monthCount` mesi incluso
+    /// Entrate (netto per mese di check-in) e uscite (per timestamp) negli ultimi `monthCount` mesi incluso
     /// quello corrente, dal più vecchio al corrente.
-    static func monthly(reservations: [Reservation], expenses: [Expense], properties: [Property], monthCount: Int, now: Int64) -> [MonthStats] {
+    static func monthly(reservations: [FinReservation], expenses: [Expense], monthCount: Int, now: Int64) -> [MonthStats] {
         var start = addMonthsUTC(startOfMonthUTC(now), -(monthCount - 1))
         return (0 ..< max(monthCount, 0)).map { _ in
             let label = shortMonthLabel(start)
             let end = addMonthsUTC(start, 1)
             let revenue = reservations
-                .filter { $0.grossAmount != nil && $0.checkIn >= start && $0.checkIn < end }
-                .reduce(0) { sum, res in sum + (res.grossAmount.map { calculate(res, $0, properties).netAmountAdmin } ?? 0) }
+                .filter { $0.checkIn >= start && $0.checkIn < end }
+                .reduce(0) { $0 + ($1.netOwner ?? 0) }
             let spent = expenses.filter { $0.timestamp >= start && $0.timestamp < end }.reduce(0) { $0 + $1.amount }
             let month = MonthStats(label: label, revenue: revenue, expenses: spent)
             start = end
@@ -194,7 +190,7 @@ enum FinanceStats {
     }
 
     /// Lordo per piattaforma, solo prenotazioni con importo inserito, dal maggiore al minore.
-    static func perPlatform(_ reservations: [Reservation]) -> [PlatformTotal] {
+    static func perPlatform(_ reservations: [FinReservation]) -> [PlatformTotal] {
         var order: [String] = []
         var totals: [String: Double] = [:]
         for res in reservations {
@@ -203,11 +199,6 @@ enum FinanceStats {
             totals[res.platform, default: 0] += gross
         }
         return stableSortedDescending(order.map { PlatformTotal(platform: $0, gross: totals[$0]!) }, by: \.gross)
-    }
-
-    private static func calculate(_ reservation: Reservation, _ gross: Double, _ properties: [Property]) -> FinancialCalculator.Result {
-        let commissioned = properties.first { $0.id == reservation.propertyId }?.isManagedOnCommission ?? false
-        return FinancialCalculator.calculate(grossAmount: gross, platform: reservation.platform, isManagedOnCommission: commissioned)
     }
 }
 

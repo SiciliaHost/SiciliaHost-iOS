@@ -18,58 +18,53 @@ final class FinanceTests: XCTestCase {
 
     private func utc(_ y: Int, _ m: Int, _ d: Int, _ h: Int = 12) -> Int64 { utcMillis(year: y, month: m, day: d, hour: h) }
 
-    private let casaA = Property(id: "a", name: "Casa A", isManagedOnCommission: false)
-    private let casaB = Property(id: "b", name: "Casa B", isManagedOnCommission: true)
-    private var properties: [Property] { [casaA, casaB] }
-
-    // Casa A (diretta): Booking 100 € → netto 76,2. Casa B (commissione): Airbnb 200 € → netto owner 123, admin 80,75.
-    private var resA: Reservation { Reservation(id: "r1", propertyId: "a", checkIn: utc(2026, 7, 10), platform: "BOOKING", grossAmount: 100) }
-    private var resB: Reservation { Reservation(id: "r2", propertyId: "b", checkIn: utc(2026, 8, 2), platform: "AIRBNB", grossAmount: 200) }
-    private var resPending: Reservation { Reservation(id: "r3", propertyId: "a", checkIn: utc(2026, 8, 20), platform: "MANUAL") }
-    private var spesaA: Expense { Expense(id: "e1", propertyId: "a", amount: 10, timestamp: utc(2026, 7, 15)) }
-    private var spesaB: Expense { Expense(id: "e2", propertyId: "b", amount: 5, timestamp: utc(2026, 8, 3)) }
-
-    func testTotalsRecomputeAmountsWithTheCurrentCommissionRegime() {
-        let t = FinanceStats.totals(reservations: [resA, resB, resPending], expenses: [spesaA, spesaB], properties: properties)
-        XCTAssertEqual(t.gross, 300, accuracy: 0.001)
-        XCTAssertEqual(t.netOwner, 76.2 + 123.0, accuracy: 0.001)
-        XCTAssertEqual(t.adminRevenue, 76.2 + 80.75, accuracy: 0.001)
-        XCTAssertEqual(t.expenses, 15, accuracy: 0.001)
-        XCTAssertEqual(t.balance, 76.2 + 80.75 - 15, accuracy: 0.001)
+    private func r(_ id: String, _ platform: String, _ gross: Double?, checkIn: Int64 = 0, pid: String = "p1") -> FinReservation {
+        FinReservation(id: id, propertyId: pid, guestName: nil, checkIn: checkIn, checkOut: checkIn + 1, platform: platform, grossAmount: gross)
     }
 
-    func testPerPropertySplitsAmountsByHouseAndSortsByBalance() {
-        let stats = FinanceStats.perProperty(reservations: [resA, resB, resPending], expenses: [spesaA, spesaB], properties: properties)
-        XCTAssertEqual(stats.count, 2)
-        XCTAssertEqual(stats[0].property.id, "b")
-        XCTAssertEqual(stats[0].gross, 200, accuracy: 0.001)
-        XCTAssertEqual(stats[0].adminRevenue, 80.75, accuracy: 0.001)
-        XCTAssertEqual(stats[0].expenses, 5, accuracy: 0.001)
-        XCTAssertEqual(stats[0].balance, 75.75, accuracy: 0.001)
-        XCTAssertEqual(stats[0].reservationCount, 1)
-        XCTAssertEqual(stats[1].property.id, "a")
-        XCTAssertEqual(stats[1].balance, 66.2, accuracy: 0.001)
-        XCTAssertEqual(stats[1].reservationCount, 2) // conta anche la prenotazione senza importo
+    func testTotalsUseNetOfPlatform() {
+        let t = FinanceStats.totals(reservations: [r("1", "BOOKING", 1000), r("2", "AIRBNB", 1000), r("3", "MANUAL", nil)],
+                                    expenses: [Expense(amount: 100)])
+        XCTAssertEqual(t.gross, 2000, accuracy: 0.001)
+        XCTAssertEqual(t.netOwner, 762 + 825, accuracy: 0.001)
+        XCTAssertEqual(t.expenses, 100, accuracy: 0.001)
+        XCTAssertEqual(t.balance, 1487, accuracy: 0.001)
     }
 
-    func testMonthlyBucketsRevenueByCheckinMonthAndExpensesByTimestamp() {
-        let months = FinanceStats.monthly(
-            reservations: [resA, resB, resPending], expenses: [spesaA, spesaB], properties: properties,
-            monthCount: 3, now: utc(2026, 8, 6)
-        )
-        XCTAssertEqual(months.map(\.label), ["giu", "lug", "ago"])
-        XCTAssertEqual(months[0].revenue, 0, accuracy: 0.001)
-        XCTAssertEqual(months[1].revenue, 76.2, accuracy: 0.001)
-        XCTAssertEqual(months[1].expenses, 10, accuracy: 0.001)
-        XCTAssertEqual(months[2].revenue, 80.75, accuracy: 0.001)
-        XCTAssertEqual(months[2].expenses, 5, accuracy: 0.001)
+    func testReservationsWithoutAmountCountZero() {
+        XCTAssertEqual(FinanceStats.totals(reservations: [r("1", "BOOKING", nil)], expenses: []).netOwner, 0)
     }
 
-    func testPerPlatformGroupsGrossAndSortsDescending() {
-        let totals = FinanceStats.perPlatform([resA, resB, resPending])
-        XCTAssertEqual(totals, [
-            FinanceStats.PlatformTotal(platform: "AIRBNB", gross: 200), FinanceStats.PlatformTotal(platform: "BOOKING", gross: 100),
+    func testTotalsUseTheRealCommissionWhenKnown() {
+        var booking = r("1", "BOOKING", 1000)
+        booking.commissionAmount = 180
+        XCTAssertEqual(FinanceStats.totals(reservations: [booking], expenses: []).netOwner, 820, accuracy: 0.001)
+    }
+
+    func testPerPropertySortedByBalance() {
+        let a = Property(id: "p1", name: "A"), b = Property(id: "p2", name: "B")
+        let out = FinanceStats.perProperty(reservations: [r("1", "MANUAL", 100, pid: "p1"), r("2", "MANUAL", 500, pid: "p2")],
+                                           expenses: [], properties: [a, b])
+        XCTAssertEqual(out.map(\.property.id), ["p2", "p1"])
+        XCTAssertEqual(out[0].netOwner, 500, accuracy: 0.001)
+        XCTAssertEqual(out[0].reservationCount, 1)
+    }
+
+    func testPerPlatformSortedByGross() {
+        let out = FinanceStats.perPlatform([r("1", "AIRBNB", 100), r("2", "BOOKING", 300), r("3", "BOOKING", nil)])
+        XCTAssertEqual(out, [
+            FinanceStats.PlatformTotal(platform: "BOOKING", gross: 300), FinanceStats.PlatformTotal(platform: "AIRBNB", gross: 100),
         ])
+    }
+
+    func testMonthlyBucketsRevenueByCheckInAndExpensesByTimestamp() {
+        let now = utc(2026, 8, 6)
+        let out = FinanceStats.monthly(reservations: [r("1", "MANUAL", 100, checkIn: now)],
+                                       expenses: [Expense(amount: 7, timestamp: now)], monthCount: 3, now: now)
+        XCTAssertEqual(out.map(\.label), ["giu", "lug", "ago"])
+        XCTAssertEqual(out.last?.revenue ?? -1, 100, accuracy: 0.001)
+        XCTAssertEqual(out.last?.expenses ?? -1, 7, accuracy: 0.001)
+        XCTAssertEqual(out.first?.revenue, 0)
     }
 
     // MARK: Periodi
@@ -106,12 +101,12 @@ final class FinanceTests: XCTestCase {
     func testInsightsFireOnlyWhenJustified() {
         let day = millisPerDay
         let many = (1 ... 6).map { i in
-            Reservation(id: "r\(i)", propertyId: "p1", checkIn: utc(2026, 4, i * 4, 0), checkOut: utc(2026, 4, i * 4, 0) + day,
-                        platform: "BOOKING", grossAmount: 100, adults: 2, guestCountry: "de")
+            FinReservation(id: "r\(i)", propertyId: "p1", checkIn: utc(2026, 4, i * 4, 0), checkOut: utc(2026, 4, i * 4, 0) + day,
+                           platform: "BOOKING", adults: 2, guestCountry: "de", grossAmount: 100)
         }
         let april = utc(2026, 4, 1, 0) ..< utc(2026, 5, 1, 0)
         let s = BookingStats.compute(reservations: many, range: april, houseCount: 1, now: utc(2026, 4, 30, 0))
-        let insights = FinanceInsights.compute(stats: s, expensesByCategory: [.utenze: 400, .pulizie: 100], revenue: 600)
+        let insights = FinanceInsights.compute(stats: s, expensesByCategory: [.utenze: 400, .pulizie: 100], netRevenue: 600)
         let titles = insights.map(\.title)
         XCTAssertTrue(titles.contains { $0.hasPrefix("Commissioni") })
         XCTAssertTrue(titles.contains { $0.hasPrefix("Molti soggiorni di una notte") })

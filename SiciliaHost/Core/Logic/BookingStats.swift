@@ -55,13 +55,13 @@ enum BookingStats {
         var occupancy: Double? { availableNights > 0 ? Double(nightsSold) / Double(availableNights) : nil }
     }
 
-    static func nights(_ res: Reservation) -> Int { max(0, Int((res.checkOut - res.checkIn) / millisPerDay)) }
+    static func nights(_ res: FinReservation) -> Int { max(0, Int((res.checkOut - res.checkIn) / millisPerDay)) }
 
     /// Statistiche delle `reservations` (già filtrate per casa) nel `range` (nil = tutto), su `houseCount` case.
     /// Una prenotazione conta nel periodo se arriva dentro il periodo; le notti vendute contano solo la parte che
     /// cade nel periodo (occupazione corretta ai bordi).
     static func compute(
-        reservations: [Reservation], range: Range<Int64>?, houseCount: Int, now: Int64,
+        reservations: [FinReservation], range: Range<Int64>?, houseCount: Int, now: Int64,
         importCounts: [BookingImportCounts] = []
     ) -> Summary {
         let valid = reservations.filter { $0.checkOut > $0.checkIn }
@@ -81,7 +81,7 @@ enum BookingStats {
 
         // Canali per piattaforma, nell'ordine di comparsa, poi per notti decrescenti (stabile).
         var platformOrder: [String] = []
-        var byPlatform: [String: [Reservation]] = [:]
+        var byPlatform: [String: [FinReservation]] = [:]
         for r in inPeriod {
             if byPlatform[r.platform] == nil { platformOrder.append(r.platform) }
             byPlatform[r.platform, default: []].append(r)
@@ -156,10 +156,10 @@ enum BookingStats {
     }
 
     /// Commissione della piattaforma: quella reale dell'export se c'è, altrimenti la tariffa dell'app.
-    static func commissionOf(_ r: Reservation) -> Double {
+    static func commissionOf(_ r: FinReservation) -> Double {
         if let real = r.commissionAmount { return real }
         guard let g = r.grossAmount else { return 0 }
-        return g - FinancialCalculator.calculate(grossAmount: g, platform: r.platform, isManagedOnCommission: false).netAmountOwner
+        return g - FinancialCalculator.netOwner(gross: g, platform: r.platform)
     }
 
     private static func overlapNights(_ checkIn: Int64, _ checkOut: Int64, _ start: Int64, _ end: Int64) -> Int {
@@ -169,7 +169,7 @@ enum BookingStats {
     }
 
     /// Occupazione mese per mese nel periodo (al massimo gli ultimi 12 mesi del periodo).
-    private static func monthlyOccupancy(_ valid: [Reservation], start: Int64, end: Int64, houseCount: Int) -> [MonthOccupancy] {
+    private static func monthlyOccupancy(_ valid: [FinReservation], start: Int64, end: Int64, houseCount: Int) -> [MonthOccupancy] {
         if houseCount <= 0 || end <= start { return [] }
         var monthStart = startOfMonthUTC(start)
         var months: [MonthOccupancy] = []
@@ -187,7 +187,7 @@ enum BookingStats {
     }
 
     /// Buchi di 1–2 notti tra due prenotazioni della stessa casa, che iniziano da oggi in poi.
-    static func orphanNights(_ reservations: [Reservation], now: Int64) -> Int {
+    static func orphanNights(_ reservations: [FinReservation], now: Int64) -> Int {
         Dictionary(grouping: reservations, by: \.propertyId).values.reduce(0) { total, list in
             let sorted = list.sorted { $0.checkIn < $1.checkIn }
             var sum = 0

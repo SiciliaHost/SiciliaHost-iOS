@@ -6,13 +6,13 @@ final class FinanceViewTests: XCTestCase {
     // MARK: FinanceListKeysTest
 
     func testTheSamePropertyHasADifferentKeyInEachSection() {
-        let keys = [FinanceListKeys.propertyDetail("p1"), FinanceListKeys.commissionRegime("p1")]
+        let keys = [FinanceListKeys.propertyDetail("p1"), FinanceListKeys.recurring("p1")]
         XCTAssertEqual(Set(keys).count, keys.count)
     }
 
     func testSectionsNeverCollideEvenWhenIdsAreEqual() {
         let id = "abc123"
-        let keys = [FinanceListKeys.propertyDetail(id), FinanceListKeys.commissionRegime(id),
+        let keys = [FinanceListKeys.propertyDetail(id), FinanceListKeys.recurring(id),
                     FinanceListKeys.pendingReservation(id), FinanceListKeys.expense(id, index: 0)]
         XCTAssertEqual(Set(keys).count, keys.count)
     }
@@ -24,7 +24,7 @@ final class FinanceViewTests: XCTestCase {
 
     func testARealisticListHasNoDuplicateKeys() {
         let ids = ["p1", "p2"]
-        let keys = ids.map(FinanceListKeys.propertyDetail) + ids.map(FinanceListKeys.commissionRegime)
+        let keys = ids.map(FinanceListKeys.propertyDetail) + ids.map(FinanceListKeys.recurring)
             + ["r1", "r2"].map(FinanceListKeys.pendingReservation)
             + ["e1", "", ""].enumerated().map { FinanceListKeys.expense($0.element, index: $0.offset) }
         XCTAssertEqual(Set(keys).count, keys.count)
@@ -36,12 +36,12 @@ final class FinanceViewTests: XCTestCase {
         let now = utcMillis(year: 2026, month: 8, day: 15)
         let houses = [Property(id: "p1", name: "A"), Property(id: "p2", name: "B")]
         let reservations = [
-            Reservation(id: "r1", propertyId: "p1", checkIn: utcMillis(year: 2026, month: 8, day: 1),
-                        checkOut: utcMillis(year: 2026, month: 8, day: 4), platform: "MANUAL", grossAmount: 300),
-            Reservation(id: "r2", propertyId: "p2", checkIn: utcMillis(year: 2026, month: 8, day: 2),
-                        checkOut: utcMillis(year: 2026, month: 8, day: 3), platform: "MANUAL", grossAmount: 100),
-            Reservation(id: "r3", propertyId: "p1", checkIn: utcMillis(year: 2026, month: 6, day: 1),
-                        checkOut: utcMillis(year: 2026, month: 6, day: 2), platform: "MANUAL", grossAmount: 50),
+            FinReservation(id: "r1", propertyId: "p1", checkIn: utcMillis(year: 2026, month: 8, day: 1),
+                           checkOut: utcMillis(year: 2026, month: 8, day: 4), platform: "MANUAL", grossAmount: 300),
+            FinReservation(id: "r2", propertyId: "p2", checkIn: utcMillis(year: 2026, month: 8, day: 2),
+                           checkOut: utcMillis(year: 2026, month: 8, day: 3), platform: "MANUAL", grossAmount: 100),
+            FinReservation(id: "r3", propertyId: "p1", checkIn: utcMillis(year: 2026, month: 6, day: 1),
+                           checkOut: utcMillis(year: 2026, month: 6, day: 2), platform: "MANUAL", grossAmount: 50),
         ]
         let expenses = [
             Expense(id: "e1", propertyId: "p1", description: "Biancheria", amount: 20, timestamp: utcMillis(year: 2026, month: 8, day: 2)),
@@ -65,13 +65,11 @@ final class FinanceViewTests: XCTestCase {
         XCTAssertEqual(all.expenses.count, 3)
     }
 
-    func testGrossCompletesTheReservationAndCreatesTheLinenExpense() {
-        let res = Reservation(id: "r1", propertyId: "p1", guestName: nil, platform: "AIRBNB", needsReview: true)
-        let done = FinanceActions.withGross(res, amount: 200, isManagedOnCommission: false)
-        XCTAssertEqual(done.grossAmount, 200)
-        XCTAssertEqual(done.netAmountOwner!, 165, accuracy: 0.001)
-        XCTAssertFalse(done.needsReview)
-        let linen = FinanceActions.linenExpense(for: res)
+    func testLinenExpenseAndAmountParsing() {
+        let linen = FinanceActions.linenExpense(propertyId: "p1", reservationId: "r1", guest: nil)
+        XCTAssertFalse(linen.id.isEmpty) // id locale: due biancherie non si sostituiscono
+        XCTAssertNotEqual(linen.id, FinanceActions.linenExpense(propertyId: "p1", reservationId: "r2", guest: nil).id)
+        XCTAssertEqual(linen.propertyId, "p1")
         XCTAssertEqual(linen.amount, 20)
         XCTAssertEqual(linen.reservationId, "r1")
         XCTAssertEqual(linen.authorId, "SYSTEM")

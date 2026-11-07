@@ -66,7 +66,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 7 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
 <!-- alloggiati-stato -->
 <!-- finanze-stato -->
-- **Finanze e contatti Excel sul telefono (2026-11-07, ramo `feat/finanze-sul-telefono`, NON spinto, NON compilato)**: piano `Siciliahost.it/docs/superpowers/plans/2026-11-06-finanze-sul-telefono-ios.md`. Fatto: Task 1 (`Core/Finance/FinanceModels.swift`, `FinanceOps.swift`, `FinanceStore.swift`, `Contact: Codable`, test `FinanceLocalTests`), Task 2 (`FinancialCalculator.netOwner`), Task 3 (`Reservation` senza soldi, `FirestoreService` ripulito). **Il target non compila finché non è completato il Task 9** (come su Android).
+- **Finanze e contatti Excel sul telefono (2026-11-07, ramo `feat/finanze-sul-telefono`, NON spinto, NON compilato)**: piano `Siciliahost.it/docs/superpowers/plans/2026-11-06-finanze-sul-telefono-ios.md`. Fatto: Task 1 (`Core/Finance/FinanceModels.swift`, `FinanceOps.swift`, `FinanceStore.swift`, `Contact: Codable`, test `FinanceLocalTests`), Task 2 (`FinancialCalculator.netOwner`), Task 3 (`Reservation` senza soldi, `FirestoreService` ripulito), Task 4 (statistiche su `FinReservation`). Da fare: Task 5-10. **Il target non compila finché non è completato il Task 9** (come su Android).
 <!-- finanze-stato -->
 
 ## Prossimi passi (in ordine)
@@ -86,7 +86,7 @@ e correggere gli errori (vedi Prossimi passi).
   5. Aggiornare `tools/gen_inventario.py` al pacchetto `com/siciliahost/cactushost` e la baseline Android a `0688569`.
 <!-- alloggiati-prossimi -->
 <!-- finanze-prossimi -->
-- **Finanze sul telefono** (ramo `feat/finanze-sul-telefono`): completare i Task 2-10 del piano, poi spingere (lo autorizza il titolare) e far girare la CI.
+- **Finanze sul telefono** (ramo `feat/finanze-sul-telefono`): completare i Task 5-10 del piano, poi spingere (lo autorizza il titolare) e far girare la CI.
 <!-- finanze-prossimi -->
 
 ## Decisioni prese
@@ -149,6 +149,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-07 — Claude Sonnet 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze sul telefono, Task 4: statistiche su `FinReservation`
+- `FinanceStats` (`Totals`/`PropertyStats` con `netOwner`, saldo = netto - spese; `totals(reservations:expenses:)`, `monthly` senza `properties`), `BookingStats` e `buildFinanceView` lavorano su `[FinReservation]`; `FinanceInsights.compute(..., netRevenue:)`. Via `FinanceListKeys.commissionRegime` e `FinanceActions.withGross`; `linenExpense(propertyId:reservationId:guest:)` con id locale (`newLocalId()`).
+- Test: `FinanceTests` (casi di `FinanceStatsTest` Android + commissione reale), `FinanceViewTests`, statistiche di `BookingTests`. I test del piano di import e del parser in `BookingTests` restano sui campi vecchi: li riscrive il Task 9.
+- **NON compilato**. Restano da adattare: `FinanceModel`/`FinanceView` (Task 7), `AgendaLogic`/`ReservationEditView`/`AgendaTests` (Task 8), `BookingImport` e i suoi test (Task 9).
 
 ### 2026-11-07 — Claude Sonnet 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze sul telefono, Task 3: `Reservation` senza soldi
 - `Reservation` senza `grossAmount`, netti, `needsReview`, `bookedAt`, `travelPurpose`, `bookingDevice`, `commissionAmount` (i documenti vecchi si leggono ignorandoli); `firestoreData` senza chiavi di denaro.

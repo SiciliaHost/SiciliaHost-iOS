@@ -7,7 +7,7 @@ import Foundation
 struct FinanceViewData {
     let houses: [Property]
     /// Prenotazioni delle case scelte con arrivo nel periodo.
-    let reservations: [Reservation]
+    let reservations: [FinReservation]
     /// Spese delle case scelte registrate nel periodo, dalla più recente.
     let expenses: [Expense]
     let totals: FinanceStats.Totals
@@ -18,7 +18,7 @@ struct FinanceViewData {
 }
 
 func buildFinanceView(
-    allReservations: [Reservation],
+    allReservations: [FinReservation],
     allExpenses: [Expense],
     properties: [Property],
     importCounts: [String: BookingImportCounts],
@@ -35,7 +35,7 @@ func buildFinanceView(
         allExpenses.filter { ids.contains($0.propertyId) && (range == nil || range!.contains($0.timestamp)) }
     ) { $0.timestamp }
 
-    let totals = FinanceStats.totals(reservations: reservations, expenses: expenses, properties: properties)
+    let totals = FinanceStats.totals(reservations: reservations, expenses: expenses)
     let stats = BookingStats.compute(
         reservations: houseReservations, range: range, houseCount: houses.count, now: now,
         importCounts: houses.compactMap { importCounts[$0.id] }
@@ -60,7 +60,7 @@ func buildFinanceView(
             .monthlyOccupancy
     }
     let insights = FinanceInsights.compute(
-        stats: stats, expensesByCategory: sums, revenue: totals.adminRevenue, upcomingMonths: upcoming
+        stats: stats, expensesByCategory: sums, netRevenue: totals.netOwner, upcomingMonths: upcoming
     )
     return FinanceViewData(houses: houses, reservations: reservations, expenses: expenses, totals: totals, stats: stats,
                            byCategory: byCategory, insights: insights)
@@ -70,7 +70,6 @@ func buildFinanceView(
 /// una chiave doppia faceva andare in crash la lista; in SwiftUI rende ambigui gli aggiornamenti.
 enum FinanceListKeys {
     static func propertyDetail(_ propertyId: String) -> String { "detail-\(propertyId)" }
-    static func commissionRegime(_ propertyId: String) -> String { "regime-\(propertyId)" }
     static func recurring(_ recurringId: String) -> String { "recurring-\(recurringId)" }
     static func pendingReservation(_ reservationId: String) -> String { "pending-\(reservationId)" }
     /// Una spesa senza id usa la posizione (due spese uguali avrebbero lo stesso contenuto).
@@ -165,28 +164,18 @@ func statsKpis(_ view: FinanceViewData, all: Bool) -> [Kpi] {
 }
 
 enum FinanceActions {
-    /// Spesa biancheria creata quando si inserisce il lordo di una prenotazione (stessa forma dell'Android).
-    static func linenExpense(for reservation: Reservation) -> Expense {
+    /// Spesa biancheria creata quando si inserisce il lordo di una prenotazione (stessa forma dell'Android). L'id è
+    /// locale: la spesa sta solo sul telefono, e un id vuoto farebbe sostituire una biancheria con l'altra.
+    static func linenExpense(propertyId: String, reservationId: String, guest: String?) -> Expense {
         Expense(
-            propertyId: reservation.propertyId,
-            reservationId: reservation.id,
-            description: "Spesa fissa biancheria (\(reservation.guestName ?? "Ospite"))",
+            id: newLocalId(),
+            propertyId: propertyId,
+            reservationId: reservationId,
+            description: "Spesa fissa biancheria (\(guest ?? "Ospite"))",
             amount: 20,
             authorId: "SYSTEM",
             category: ExpenseCategory.pulizie.key
         )
-    }
-
-    /// Prenotazione completata con il lordo: netti ricalcolati col regime della casa, non più da completare.
-    static func withGross(_ reservation: Reservation, amount: Double, isManagedOnCommission: Bool) -> Reservation {
-        let calc = FinancialCalculator.calculate(grossAmount: amount, platform: reservation.platform,
-                                                 isManagedOnCommission: isManagedOnCommission)
-        var r = reservation
-        r.grossAmount = amount
-        r.netAmountOwner = calc.netAmountOwner
-        r.netAmountAdmin = calc.netAmountAdmin
-        r.needsReview = false
-        return r
     }
 
     /// Importo scritto a mano ("12,50"): nil se non è un numero.
