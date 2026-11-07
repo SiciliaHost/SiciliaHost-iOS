@@ -52,6 +52,20 @@ final class ModelsTests: XCTestCase {
         XCTAssertTrue(Reservation().firestoreData["guestName"] is NSNull)
     }
 
+    func testReservationNeverWritesMoneyFields() {
+        let r = Reservation(id: "r1", propertyId: "p1", guestName: "Rossi", checkIn: 1, checkOut: 2, platform: "BOOKING", icalUid: "u", adults: 2, children: 0, guestCountry: "de")
+        let keys = Set(r.firestoreData.keys)
+        for money in ["grossAmount", "netAmountOwner", "netAmountAdmin", "needsReview", "bookedAt", "travelPurpose", "bookingDevice", "commissionAmount"] {
+            XCTAssertFalse(keys.contains(money), money)
+        }
+    }
+
+    func testOldReservationDocumentWithMoneyFieldsStillDecodes() throws {
+        let json = #"{"id":"r1","propertyId":"p1","checkIn":1,"checkOut":2,"platform":"BOOKING","grossAmount":300,"netAmountOwner":228.6,"netAmountAdmin":228.6,"needsReview":true,"bookedAt":0,"commissionAmount":50,"adults":2}"#
+        let r = try JSONDecoder().decode(Reservation.self, from: Data(json.utf8))
+        XCTAssertEqual(r, Reservation(id: "r1", propertyId: "p1", checkIn: 1, checkOut: 2, platform: "BOOKING", adults: 2))
+    }
+
     func testInventoryKeepsTheDepletedFlagUnderItsRealName() {
         XCTAssertEqual(InventoryItem(isDepleted: true).firestoreData["isDepleted"] as? Bool, true)
     }

@@ -25,15 +25,9 @@ struct ICalSyncService {
             )
 
             if !plan.toUpsert.isEmpty { _ = try await db.syncIcalReservationsBatch(plan.toUpsert) }
-            if !plan.toDelete.isEmpty {
-                // Le spese collegate (biancheria) si toccano solo con il permesso sulle finanze.
-                let scope = try await AccessSession.shared.scope()
-                let canFinance = scope.properties.first { $0.id == propertyId }.map(scope.canFinance) == true
-                for reservation in plan.toDelete {
-                    try await db.deleteReservationWithExpenses(
-                        reservationId: reservation.id, propertyId: propertyId, withExpenses: canFinance
-                    )
-                }
+            // Solo la prenotazione condivisa: spese e importi rimasti sul telefono li ripulisce `FinanceRepository` (orfani).
+            for reservation in plan.toDelete {
+                try await db.deleteReservation(reservation.id)
             }
         } catch let error as ServiceError {
             throw error

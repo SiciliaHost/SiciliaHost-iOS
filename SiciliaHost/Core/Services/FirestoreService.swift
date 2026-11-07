@@ -10,8 +10,6 @@ protocol FirestoreDocument: Decodable {
 
 extension Property: FirestoreDocument {}
 extension Reservation: FirestoreDocument {}
-extension Expense: FirestoreDocument {}
-extension RecurringExpense: FirestoreDocument {}
 extension InventoryItem: FirestoreDocument {}
 extension UserProfile: FirestoreDocument {}
 
@@ -178,18 +176,6 @@ struct FirestoreService: @unchecked Sendable {
         )
     }
 
-    func getExpenses(propertyIds: [String]) async throws -> [Expense] {
-        try await fanOut(propertyIds) { id in
-            decodeAll(try await db.collection("expenses").whereField("propertyId", isEqualTo: id).getDocuments())
-        }
-    }
-
-    func getRecurringExpenses(propertyIds: [String]) async throws -> [RecurringExpense] {
-        try await fanOut(propertyIds) { id in
-            decodeAll(try await db.collection("recurring_expenses").whereField("propertyId", isEqualTo: id).getDocuments())
-        }
-    }
-
     func getInventory(propertyIds: [String]) async throws -> [InventoryItem] {
         try await fanOut(propertyIds) { id in try await getInventory(propertyId: id) }
     }
@@ -204,15 +190,9 @@ struct FirestoreService: @unchecked Sendable {
         return created
     }
 
-    /// Aggiunge/aggiorna solo `fields` di una prenotazione esistente (merge; `propertyId` non cambia).
-    func mergeReservationFields(_ id: String, fields: [String: Any]) async throws {
-        try await db.collection("reservations").document(id).setData(fields, merge: true)
-    }
-
     /// Usa `icalUid` come id del documento (dedup): stesso evento iCal = stesso documento, mai duplicati anche
-    /// se la sincronizzazione gira più volte sullo stesso evento. Ritorna i soli documenti creati ora (o
-    /// completati con un importo che mancava): serve a chi importa prezzi già noti (import Excel Booking) per
-    /// creare la spesa biancheria una volta sola per prenotazione.
+    /// se la sincronizzazione gira più volte sullo stesso evento. Ritorna i soli documenti creati ora. Nessun campo
+    /// di denaro: importi e dati dell'Excel stanno solo sul telefono (`FinanceData`).
     func syncIcalReservationsBatch(_ reservations: [Reservation]) async throws -> [Reservation] {
         if reservations.isEmpty { return [] }
 
@@ -220,30 +200,27 @@ struct FirestoreService: @unchecked Sendable {
             ($0.icalUid ?? db.collection("reservations").document().documentID, $0)
         }
 
-        // Quali documenti esistono già, per non sovrascrivere un importo/`needsReview` impostato a mano a ogni
-        // sincronizzazione. Una lettura per id non si può fare (le regole rifiutano i documenti inesistenti) e un
-        // `whereIn` sull'id non ha `propertyId`: si legge l'elenco di ciascuna casa coinvolta e si confrontano gli id.
+        // Quali documenti esistono già. Una lettura per id non si può fare (le regole rifiutano i documenti
+        // inesistenti) e un `whereIn` sull'id non ha `propertyId`: si legge l'elenco di ciascuna casa coinvolta e si
+        // confrontano gli id.
         var existingIds = Set<String>()
-        var existingWithoutGross = Set<String>()
         let wantedIds = Set(withIds.map { $0.docId })
         var seenProperties = Set<String>()
         for propertyId in withIds.map({ $0.res.propertyId }) where seenProperties.insert(propertyId).inserted {
             let snapshot = try await db.collection("reservations").whereField("propertyId", isEqualTo: propertyId).getDocuments()
             for doc in snapshot.documents where wantedIds.contains(doc.documentID) {
                 existingIds.insert(doc.documentID)
-                if (doc.data()["grossAmount"] as? NSNumber) == nil { existingWithoutGross.insert(doc.documentID) }
             }
         }
 
-        var newlyInserted: [Reservation] = []
+        var created: [Reservation] = []
         for start in stride(from: 0, to: withIds.count, by: 500) {
             let chunk = withIds[start ..< min(start + 500, withIds.count)]
             let batch = db.batch()
             for (docId, res) in chunk {
                 let ref = db.collection("reservations").document(docId)
                 if existingIds.contains(docId) {
-                    // Già esistente: aggiorna solo i campi che arrivano dalla piattaforma, senza toccare
-                    // importi e `needsReview`.
+                    // Già esistente: aggiorna solo i campi che arrivano dalla piattaforma.
                     var updates: [String: Any] = [
                         "guestName": orNull(res.guestName),
                         "checkIn": res.checkIn,
@@ -251,61 +228,30 @@ struct FirestoreService: @unchecked Sendable {
                         "platform": res.platform,
                         "propertyId": res.propertyId,
                     ]
-                    // Eccezione: se il documento non ha ancora un importo (import precedente fallito a metà, o
-                    // creato senza prezzo) e questa riga lo porta (Excel Booking), lo si completa.
-                    if existingWithoutGross.contains(docId), let gross = res.grossAmount {
-                        updates["grossAmount"] = gross
-                        updates["netAmountOwner"] = orNull(res.netAmountOwner)
-                        updates["netAmountAdmin"] = orNull(res.netAmountAdmin)
-                        updates["needsReview"] = false
-                        updates["adults"] = res.adults
-                        updates["children"] = res.children
-                        var completed = res
-                        completed.id = docId
-                        newlyInserted.append(completed)
-                    }
-                    // Dati statistici dell'export Booking: un nuovo import li aggiunge anche alle prenotazioni già
-                    // salvate. Mai sovrascritti con null.
-                    if let v = res.bookedAt { updates["bookedAt"] = v }
-                    if let v = res.guestCountry { updates["guestCountry"] = v }
-                    if let v = res.travelPurpose { updates["travelPurpose"] = v }
-                    if let v = res.bookingDevice { updates["bookingDevice"] = v }
-                    if let v = res.commissionAmount { updates["commissionAmount"] = v }
-                    if res.adults > 0 && updates["adults"] == nil {
+                    if let country = res.guestCountry { updates["guestCountry"] = country }
+                    if res.adults > 0 {
                         updates["adults"] = res.adults
                         updates["children"] = res.children
                     }
                     batch.setData(updates, forDocument: ref, merge: true)
                 } else {
-                    var created = res
-                    created.id = docId
-                    batch.setData(created.firestoreData, forDocument: ref)
-                    newlyInserted.append(created)
+                    var newRes = res
+                    newRes.id = docId
+                    batch.setData(newRes.firestoreData, forDocument: ref)
+                    created.append(newRes)
                 }
             }
             try await batch.commit()
         }
-        return newlyInserted
+        return created
     }
 
-    /// Rubrica marketing (import Excel Booking). Telefono come id: dedup naturale su un secondo soggiorno
-    /// dello stesso ospite, più affidabile del nome (nel file arriva in formati incoerenti).
-    func saveContactsBatch(_ contacts: [Contact]) async throws {
-        let valid = contacts.filter { !$0.phone.trimmed.isEmpty }
-        for start in stride(from: 0, to: valid.count, by: 500) {
-            let batch = db.batch()
-            for contact in valid[start ..< min(start + 500, valid.count)] {
-                batch.setData(contact.firestoreData, forDocument: db.collection("contacts").document(contact.phone))
-            }
-            try await batch.commit()
-        }
-    }
-
-    func getPendingReviewReservations(propertyId: String) async throws -> [Reservation] {
-        decodeAll(try await db.collection("reservations")
-            .whereField("propertyId", isEqualTo: propertyId)
-            .whereField("needsReview", isEqualTo: true)
-            .getDocuments())
+    /// Completa un segnaposto iCal con i soli dati condivisi dell'Excel (mappa esplicita, mai l'intera prenotazione).
+    func completePlaceholder(_ id: String, row: Reservation) async throws {
+        var fields: [String: Any] = ["adults": row.adults, "children": row.children]
+        fields["guestName"] = orNull(row.guestName)
+        if let country = row.guestCountry { fields["guestCountry"] = country }
+        try await db.collection("reservations").document(id).setData(fields, merge: true)
     }
 
     /// Merge con tutti i campi (i nulli cancellano il valore: come `set(reservation, merge)` dell'Android).
@@ -338,59 +284,9 @@ struct FirestoreService: @unchecked Sendable {
             .updateData(["checkin": ["sentAt": now, "guests": max(0, guests), "by": uid] as [String: Any]])
     }
 
-    /// Elimina la prenotazione e, se `withExpenses`, le spese collegate (es. i 20 € biancheria) in un unico batch.
-    /// Le spese si leggono e si cancellano solo con il permesso sulle finanze (proprietario): per un collaboratore
-    /// si passa `withExpenses = false`, e le spese rimaste senza prenotazione le elimina la schermata Finanze.
-    func deleteReservationWithExpenses(reservationId: String, propertyId: String, withExpenses: Bool) async throws {
-        let batch = db.batch()
-        if withExpenses {
-            let expenses = try await db.collection("expenses")
-                .whereField("propertyId", isEqualTo: propertyId)
-                .whereField("reservationId", isEqualTo: reservationId)
-                .getDocuments()
-            for doc in expenses.documents { batch.deleteDocument(doc.reference) }
-        }
-        batch.deleteDocument(db.collection("reservations").document(reservationId))
-        try await batch.commit()
-    }
-
-    // MARK: Spese
-
-    /// Elimina spese per id (batch da 500). Solo chi gestisce le finanze della casa può farlo.
-    func deleteExpenses(_ ids: [String]) async throws {
-        for start in stride(from: 0, to: ids.count, by: 500) {
-            let batch = db.batch()
-            for id in ids[start ..< min(start + 500, ids.count)] {
-                batch.deleteDocument(db.collection("expenses").document(id))
-            }
-            try await batch.commit()
-        }
-    }
-
-    func addExpense(_ expense: Expense) async throws {
-        let ref = db.collection("expenses").document()
-        var created = expense
-        created.id = ref.documentID
-        try await ref.setData(created.firestoreData)
-    }
-
-    /// Spesa con id scelto dal chiamante (spese generate dalle fisse mensili: id deterministico).
-    func setExpense(_ expense: Expense) async throws {
-        try await db.collection("expenses").document(expense.id).setData(expense.firestoreData)
-    }
-
-    // MARK: Spese fisse mensili
-
-    func addRecurringExpense(_ expense: RecurringExpense) async throws {
-        let ref = db.collection("recurring_expenses").document()
-        var created = expense
-        created.id = ref.documentID
-        try await ref.setData(created.firestoreData)
-    }
-
-    /// Elimina la definizione; le spese già generate restano nel registro.
-    func deleteRecurringExpense(_ id: String) async throws {
-        try await db.collection("recurring_expenses").document(id).delete()
+    /// Elimina solo la prenotazione condivisa. Spese e importi locali li ripulisce `FinanceRepository` (orfani).
+    func deleteReservation(_ id: String) async throws {
+        try await db.collection("reservations").document(id).delete()
     }
 
     // MARK: Scorte
