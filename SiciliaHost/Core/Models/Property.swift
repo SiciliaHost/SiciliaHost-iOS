@@ -11,15 +11,14 @@ enum PropertyRole: String, Sendable {
 }
 
 /// Funzioni extra che il proprietario concede a un collaboratore (`properties/{id}.permissions[uid]`,
-/// scritto solo dalle Cloud Functions).
+/// scritto solo dalle Cloud Functions). Le Finanze non sono più un permesso (solo il proprietario): un `FINANCE`
+/// rimasto nei dati vecchi non si decodifica e viene ignorato.
 enum PropertyPermission: String, CaseIterable, Sendable {
-    case finance = "FINANCE"
     case prices = "PRICES"
     case site = "SITE"
 
     var label: String {
         switch self {
-        case .finance: return "Finanze"
         case .prices: return "Prezzi e calendario"
         case .site: return "Contenuti del sito"
         }

@@ -93,7 +93,7 @@ struct InviteShareItem: Equatable {
 enum InviteText {
     static let baseManagementNote = "La gestione base comprende prenotazioni, scorte, check-in e invio Alloggiati."
 
-    /// Permessi in ordine stabile (Finanze, Prezzi, Sito).
+    /// Permessi in ordine stabile (Prezzi, Sito).
     private static func ordered(_ permissions: Set<PropertyPermission>) -> [PropertyPermission] {
         PropertyPermission.allCases.filter { permissions.contains($0) }
     }

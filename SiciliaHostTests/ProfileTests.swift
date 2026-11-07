@@ -28,7 +28,7 @@ final class ProfileTests: XCTestCase {
     }
 
     func testPermissionsSummaryListsLabelsInFixedOrder() {
-        XCTAssertEqual(permissionsSummary([.prices, .finance]), "Finanze, Prezzi e calendario")
+        XCTAssertEqual(permissionsSummary([.site, .prices]), "Prezzi e calendario, Contenuti del sito")
         XCTAssertEqual(permissionsSummary([]), "Nessun permesso aggiuntivo")
     }
 
@@ -39,12 +39,12 @@ final class ProfileTests: XCTestCase {
 
     func testHouseRowsShowPermissionsOnlyForCollaborators() {
         let rows = Dictionary(uniqueKeysWithValues: houseRows(scope([
-            house("1", "Casa A", "OWNER"), house("2", "Casa B", "COLLABORATOR", perms: ["FINANCE"]),
+            house("1", "Casa A", "OWNER"), house("2", "Casa B", "COLLABORATOR", perms: ["PRICES", "FINANCE"]),
         ])).map { ($0.propertyId, $0) })
         XCTAssertEqual(rows["1"]?.roleLabel, "Proprietario")
         XCTAssertNil(rows["1"]?.permissionsText)
         XCTAssertEqual(rows["2"]?.roleLabel, "Collaboratore")
-        XCTAssertEqual(rows["2"]?.permissionsText, "Finanze")
+        XCTAssertEqual(rows["2"]?.permissionsText, "Prezzi e calendario")   // FINANCE dei dati vecchi ignorato
     }
 
     func testSuperAdminOnAnotherHostsHouseIsLabelledAdministrator() {

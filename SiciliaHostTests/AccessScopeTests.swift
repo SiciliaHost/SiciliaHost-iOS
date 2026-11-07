@@ -26,13 +26,34 @@ final class AccessScopeTests: XCTestCase {
         XCTAssertEqual(MainTabs.visible(for: scope), [.home, .agenda, .scorte])
     }
 
-    func testCollaboratorPermissionsGrantTabs() {
+    func testCollaboratorPermissionsGrantTabsButNeverFinance() {
+        // Un FINANCE rimasto nei dati vecchi non dà più le Finanze: sono del solo proprietario.
         let h = house("a", members: ["u2": "COLLABORATOR"], permissions: ["u2": ["FINANCE", "SITE", "BOGUS"]])
         let scope = AccessScope(uid: "u2", isSuperAdmin: false, properties: [h])
-        XCTAssertTrue(scope.canFinance(h))
+        XCTAssertFalse(scope.canFinance(h))
+        XCTAssertTrue(scope.financeProperties.isEmpty)
         XCTAssertTrue(scope.canEditSite(h))
         XCTAssertFalse(scope.canEditPrices(h))
+        XCTAssertEqual(MainTabs.visible(for: scope), [.home, .agenda, .scorte, .case_])
+    }
+
+    func testFinanceOnlyForOwner() {
+        let mine = house("a", members: ["u1": "OWNER"])
+        let shared = house("b", members: ["x": "OWNER", "u1": "COLLABORATOR"], permissions: ["u1": ["PRICES", "SITE"]])
+        let scope = AccessScope(uid: "u1", isSuperAdmin: false, properties: [mine, shared])
+        XCTAssertTrue(scope.canFinance(mine))
+        XCTAssertFalse(scope.canFinance(shared))
+        XCTAssertEqual(scope.financeProperties.map(\.id), ["a"])
         XCTAssertEqual(MainTabs.visible(for: scope), [.home, .agenda, .scorte, .finanze, .case_])
+    }
+
+    func testSuperAdminOnCommissionHouseManagesButHasNoFinance() {
+        let commission = house("b", members: ["x": "OWNER"], commission: true)
+        let scope = AccessScope(uid: "admin", isSuperAdmin: true, properties: [commission])
+        XCTAssertTrue(scope.canManage(commission))
+        XCTAssertFalse(scope.canFinance(commission))
+        XCTAssertTrue(scope.financeProperties.isEmpty)
+        XCTAssertFalse(MainTabs.visible(for: scope).contains(.finanze))
     }
 
     func testPermissionsIgnoredWhenNoLongerCollaborator() {

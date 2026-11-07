@@ -12,8 +12,9 @@ func isSuperAdminAccount(email: String?, emailVerified: Bool) -> Bool {
 enum AppFieldsAccess { case direct, viaAdmin, readOnly }
 
 /// Cosa può fare l'utente loggato su ciascuna casa. Porting 1:1 di `AccessScope.kt` (specchio delle
-/// firestore.rules): un membro "opera"; solo l'OWNER "gestisce"; il COLLABORATOR può ricevere
-/// FINANCE / PRICES / SITE; il super-admin opera/gestisce solo le case di cui è OWNER e quelle in commissione.
+/// firestore.rules): un membro "opera"; solo l'OWNER "gestisce"; Finanze solo l'OWNER (i soldi stanno sul suo
+/// telefono, nemmeno il super-admin sulle case in commissione); il COLLABORATOR può ricevere PRICES / SITE;
+/// il super-admin opera/gestisce solo le case di cui è OWNER e quelle in commissione.
 struct AccessScope: Equatable, Sendable {
     let uid: String
     let isSuperAdmin: Bool
@@ -33,7 +34,8 @@ struct AccessScope: Equatable, Sendable {
         canManage(property) || property.permissionsOf(uid).contains(permission)
     }
 
-    func canFinance(_ property: Property) -> Bool { hasPermission(property, .finance) }
+    /// Finanze: solo il proprietario della casa (i soldi stanno sul suo telefono). Né collaboratori né super-admin in commissione.
+    func canFinance(_ property: Property) -> Bool { isOwner(property) }
     func canEditPrices(_ property: Property) -> Bool { hasPermission(property, .prices) }
     func canEditSite(_ property: Property) -> Bool { hasPermission(property, .site) }
 

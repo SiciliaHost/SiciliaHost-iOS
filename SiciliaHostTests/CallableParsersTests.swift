@@ -29,7 +29,8 @@ final class CallableParsersTests: XCTestCase {
         XCTAssertEqual(preview, InvitePreview(
             code: "ABCD2345", expiresAt: 1_760_000_000_000, inviterEmail: "boss@example.com",
             grants: [
-                InvitePreviewGrant(propertyId: "p1", propertyName: "Casa Mare", permissions: [.prices, .finance]),
+                // FINANCE non è più un permesso: un invito vecchio che lo contiene lo perde.
+                InvitePreviewGrant(propertyId: "p1", propertyName: "Casa Mare", permissions: [.prices]),
                 InvitePreviewGrant(propertyId: "p2", propertyName: "Casa Monte", permissions: []),
             ]
         ))
@@ -70,13 +71,13 @@ final class CallableParsersTests: XCTestCase {
 
     func testInviteGrantsPayloadSortsPermissionsAndKeepsEmptySets() {
         let payload = inviteGrantsPayload([
-            InviteGrant(propertyId: "p1", permissions: [.site, .finance]),
+            InviteGrant(propertyId: "p1", permissions: [.site, .prices]),
             InviteGrant(propertyId: "p2", permissions: []),
         ])
         let grants = payload["grants"] as? [[String: Any]]
         XCTAssertEqual(grants?.count, 2)
         XCTAssertEqual(grants?[0]["propertyId"] as? String, "p1")
-        XCTAssertEqual(grants?[0]["permissions"] as? [String], ["FINANCE", "SITE"])
+        XCTAssertEqual(grants?[0]["permissions"] as? [String], ["PRICES", "SITE"])
         XCTAssertEqual(grants?[1]["permissions"] as? [String], [])
     }
 
@@ -104,7 +105,7 @@ final class CallableParsersTests: XCTestCase {
             ["uid": "u4", "role": "COLLABORATOR", "email": ""],
         ] as [Any]]
         let parsed = parseMembers(data)
-        XCTAssertEqual(parsed[0].permissions, [.finance, .site])
+        XCTAssertEqual(parsed[0].permissions, [.site])   // FINANCE (dati vecchi) e BOH ignorati
         XCTAssertTrue(parsed[1].permissions.isEmpty)
         XCTAssertTrue(parsed[2].permissions.isEmpty)
     }

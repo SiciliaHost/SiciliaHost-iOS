@@ -23,7 +23,7 @@ enum MainTab: String, CaseIterable, Identifiable, Sendable {
 }
 
 /// Quali schede mostra la barra principale (porting di `MainTabs.kt`): Home, Agenda e Scorte sempre;
-/// Finanze se l'utente ha i permessi finanze su almeno una casa; Case per chi gestisce una casa,
+/// Finanze solo per il proprietario di almeno una casa (i soldi stanno sul suo telefono); Case per chi gestisce una casa,
 /// per il collaboratore con permesso SITE e per il super-admin. Messaggi (dopo Scorte) solo se il server lo abilita
 /// (`getMessagingStatus().host.enabled`: l'utente gestisce almeno una casa online sul sito) e le case sono caricate.
 enum MainTabs {

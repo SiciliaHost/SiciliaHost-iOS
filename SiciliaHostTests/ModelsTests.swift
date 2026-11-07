@@ -25,7 +25,7 @@ final class ModelsTests: XCTestCase {
             id: "p1", members: ["c": "COLLABORATOR", "o": "OWNER"],
             permissions: ["c": ["FINANCE", "BOH", "SITE"], "o": ["PRICES"], "x": ["SITE"]]
         )
-        XCTAssertEqual(p.permissionsOf("c"), [.finance, .site])
+        XCTAssertEqual(p.permissionsOf("c"), [.site])   // FINANCE (non più un permesso) e BOH ignorati
         XCTAssertTrue(p.permissionsOf("o").isEmpty)
         XCTAssertTrue(p.permissionsOf("x").isEmpty)
         XCTAssertTrue(Property(id: "p2", members: ["c": "COLLABORATOR"]).permissionsOf("c").isEmpty)

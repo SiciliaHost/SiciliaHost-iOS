@@ -52,13 +52,13 @@ final class MembersTests: XCTestCase {
 
     func testTogglePermissionAddsAndRemovesIdempotently() {
         let none = Set<PropertyPermission>()
-        let withFinance = MembersLogic.toggle(none, .finance, true)
-        XCTAssertEqual(withFinance, [.finance])
-        XCTAssertEqual(MembersLogic.toggle(withFinance, .finance, true), withFinance)
-        let both = MembersLogic.toggle(withFinance, .site, true)
-        XCTAssertEqual(both, [.finance, .site])
-        XCTAssertEqual(MembersLogic.toggle(both, .finance, false), [.site])
-        XCTAssertEqual(MembersLogic.toggle(none, .prices, false), none)
+        let withPrices = MembersLogic.toggle(none, .prices, true)
+        XCTAssertEqual(withPrices, [.prices])
+        XCTAssertEqual(MembersLogic.toggle(withPrices, .prices, true), withPrices)
+        let both = MembersLogic.toggle(withPrices, .site, true)
+        XCTAssertEqual(both, [.prices, .site])
+        XCTAssertEqual(MembersLogic.toggle(both, .prices, false), [.site])
+        XCTAssertEqual(MembersLogic.toggle(none, .site, false), none)
     }
 
     // MARK: InviteFormTest
@@ -82,17 +82,17 @@ final class MembersTests: XCTestCase {
     func testToGrantsIgnoresUnselectedHousesAndFollowsTheListOrder() {
         let form = InviteForm.create(order: order, currentId: "c")
             .withProperty("a", selected: true)
-            .withPermission("a", .finance, enabled: true)
+            .withPermission("a", .prices, enabled: true)
             .withPermission("c", .site, enabled: true)
             .withPermission("c", .prices, enabled: true)
         XCTAssertEqual(form.toGrants(), [
-            InviteGrant(propertyId: "a", permissions: [.finance]),
+            InviteGrant(propertyId: "a", permissions: [.prices]),
             InviteGrant(propertyId: "c", permissions: [.prices, .site]),
         ])
     }
 
     func testPermissionsOfAnUnselectedHouseAreIgnoredAndDroppedOnDeselect() {
-        let form = InviteForm.create(order: order, currentId: "a").withPermission("b", .finance, enabled: true)
+        let form = InviteForm.create(order: order, currentId: "a").withPermission("b", .prices, enabled: true)
         XCTAssertFalse(form.isSelected("b"))
         XCTAssertEqual(form.permissionsOf("b"), [])
         let again = form.withPermission("a", .site, enabled: true).withProperty("a", selected: false).withProperty("a", selected: true)
@@ -116,11 +116,11 @@ final class MembersTests: XCTestCase {
 
     func testShareTextListsHousesPermissionsLinkCodeAndExpiry() {
         let text = InviteText.shareText(
-            [InviteShareItem(propertyName: "Casa Mare", permissions: [.finance, .prices]),
+            [InviteShareItem(propertyName: "Casa Mare", permissions: [.site, .prices]),
              InviteShareItem(propertyName: "Casa Sole", permissions: [])],
             link: "siciliahost://invito/ABCD2345", code: "ABCD2345", expiryDate: "21/10/2026"
         )
-        XCTAssertTrue(text.contains("Casa Mare: Finanze, Prezzi e calendario"))
+        XCTAssertTrue(text.contains("Casa Mare: Prezzi e calendario, Contenuti del sito"))
         XCTAssertTrue(text.contains("Casa Sole: solo gestione base"))
         XCTAssertTrue(text.contains("siciliahost://invito/ABCD2345"))
         XCTAssertTrue(text.contains("inserisci: ABCD2345"))
@@ -140,7 +140,7 @@ final class MembersTests: XCTestCase {
 
     func testInviteFormat() {
         XCTAssertEqual(InviteText.permissionsText([]), "Solo gestione base")
-        XCTAssertEqual(InviteText.permissionsText([.prices, .finance]), "Gestione base + Finanze, Prezzi e calendario")
+        XCTAssertEqual(InviteText.permissionsText([.site, .prices]), "Gestione base + Prezzi e calendario, Contenuti del sito")
         XCTAssertEqual(InviteText.permissionsText([.site]), "Gestione base + Contenuti del sito")
         XCTAssertEqual(InviteText.headline("mario@x.it"), "mario@x.it ti invita a collaborare")
         XCTAssertEqual(InviteText.headline("   "), "Un proprietario ti invita a collaborare")
@@ -189,7 +189,7 @@ private final class FakeInviteAPI: InviteAPI {
 final class InviteModelTests: XCTestCase {
     private let preview = InvitePreview(
         code: "ABCD2345", expiresAt: 1_800_000_000_000, inviterEmail: "mario@x.it",
-        grants: [InvitePreviewGrant(propertyId: "p1", propertyName: "Casa Mare", permissions: [.finance])]
+        grants: [InvitePreviewGrant(propertyId: "p1", propertyName: "Casa Mare", permissions: [.prices])]
     )
     private var pending: PendingInvite!
 
