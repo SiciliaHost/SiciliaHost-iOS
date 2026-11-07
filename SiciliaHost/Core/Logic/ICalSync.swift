@@ -128,11 +128,11 @@ enum ICalSync {
         }
     }
 
-    /// Segnaposto Booking creato dall'iCal e mai toccato dall'host: niente importo, niente nome, non dall'Excel. Solo
-    /// questi si tolgono come «eco» senza perdere dati (non hanno la spesa biancheria).
+    /// Segnaposto Booking creato dall'iCal e mai toccato dall'host: niente nome, non dall'Excel. Solo questi si tolgono
+    /// come «eco» senza perdere dati. L'importo non c'è più sul server (sta sul telefono): il segno è il nome vuoto.
     static func isUntouchedPlaceholder(_ r: Reservation) -> Bool {
         guard let uid = r.icalUid else { return false }
-        return !uid.hasPrefix("booking-xls-") && r.grossAmount == nil && (r.guestName ?? "").trimmed.isEmpty
+        return !uid.hasPrefix("booking-xls-") && (r.guestName ?? "").trimmed.isEmpty
     }
 
     /// Decide cosa importare e cosa cancellare, per piattaforma:
@@ -165,7 +165,7 @@ enum ICalSync {
                 .map { event in
                     Reservation(
                         propertyId: propertyId, guestName: event.summary, checkIn: event.checkIn, checkOut: event.checkOut,
-                        platform: platform, icalUid: event.uid, needsReview: true
+                        platform: platform, icalUid: event.uid
                     )
                 }
             let feedUids = Set(validEvents.map(\.uid))
@@ -189,7 +189,7 @@ enum ICalSync {
                 .map { event in
                     Reservation(
                         propertyId: propertyId, guestName: nil, checkIn: event.checkIn, checkOut: event.checkOut,
-                        platform: platform, icalUid: event.uid, needsReview: true
+                        platform: platform, icalUid: event.uid
                     )
                 }
             // Mai creare e cancellare lo stesso id nello stesso giro: un evento che si sovrappone a un segnaposto

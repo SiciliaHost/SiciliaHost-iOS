@@ -1,7 +1,8 @@
 import Observation
 import SwiftUI
 
-/// Dati della Home (`DashboardViewModel`): arrivi di oggi e prenotazioni da completare delle case su cui si opera.
+/// Dati della Home (`DashboardViewModel`): arrivi di oggi delle case su cui si opera e prenotazioni da completare
+/// (importo mancante) delle case di cui si è proprietari.
 /// Il caricamento è iniettabile per le anteprime della CI (dati inventati, nessun accesso a Firestore).
 @MainActor
 @Observable
@@ -38,13 +39,25 @@ final class HomeModel {
             let loaded = try await fetch(operable.map(\.id))
             let all = loaded.reservations
             arrivalsToday = AgendaLogic.arrivalsToday(all, now: millisFromDate(Date()))
-            pendingReview = AgendaLogic.pendingReview(all)
+            pendingReview = await ownerPending(all, scope: scope)
             checkinSentIds = loaded.checkinSentIds
         } catch {
             arrivalsToday = []
             pendingReview = []
             checkinSentIds = []
         }
+    }
+
+    /// «Da completare» = importo mancante; esiste solo per il proprietario, che ha gli importi sul suo telefono.
+    /// Le prenotazioni sono quelle già lette per gli arrivi (le case del proprietario sono tra quelle su cui opera).
+    private func ownerPending(_ all: [Reservation], scope: AccessScope?) async -> [Reservation] {
+        guard let scope else { return [] }
+        let ownedIds = Set(scope.financeProperties.map(\.id))
+        if ownedIds.isEmpty { return [] }
+        let owned = all.filter { ownedIds.contains($0.propertyId) }
+        let money = await FinanceStore.forUser(scope.uid).read().moneyById()
+        let pendingIds = Set(pendingAmounts(joinMoney(owned, money), now: millisFromDate(Date())).map(\.id))
+        return owned.filter { pendingIds.contains($0.id) }
     }
 
     /// "Aggiungi ospite": crea una prenotazione manuale oggi → domani e ne restituisce l'id per aprire il check-in.

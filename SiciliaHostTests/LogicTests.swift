@@ -55,13 +55,13 @@ final class LogicTests: XCTestCase {
     func testBookingImportsEveryEventAsPlaceholderWithNilGuestName() {
         let plan = ICalSync.buildSyncPlan(events: ICalSync.parseEvents(sampleIcal), propertyId: "prop1", platform: "BOOKING", existingFutureReservations: [])
         XCTAssertEqual(plan.toUpsert.count, 3)
-        XCTAssertTrue(plan.toUpsert.allSatisfy { $0.guestName == nil && $0.needsReview })
+        XCTAssertTrue(plan.toUpsert.allSatisfy { $0.guestName == nil && $0.firestoreData["needsReview"] == nil })
     }
 
     func testBookingSkipsEventOverlappingAnExistingReservation() {
         // Copre già le date dell'evento real-booking-1 (1-5 agosto 2026): dev'essere l'unico scartato.
         let already = Reservation(id: "excel-1", propertyId: "prop1", checkIn: 1_785_542_400_000, checkOut: 1_785_888_000_000,
-                                  platform: "BOOKING", icalUid: "booking-xls-42", needsReview: false)
+                                  platform: "BOOKING", icalUid: "booking-xls-42")
         let plan = ICalSync.buildSyncPlan(events: ICalSync.parseEvents(sampleIcal), propertyId: "prop1", platform: "BOOKING", existingFutureReservations: [already])
         XCTAssertEqual(plan.toUpsert.count, 2)
         XCTAssertTrue(plan.toUpsert.allSatisfy { $0.checkIn != 1_785_542_400_000 })
@@ -79,7 +79,7 @@ final class LogicTests: XCTestCase {
         XCTAssertTrue(empty.isEmpty)
         let airbnb = Reservation(id: "r1", propertyId: "prop1", checkIn: 1, checkOut: 2, platform: "AIRBNB", icalUid: "would-be-deleted@airbnb.com")
         let booking = Reservation(id: "excel-1", propertyId: "prop1", checkIn: 1_785_542_400_000, checkOut: 1_785_888_000_000,
-                                  platform: "BOOKING", icalUid: "booking-xls-42", needsReview: false)
+                                  platform: "BOOKING", icalUid: "booking-xls-42")
         for (platform, existing) in [("AIRBNB", airbnb), ("BOOKING", booking)] {
             let plan = ICalSync.buildSyncPlan(events: empty, propertyId: "prop1", platform: platform, existingFutureReservations: [existing])
             XCTAssertTrue(plan.toUpsert.isEmpty)

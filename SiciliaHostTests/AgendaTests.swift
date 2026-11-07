@@ -58,10 +58,7 @@ final class AgendaTests: XCTestCase {
         XCTAssertEqual(ids, ["a", "b"])
     }
 
-    func testPendingReviewAndNewManualReservation() {
-        let list = [Reservation(id: "a", needsReview: true), Reservation(id: "b")]
-        XCTAssertEqual(AgendaLogic.pendingReview(list).map(\.id), ["a"])
-
+    func testNewManualReservation() {
         let now = millisFromDate(rome.date(from: DateComponents(year: 2026, month: 8, day: 10, hour: 15))!)
         let created = AgendaLogic.newManualReservation(propertyId: "p1", now: now, calendar: rome)
         let midnight = millisFromDate(rome.date(from: DateComponents(year: 2026, month: 8, day: 10))!)
@@ -69,8 +66,7 @@ final class AgendaTests: XCTestCase {
         XCTAssertEqual(created.platform, "MANUAL")
         XCTAssertEqual(created.checkIn, midnight)
         XCTAssertEqual(created.checkOut, midnight + 86_400_000)
-        XCTAssertFalse(created.needsReview)
-        XCTAssertNil(created.grossAmount)
+        XCTAssertNil(created.firestoreData["grossAmount"])
     }
 
     func testDayEventsAndMarks() {
@@ -107,31 +103,37 @@ final class AgendaTests: XCTestCase {
         XCTAssertEqual(ReservationEditLogic.amountText(99.5), "99.5")
     }
 
-    func testApplyEditRecomputesNetsAndReviewFlag() {
+    func testApplyEditChangesOnlyTheSharedFields() {
         let current = Reservation(id: "r", propertyId: "p", guestName: "Old", checkIn: 1, checkOut: 2, platform: "MANUAL",
-                                  icalUid: "uid-1", needsReview: true, guestCountry: "de")
+                                  icalUid: "uid-1", guestCountry: "de")
         let edited = ReservationEditLogic.applyEdit(
-            to: current, guestName: "  Anna  ", checkIn: 10, checkOut: 20, platform: "BOOKING",
-            grossAmount: 100, adults: 2, children: 1, isManagedOnCommission: false
+            to: current, guestName: "  Anna  ", checkIn: 10, checkOut: 20, platform: "BOOKING", adults: 2, children: 1
         )
         XCTAssertEqual(edited.guestName, "Anna")
         XCTAssertEqual(edited.checkIn, 10)
+        XCTAssertEqual(edited.checkOut, 20)
         XCTAssertEqual(edited.platform, "BOOKING")
-        XCTAssertEqual(edited.netAmountOwner!, 76.2, accuracy: 0.0001)
-        XCTAssertEqual(edited.netAmountAdmin!, 76.2, accuracy: 0.0001)
-        XCTAssertFalse(edited.needsReview)
-        // Campi non toccati dal modulo restano.
+        XCTAssertEqual(edited.adults, 2)
+        XCTAssertEqual(edited.children, 1)
+        // Campi non toccati dal modulo restano; nessun campo di denaro finisce sul server.
         XCTAssertEqual(edited.icalUid, "uid-1")
         XCTAssertEqual(edited.guestCountry, "de")
+        XCTAssertNil(edited.firestoreData["grossAmount"])
+        XCTAssertNil(edited.firestoreData["needsReview"])
 
         let blank = ReservationEditLogic.applyEdit(
-            to: edited, guestName: "   ", checkIn: 10, checkOut: 20, platform: "BOOKING",
-            grossAmount: nil, adults: 0, children: 0, isManagedOnCommission: true
+            to: edited, guestName: "   ", checkIn: 10, checkOut: 20, platform: "BOOKING", adults: 0, children: 0
         )
         XCTAssertNil(blank.guestName)
-        XCTAssertNil(blank.netAmountOwner)
-        XCTAssertNil(blank.netAmountAdmin)
-        XCTAssertTrue(blank.needsReview)
+    }
+
+    func testGrossChangeWritesOnlyWhenTheAmountChanged() {
+        typealias C = ReservationEditLogic.GrossChange
+        XCTAssertEqual(ReservationEditLogic.grossChange(initial: 120, edited: 120), C.unchanged)
+        XCTAssertEqual(ReservationEditLogic.grossChange(initial: nil, edited: nil), C.unchanged)
+        XCTAssertEqual(ReservationEditLogic.grossChange(initial: 120, edited: 150), C.set(150))
+        XCTAssertEqual(ReservationEditLogic.grossChange(initial: nil, edited: 80), C.set(80))
+        XCTAssertEqual(ReservationEditLogic.grossChange(initial: 120, edited: nil), C.clear)
     }
 
     func testPickedDayIsUtcMidnightOfTheLocalDay() {

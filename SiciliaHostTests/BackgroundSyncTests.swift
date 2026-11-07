@@ -24,9 +24,9 @@ final class BackgroundSyncTests: XCTestCase {
         ICalSync.ParsedEvent(uid: uid, summary: "CLOSED - Not available", checkIn: day(from), checkOut: day(to))
     }
 
-    private func booking(_ id: String, _ from: Int, _ to: Int, gross: Double? = nil, name: String? = nil) -> Reservation {
+    private func booking(_ id: String, _ from: Int, _ to: Int, name: String? = nil) -> Reservation {
         Reservation(id: id, propertyId: "p1", guestName: name, checkIn: day(from), checkOut: day(to), platform: "BOOKING",
-                    grossAmount: gross, icalUid: id)
+                    icalUid: id)
     }
 
     private var airbnb: Reservation {
@@ -36,7 +36,7 @@ final class BackgroundSyncTests: XCTestCase {
 
     private func manual(_ id: String, _ from: Int, _ to: Int) -> Reservation {
         Reservation(id: id, propertyId: "p1", guestName: "Rossi", checkIn: romeMidnight(from), checkOut: romeMidnight(to),
-                    platform: "MANUAL", grossAmount: 500)
+                    platform: "MANUAL")
     }
 
     private func plan(_ events: [ICalSync.ParsedEvent], _ existing: [Reservation], _ others: [Reservation], now: Int64 = 0) -> ICalSync.Plan {
@@ -75,10 +75,35 @@ final class BackgroundSyncTests: XCTestCase {
     }
 
     func testCompletedPlaceholderAndExcelReservationAreKept() {
-        let withGross = booking("g@booking.com", 1, 5, gross: 0)
         let withName = booking("n@booking.com", 1, 5, name: "Bianchi")
         let excel = booking("booking-xls-7", 1, 5)
-        XCTAssertTrue(plan([ev("echo@booking.com", 1, 5)], [withGross, withName, excel], [airbnb]).toDelete.isEmpty)
+        XCTAssertTrue(plan([ev("echo@booking.com", 1, 5)], [withName, excel], [airbnb]).toDelete.isEmpty)
+    }
+
+    func testUntouchedPlaceholderIsAnIcalBookingWithoutName() {
+        // L'importo non è più sul server: il segnaposto mai toccato è quello iCal senza nome.
+        XCTAssertTrue(ICalSync.isUntouchedPlaceholder(booking("x@booking.com", 1, 5)))
+        XCTAssertTrue(ICalSync.isUntouchedPlaceholder(booking("x@booking.com", 1, 5, name: "   ")))
+        XCTAssertFalse(ICalSync.isUntouchedPlaceholder(booking("x@booking.com", 1, 5, name: "Bianchi")))
+        XCTAssertFalse(ICalSync.isUntouchedPlaceholder(booking("booking-xls-7", 1, 5)))
+        var noUid = booking("m1", 1, 5)
+        noUid.icalUid = nil
+        XCTAssertFalse(ICalSync.isUntouchedPlaceholder(noUid))
+    }
+
+    func testCreatedReservationsCarryNoReviewFlagOrMoney() {
+        let bookingPlan = plan([ev("real@booking.com", 10, 12)], [], [])
+        let airbnbPlan = ICalSync.buildSyncPlan(
+            events: [ICalSync.ParsedEvent(uid: "r@airbnb.com", summary: "Reserved", checkIn: day(1), checkOut: day(5))],
+            propertyId: "p1", platform: "AIRBNB", existingFutureReservations: []
+        )
+        let created = bookingPlan.toUpsert + airbnbPlan.toUpsert
+        XCTAssertEqual(created.count, 2)
+        for r in created {
+            for key in ["needsReview", "grossAmount", "netAmountOwner", "netAmountAdmin"] {
+                XCTAssertNil(r.firestoreData[key], key)
+            }
+        }
     }
 
     func testEventStrictlyInsideALongerForeignStayIsImportedAndItsPlaceholderKept() {

@@ -37,10 +37,6 @@ enum AgendaLogic {
         return reservations.filter { $0.checkIn >= today && $0.checkIn < tomorrow }
     }
 
-    static func pendingReview(_ reservations: [Reservation]) -> [Reservation] {
-        reservations.filter(\.needsReview)
-    }
-
     /// Prenotazione manuale vuota (oggi → domani, mezzanotte locale) creata da "Aggiungi ospite" per aprire il check-in.
     static func newManualReservation(propertyId: String, now: Int64, calendar: Calendar = .current) -> Reservation {
         let today = startOfDay(now, calendar: calendar)
@@ -100,35 +96,35 @@ enum ReservationEditLogic {
         return String(amount)
     }
 
-    /// La prenotazione salvata da "Salva" (`ReservationEditViewModel.save`): nome vuoto = nessun nome, netti ricalcolati
-    /// dal lordo con il regime della casa, `needsReview` finché manca il lordo.
-    static func applyEdit(
-        to current: Reservation,
-        guestName: String,
-        checkIn: Int64,
-        checkOut: Int64,
-        platform: String,
-        grossAmount: Double?,
-        adults: Int,
-        children: Int,
-        isManagedOnCommission: Bool
-    ) -> Reservation {
-        let calc = grossAmount.map {
-            FinancialCalculator.calculate(grossAmount: $0, platform: platform, isManagedOnCommission: isManagedOnCommission)
-        }
+    /// La prenotazione salvata da "Salva" (`ReservationEditViewModel.save`): nome vuoto = nessun nome. Nessun campo
+    /// di denaro: l'importo sta solo sul telefono del proprietario (vedi `grossChange`).
+    static func applyEdit(to current: Reservation, guestName: String, checkIn: Int64, checkOut: Int64,
+                          platform: String, adults: Int, children: Int) -> Reservation {
         var updated = current
         let trimmed = guestName.trimmingCharacters(in: .whitespacesAndNewlines)
         updated.guestName = trimmed.isEmpty ? nil : trimmed
-        updated.checkIn = checkIn
-        updated.checkOut = checkOut
+        updated.checkIn = checkIn; updated.checkOut = checkOut
         updated.platform = platform
-        updated.grossAmount = grossAmount
-        updated.netAmountOwner = calc?.netAmountOwner
-        updated.netAmountAdmin = calc?.netAmountAdmin
-        updated.adults = adults
-        updated.children = children
-        updated.needsReview = grossAmount == nil
+        updated.adults = adults; updated.children = children
         return updated
+    }
+
+    /// Cosa fare dell'importo sul telefono al salvataggio della modifica.
+    enum GrossChange: Equatable {
+        /// Invariato: nessuna scrittura (né blocco come importo manuale né biancheria). Non si chiama `none` per non
+        /// confondersi con `Optional.none`.
+        case unchanged
+        case set(Double)
+        case clear
+    }
+
+    /// Confronta l'importo caricato `initial` con quello del campo `edited`: si scrive solo se è cambiato. Il campo è
+    /// precompilato, quindi senza questo controllo ogni salvataggio renderebbe l'importo MANUAL (sito ed Excel non lo
+    /// aggiornerebbero più) e aggiungerebbe la biancheria.
+    static func grossChange(initial: Double?, edited: Double?) -> GrossChange {
+        if edited == initial { return .unchanged }
+        if let edited { return .set(edited) }
+        return .clear
     }
 
     /// Data scelta nel selettore → millisecondi da salvare. Il selettore dell'Android restituisce la mezzanotte UTC del

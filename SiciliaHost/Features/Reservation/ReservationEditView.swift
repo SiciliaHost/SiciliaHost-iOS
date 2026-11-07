@@ -1,40 +1,70 @@
 import Observation
 import SwiftUI
 
-/// Dati della modifica prenotazione (`ReservationEditViewModel`).
+/// Dati della modifica prenotazione (`ReservationEditViewModel`). La prenotazione è sul server; l'importo lordo sta solo
+/// sul telefono del proprietario (`FinanceStore`): un collaboratore non lo vede e non lo tocca mai.
 @MainActor
 @Observable
 final class ReservationEditModel {
     private(set) var reservation: Reservation?
     private(set) var isLoading = false
     private(set) var isSaving = false
-    private(set) var isManagedOnCommission = false
-    private(set) var canFinance = false
+    /// Solo il proprietario vede e modifica l'importo (sta sul suo telefono).
+    private(set) var canEditMoney = false
+    /// Importo letto dal telefono al caricamento: al salvataggio si scrive solo se è cambiato.
+    private(set) var grossAmount: Double?
     var error: String?
 
     private let db = FirestoreService()
+
+    /// Serve solo per le scritture locali (nessuna lettura dal server).
+    private func finance(_ uid: String) -> FinanceRepository {
+        FinanceRepository(store: FinanceStore.forUser(uid), loadReservations: { _ in ([], false) }, site: CloudSiteAmounts())
+    }
 
     func load(_ reservationId: String) async {
         isLoading = true
         defer { isLoading = false }
         do {
-            reservation = try await db.getReservation(reservationId)
-            if let propertyId = reservation?.propertyId {
+            let res = try await db.getReservation(reservationId)
+            var money = false
+            var gross: Double?
+            if let res {
                 let scope = try await AccessSession.shared.scope()
-                let property = scope.properties.first { $0.id == propertyId }
-                isManagedOnCommission = property?.isManagedOnCommission ?? false
-                canFinance = property.map(scope.canFinance) ?? false
+                if let property = scope.properties.first(where: { $0.id == res.propertyId }), scope.canFinance(property) {
+                    money = true
+                    gross = await FinanceStore.forUser(scope.uid).read().moneyById()[res.id]?.grossAmount
+                }
             }
+            // Importo prima della prenotazione: il modulo nasce con la prenotazione e legge l'importo una volta sola.
+            canEditMoney = money
+            grossAmount = gross
+            reservation = res
         } catch {
             reservation = nil
         }
     }
 
-    func save(_ updated: Reservation) async -> Bool {
+    /// `editedGross`: il valore del campo importo (ignorato se non si è il proprietario).
+    func save(_ updated: Reservation, editedGross: Double?) async -> Bool {
         isSaving = true
         defer { isSaving = false }
         do {
             try await db.updateReservation(updated)
+            // Il campo è precompilato: si scrive solo se l'importo è cambiato, altrimenti ogni salvataggio lo
+            // bloccherebbe come manuale e aggiungerebbe la biancheria.
+            if canEditMoney {
+                switch ReservationEditLogic.grossChange(initial: grossAmount, edited: editedGross) {
+                case .unchanged:
+                    break
+                case let .set(amount):
+                    let uid = try await AccessSession.shared.scope().uid
+                    try await finance(uid).saveGross(joinMoney([updated], [:])[0], amount: amount)
+                case .clear:
+                    let uid = try await AccessSession.shared.scope().uid
+                    try await finance(uid).clearGross(updated.id)
+                }
+            }
             return true
         } catch {
             self.error = "Salvataggio non riuscito. Controlla la connessione e riprova."
@@ -42,16 +72,18 @@ final class ReservationEditModel {
         }
     }
 
-    /// Le spese collegate (biancheria) si cancellano solo con il permesso sulle finanze: per un collaboratore le
-    /// spese rimaste orfane le elimina la schermata Finanze.
+    /// Sul server si cancella solo la prenotazione; spese e importo collegati stanno sul telefono del proprietario e
+    /// li toglie lui (qui, o il riallineamento delle Finanze se l'ha cancellata un collaboratore).
     func delete() async -> Bool {
         guard let current = reservation else { return false }
         isSaving = true
         defer { isSaving = false }
         do {
-            try await db.deleteReservationWithExpenses(
-                reservationId: current.id, propertyId: current.propertyId, withExpenses: canFinance
-            )
+            try await db.deleteReservation(current.id)
+            if canEditMoney {
+                let uid = try await AccessSession.shared.scope().uid
+                try await finance(uid).onReservationDeleted(current.id)
+            }
             return true
         } catch {
             self.error = "Eliminazione non riuscita. Controlla la connessione e riprova."
@@ -60,8 +92,8 @@ final class ReservationEditModel {
     }
 }
 
-/// Modifica prenotazione (`ReservationEditScreen.kt`): nome, adulti/bambini, date, piattaforma, importo lordo (vuoto =
-/// ancora da definire); "Salva" ricalcola i netti; "Elimina prenotazione" chiede conferma.
+/// Modifica prenotazione (`ReservationEditScreen.kt`): nome, adulti/bambini, date, piattaforma e, solo per il
+/// proprietario, importo lordo (vuoto = ancora da definire); "Elimina prenotazione" chiede conferma.
 struct ReservationEditView: View {
     let reservationId: String
     let onBack: () -> Void
@@ -108,6 +140,8 @@ private struct ReservationEditForm: View {
         var id: Self { self }
     }
 
+    /// `@MainActor`: legge l'importo dal modello (isolato sul main actor).
+    @MainActor
     init(reservation: Reservation, model: ReservationEditModel, onDone: @escaping () -> Void) {
         self.reservation = reservation
         self.model = model
@@ -118,7 +152,7 @@ private struct ReservationEditForm: View {
         _checkIn = State(initialValue: reservation.checkIn)
         _checkOut = State(initialValue: reservation.checkOut)
         _platform = State(initialValue: reservation.platform)
-        _amountText = State(initialValue: ReservationEditLogic.amountText(reservation.grossAmount))
+        _amountText = State(initialValue: ReservationEditLogic.amountText(model.grossAmount))
     }
 
     var body: some View {
@@ -139,10 +173,12 @@ private struct ReservationEditForm: View {
                     optionLabel: { $0 },
                     onSelect: { platform = $0 }
                 )
-                AppTextField(
-                    label: "Importo lordo (€)", text: $amountText,
-                    supporting: "Lascia vuoto se ancora da definire", keyboard: .decimalPad
-                )
+                if model.canEditMoney {
+                    AppTextField(
+                        label: "Importo lordo (€)", text: $amountText,
+                        supporting: "Lascia vuoto se ancora da definire", keyboard: .decimalPad
+                    )
+                }
 
                 Button("Salva", action: save)
                     .buttonStyle(.appPrimary)
@@ -171,7 +207,10 @@ private struct ReservationEditForm: View {
             }
             Button("Annulla", role: .cancel) {}
         } message: {
-            Text("L'operazione è definitiva e cancella anche eventuali spese collegate (es. biancheria).")
+            // Le spese collegate stanno solo sul telefono del proprietario: il collaboratore non ne tocca (Android `60a8f98`).
+            Text(model.canEditMoney
+                 ? "Cancella la prenotazione. Le eventuali spese collegate sul tuo telefono vengono tolte dalle Finanze. L'operazione non si può annullare."
+                 : "Elimina la prenotazione. L'operazione non si può annullare.")
         }
         .alert("Operazione non riuscita", isPresented: Binding(
             get: { model.error != nil }, set: { if !$0 { model.error = nil } }
@@ -198,12 +237,11 @@ private struct ReservationEditForm: View {
             checkIn: checkIn,
             checkOut: checkOut,
             platform: platform,
-            grossAmount: ReservationEditLogic.parseAmount(amountText),
             adults: ReservationEditLogic.parseCount(adultsText),
-            children: ReservationEditLogic.parseCount(childrenText),
-            isManagedOnCommission: model.isManagedOnCommission
+            children: ReservationEditLogic.parseCount(childrenText)
         )
-        Task { if await model.save(updated) { onDone() } }
+        let gross = ReservationEditLogic.parseAmount(amountText)
+        Task { if await model.save(updated, editedGross: gross) { onDone() } }
     }
 }
 
