@@ -83,7 +83,7 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `data/mrz/MrzParser.kt` | 108 | `Core/Logic/IdentityParsers.swift` | scritto |
 | `data/utils/AirbnbListingScraper.kt` | 80 | `Core/Logic/ListingImport.swift` | scritto |
 | `data/utils/BookingExcelParser.kt` | 268 | `Core/Logic/BookingImport.swift, XlsReader.swift` | scritto (xls: lettore OLE2/BIFF8 scritto a mano, validato in Python sui file reali) |
-| `data/utils/BookingImportPlan.kt` | 55 | `Core/Logic/BookingImport.swift` | scritto |
+| `data/utils/BookingImportPlan.kt` | 55 | `Core/Logic/BookingImport.swift` (`ExcelRow`, `isNamelessIcalPlaceholder`) | scritto (2026-11-07, Android `2165058`: soldi sul telefono; non compilato) |
 | `data/utils/BookingStats.kt` | 195 | `Core/Logic/BookingStats.swift` | scritto |
 | `data/utils/DateRangeUtils.kt` | 6 | `Core/Logic/TimeUtils.swift` | scritto |
 | `data/utils/ExpenseCategory.kt` | 46 | `Core/Logic/Finance.swift` | scritto |
@@ -218,6 +218,16 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/finance/FinanceParts.kt` | 195 | `Features/Finance/FinanceParts.swift`, `Core/Logic/FinanceViewLogic.swift` (formati) | compilato+test |
 | `ui/finance/FinanceScreen.kt` | 896 | `Features/Finance/FinanceView.swift`, `FinanceModel.swift` | compilato+test |
 | `ui/finance/FinanceView.kt` | 69 | `Core/Logic/FinanceViewLogic.swift` | compilato+test |
+| `data/finance/FinanceModels.kt` | 78 | `Core/Finance/FinanceModels.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| `data/finance/FinanceOps.kt` | 33 | `Core/Finance/FinanceOps.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| `data/finance/FinanceReconcile.kt` | 69 | `Core/Finance/FinanceReconcile.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| `data/finance/FinanceRepository.kt` | 152 | `Core/Finance/FinanceRepository.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| `data/finance/FinanceStore.kt` | 76 | `Core/Finance/FinanceStore.swift` (actor + registro per file) | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| 🧪 `data/finance/FinanceOpsTest.kt` | 39 | `SiciliaHostTests/FinanceLocalTests.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| 🧪 `data/finance/FinanceReconcileTest.kt` | 108 | `SiciliaHostTests/FinanceLocalTests.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| 🧪 `data/finance/FinanceRepositoryTest.kt` | 204 | `SiciliaHostTests/FinanceLocalTests.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| 🧪 `data/finance/FinanceStoreTest.kt` | 63 | `SiciliaHostTests/FinanceLocalTests.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
+| 🧪 `data/finance/JoinMoneyTest.kt` | 25 | `SiciliaHostTests/FinanceLocalTests.swift` | scritto (2026-11-07, Android `2165058`, sul telefono; non compilato) |
 | 🧪 `ui/finance/FinanceListKeysTest.kt` | 47 | `SiciliaHostTests/FinanceViewTests.swift` | compilato, verde |
 
 ## F8 — Check-in Alloggiati

@@ -8,7 +8,7 @@ import UIKit
 //
 // I tre colori valgono anche come linguaggio di stato, perché l'app ha esattamente tre stati ovunque:
 //   verde  = confermato   (check-in, saldo positivo, scorte ok)
-//   giallo = da rivedere  (needsReview, scorta bassa, in attesa)
+//   giallo = da rivedere  (da completare, scorta bassa, in attesa)
 //   rosso  = in uscita    (check-out, spesa, esaurito, errore)
 // Le schermate li leggono da `Theme.primary` / `Theme.secondary` / `Theme.error`, non dalle costanti di `Brand`
 // (le uniche eccezioni sono il login con il suo gradiente fisso e il riquadro dello scanner sopra la fotocamera).

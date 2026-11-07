@@ -76,6 +76,12 @@ enum AgendaLogic {
 enum ReservationEditLogic {
     static let platforms = ["AIRBNB", "BOOKING", "MANUAL"]
 
+    static let loadFailedMessage = "Impossibile caricare la prenotazione. Controlla la connessione e riprova."
+
+    /// Testo al posto del modulo quando non c'è una prenotazione: l'errore del caricamento se c'è stato (come l'Android
+    /// `0176b63`), altrimenti la prenotazione davvero non esiste.
+    static func emptyStateText(loadError: String?) -> String { loadError ?? "Prenotazione non trovata" }
+
     /// Importo scritto a mano: la virgola vale come punto; testo vuoto o non numerico = importo da definire (`nil`).
     static func parseAmount(_ text: String) -> Double? {
         let normalized = text.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")

@@ -89,9 +89,13 @@ final class AccountDeletionModel {
             }
             // Token con il login appena rifatto (`auth_time` recente), come fa il sito.
             _ = try await user.getIDTokenResult(forcingRefresh: true)
+            // L'uid va preso prima: dopo la callable l'utente non esiste più.
+            let uid = user.uid
             _ = try await Functions.functions().httpsCallable("deleteMyAccount").call([String: Any]())
             // Account eliminato: via anche schede del check-in e ricevuta da questo telefono (come l'Android).
             try? GuestRecordStore.shared.clear()
+            // Anche le finanze del proprietario (file JSON per utente) spariscono con l'account. Il logout normale no.
+            await FinanceStore.forUser(uid).wipe()
             ReceiptFiles.clear()
             return true
         } catch {

@@ -12,4 +12,5 @@ App iOS nativa (SwiftUI) di SiciliaHost: riscrittura dell'app Android in `../And
 - Backend = stesso Firebase `siciliahostmanager` dell'Android. Il contratto dati è in `../Androidapp/CLAUDE.md` ("Who owns what"): non cambiare nomi/forma dei campi, scrivi `properties` solo con merge e solo i campi dell'app.
 - Piano a fasi: `docs/PIANO.md`. Stato di ogni file Android (211, nessuno escluso): `docs/INVENTARIO.md` — aggiornalo a ogni file portato (colonne iOS e Stato). Corrispondenza librerie: `docs/MAPPA_PORTING.md`.
 - Architettura: `docs/ARCHITETTURA.md`. Setup Mac: `docs/SETUP_MAC.md`.
+- **Finanze e contatti dell'Excel solo sul telefono del proprietario** (`Core/Finance/`, file JSON per uid): mai scrivere su Firestore `grossAmount`, `netAmountOwner`, `netAmountAdmin`, `commissionAmount`, `bookedAt`, `travelPurpose`, `bookingDevice`, `needsReview`, né `expenses`, `recurring_expenses`, `contacts`. Dettagli in `docs/ARCHITETTURA.md`.
 - Non avviare emulatori/dispositivi né fare deploy senza richiesta esplicita. Non fare push/pubblicare senza che l'utente lo chieda.

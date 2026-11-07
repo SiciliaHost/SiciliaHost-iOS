@@ -3,7 +3,7 @@ import Foundation
 /// Testi dell'assistente Cactus per l'applicazione iOS.
 public enum AssistantTexts {
     public static let title = "Assistente"
-    public static let welcome = "Ciao! Posso aiutarti con prenotazioni, disponibilità, finanze e scorte delle tue case. Scrivimi o premi il microfono."
+    public static let welcome = "Ciao! Posso aiutarti con prenotazioni, disponibilità e scorte delle tue case. Scrivimi o premi il microfono."
     public static let thinking = "L'assistente sta scrivendo…"
 
     // MARK: - Schermata di Cactus (Overlay con Avatar e Neon)
@@ -189,7 +189,7 @@ public enum AssistantTexts {
     public static let consentIntro = "L'assistente ti aiuta a consultare e gestire le tue case su SiciliaHost. Leggi come funziona e come trattiamo i tuoi dati."
     public static let consentPoints: [(String, String)] = [
         ("Cos'è.", "Un assistente automatico basato su un modello di intelligenza artificiale. Può sbagliare: controlla sempre le informazioni importanti."),
-        ("Quali dati usa.", "I messaggi che scrivi o detti e i dati delle tue case che l'assistente consulta per risponderti: prenotazioni con nome dell'ospite e date, disponibilità, importi, spese, scorte. Non legge i documenti d'identità degli ospiti, le credenziali Alloggiati, i recapiti degli ospiti né le tue email."),
+        ("Quali dati usa.", "I messaggi che scrivi o detti e i dati delle tue case che l'assistente consulta per risponderti: prenotazioni con nome dell'ospite e date, disponibilità, scorte. Non vede importi, spese o dati finanziari: restano solo sul tuo telefono. Non legge i documenti d'identità degli ospiti, le credenziali Alloggiati, i recapiti degli ospiti né le tue email."),
         ("A chi vanno.", "Questi dati sono inviati al fornitore del modello di intelligenza artificiale che usiamo, solo per generare la risposta. Il fornitore agisce per nostro conto come responsabile del trattamento. I dettagli sono nell'informativa privacy."),
         ("La voce.", "Se usi il microfono, il riconoscimento e la lettura ad alta voce sono fatti dal servizio vocale del tuo dispositivo (per esempio Apple), secondo le sue regole. A SiciliaHost arriva solo il testo e non registriamo l'audio."),
         ("Nessuna cronologia.", "Non conserviamo uno storico: la conversazione viene cancellata quando premi «Nuova chat» o quando chiudi, e ogni eventuale residuo si elimina da solo entro 3 giorni."),

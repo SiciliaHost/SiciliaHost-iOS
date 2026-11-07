@@ -14,6 +14,8 @@ final class ReservationEditModel {
     /// Importo letto dal telefono al caricamento: al salvataggio si scrive solo se è cambiato.
     private(set) var grossAmount: Double?
     var error: String?
+    /// Errore del caricamento (rete, permessi): distinto da «Prenotazione non trovata».
+    private(set) var loadError: String?
 
     private let db = FirestoreService()
 
@@ -24,6 +26,7 @@ final class ReservationEditModel {
 
     func load(_ reservationId: String) async {
         isLoading = true
+        loadError = nil
         defer { isLoading = false }
         do {
             let res = try await db.getReservation(reservationId)
@@ -40,8 +43,11 @@ final class ReservationEditModel {
             canEditMoney = money
             grossAmount = gross
             reservation = res
+        } catch is CancellationError {
+            // La schermata è sparita o è cambiata la prenotazione: nessun messaggio.
         } catch {
             reservation = nil
+            loadError = ReservationEditLogic.loadFailedMessage
         }
     }
 
@@ -108,7 +114,7 @@ struct ReservationEditView: View {
             } else if model.isLoading {
                 ProgressView().tint(Theme.primary).frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                Text("Prenotazione non trovata")
+                Text(ReservationEditLogic.emptyStateText(loadError: model.loadError))
                     .appStyle(.bodyMedium)
                     .foregroundStyle(Theme.onSurfaceVariant)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

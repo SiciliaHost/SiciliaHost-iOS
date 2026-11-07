@@ -127,6 +127,12 @@ final class AgendaTests: XCTestCase {
         XCTAssertNil(blank.guestName)
     }
 
+    func testLoadErrorIsNotShownAsNotFound() {
+        XCTAssertEqual(ReservationEditLogic.emptyStateText(loadError: nil), "Prenotazione non trovata")
+        XCTAssertEqual(ReservationEditLogic.emptyStateText(loadError: ReservationEditLogic.loadFailedMessage),
+                       "Impossibile caricare la prenotazione. Controlla la connessione e riprova.")
+    }
+
     func testGrossChangeWritesOnlyWhenTheAmountChanged() {
         typealias C = ReservationEditLogic.GrossChange
         XCTAssertEqual(ReservationEditLogic.grossChange(initial: 120, edited: 120), C.unchanged)

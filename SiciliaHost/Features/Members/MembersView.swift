@@ -340,7 +340,9 @@ private struct TransferSheet: View {
         let problem = MembersLogic.validateTransferEmail(email, myEmail: myEmail)
         VStack(alignment: .leading, spacing: 8) {
             Text("Trasferisci \"\(propertyName)\"").appStyle(.titleMedium).foregroundStyle(Theme.onSurface)
-            Text("Il nuovo proprietario avrà finanze, scheda e inviti. Tu perderai la gestione, salvo restare come collaboratore.")
+            Text("Il nuovo proprietario avrà scheda e inviti. Tu perderai la gestione, salvo restare come collaboratore.")
+                .appStyle(.bodySmall).foregroundStyle(Theme.onSurface)
+            Text("Le finanze restano sul tuo telefono: il nuovo proprietario parte da zero.")
                 .appStyle(.bodySmall).foregroundStyle(Theme.onSurface)
             AppTextField(label: "Email del nuovo proprietario", text: $email,
                          error: !email.isEmpty ? problem : nil, keyboard: .emailAddress, capitalization: .never)
