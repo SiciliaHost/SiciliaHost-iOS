@@ -66,7 +66,7 @@ e correggere gli errori (vedi Prossimi passi).
 - **Check-in Alloggiati sul telefono (2026-11-06, ramo `feat/alloggiati-sul-telefono`, 7 commit, NON unito, NON spinto, NON compilato)**: porta del codice Android finale (`Androidapp` `main` `0688569`). Schede ospite in file JSON sul telefono (`Core/Alloggiati/GuestRecordStore.swift`), credenziali nel portachiavi, invio diretto ad Alloggiati Web (`AlloggiatiClient`), sul server solo `reservations/{id}.checkin`; via callable Alloggiati, `guest_records`, credenziali e `alloggiatiConfigured`. Test in `SiciliaHostTests/AlloggiatiTests.swift`. Dettagli nelle voci del Registro 2026-11-06 (Claude Opus 5.5, 1/5–5/5).
 <!-- alloggiati-stato -->
 <!-- finanze-stato -->
-- **Finanze e contatti Excel sul telefono (2026-11-07, ramo `feat/finanze-sul-telefono`, NON spinto, NON compilato)**: piano `Siciliahost.it-alloggiati/docs/superpowers/plans/2026-11-06-finanze-sul-telefono-ios.md`. Fatto: Task 1 (`Core/Finance/FinanceModels.swift`, `FinanceOps.swift`, `FinanceStore.swift`, `Contact: Codable`, test `FinanceLocalTests`), Task 2 (`FinancialCalculator.netOwner`), Task 3 (`Reservation` senza soldi, `FirestoreService` ripulito), Task 4 (statistiche su `FinReservation`), Task 5 (Finanze solo all'OWNER, via `PropertyPermission.finance`), Task 6 (`FinanceReconcile.swift`, `FinanceRepository.swift`, `getSiteBookingAmounts`, `getReservationsReportingCache`). Da fare: Task 7-10. **Il target non compila finché non è completato il Task 9** (come su Android).
+- **Finanze e contatti Excel sul telefono (2026-11-07, ramo `feat/finanze-sul-telefono`, NON spinto, NON compilato)**: piano `Siciliahost.it-alloggiati/docs/superpowers/plans/2026-11-06-finanze-sul-telefono-ios.md`. Fatto: Task 1 (`Core/Finance/FinanceModels.swift`, `FinanceOps.swift`, `FinanceStore.swift`, `Contact: Codable`, test `FinanceLocalTests`), Task 2 (`FinancialCalculator.netOwner`), Task 3 (`Reservation` senza soldi, `FirestoreService` ripulito), Task 4 (statistiche su `FinReservation`), Task 5 (Finanze solo all'OWNER, via `PropertyPermission.finance`), Task 6 (`FinanceReconcile.swift`, `FinanceRepository.swift`, `getSiteBookingAmounts`, `getReservationsReportingCache`), Task 7 (`FinanceModel`/`FinanceView` sul `FinanceRepository`, avviso «solo su questo telefono»). Da fare: Task 8-10. **Il target non compila finché non è completato il Task 9** (come su Android).
 <!-- finanze-stato -->
 
 ## Prossimi passi (in ordine)
@@ -86,7 +86,7 @@ e correggere gli errori (vedi Prossimi passi).
   5. Aggiornare `tools/gen_inventario.py` al pacchetto `com/siciliahost/cactushost` e la baseline Android a `0688569`.
 <!-- alloggiati-prossimi -->
 <!-- finanze-prossimi -->
-- **Finanze sul telefono** (ramo `feat/finanze-sul-telefono`): completare i Task 7-10 del piano, poi spingere (lo autorizza il titolare) e far girare la CI.
+- **Finanze sul telefono** (ramo `feat/finanze-sul-telefono`): completare i Task 8-10 del piano, poi spingere (lo autorizza il titolare) e far girare la CI.
 <!-- finanze-prossimi -->
 
 ## Decisioni prese
@@ -149,6 +149,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-07 — Claude Sonnet 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze sul telefono, Task 7: schermata Finanze dal telefono
+- `FinanceModel` riscritto sul `FinanceRepository` (ricreato a ogni uso, store per uid): `reservations`/`pending` `[FinReservation]`, `loadFailed`, `storeWasCorrupt`, `showLocalNotice` (`UserDefaults` `finance_local_notice_seen`), scritture solo locali e poi ricarica; `CloudSiteAmounts` (callable via `HostFunctionsService`). Via `isSuperAdmin`/`setCommissionMode`.
+- `FinanceView`: card «Le finanze di questa app restano solo su questo telefono…» con «Ho capito», riga del file illeggibile, riga d'errore con «Riprova»; «Importi da inserire» da `model.pending` (finestra 45 giorni); via la sezione «Regime commissioni» e `CommissionRow`; ENTRATE e «Entrate nette» = netto del proprietario; `monthly` senza `properties`.
+- `UIPreview`: `reservations` senza importi (Home/Agenda) e `financeReservations` per le Finanze. Test `FinanceViewTests` (prenotazione senza lordo fuori dai totali). **NON compilato.**
 
 ### 2026-11-07 — Claude Sonnet 5.5 (worktree `SiciliaHost-iOS-finanze`, Windows senza Swift) — Finanze sul telefono, Task 6: riallineamento e `FinanceRepository`
 - `Core/Finance/FinanceReconcile.swift`: `SiteBookingAmount`, `reconcile(_:loadedPropertyIds:reservations:siteAmounts:now:cleanOrphans:orphanCandidates:)` (importi del sito mai sopra un MANUAL, spese fisse, orfani solo delle case caricate, solo tra gli id noti PRIMA della lettura e mai con una lettura dalla cache), `orphanCandidates(_:)` (come l'Android `9bb2292`), `pendingAmounts` (finestra 45 giorni, niente `blocco-`).

@@ -29,19 +29,35 @@ enum UIPreview {
         InventoryItem(id: "i4", propertyId: "p2", name: "Lenzuola matrimoniali", quantity: 4, lowStockThreshold: 2, category: "Biancheria"),
     ]
 
-    /// Prenotazioni inventate attorno a oggi (nomi di fantasia, nessun dato reale).
+    /// Prenotazioni inventate attorno a oggi (nomi di fantasia, nessun dato reale). Senza importi: Home e Agenda.
     static var reservations: [Reservation] {
         let today = AgendaLogic.startOfDay(millisFromDate(Date()))
         let day: Int64 = 86_400_000
         return [
             Reservation(id: "r1", propertyId: "p1", guestName: "Mario Rossi", checkIn: today, checkOut: today + 3 * day,
-                        platform: "AIRBNB", grossAmount: 360, adults: 2),
+                        platform: "AIRBNB", adults: 2),
             Reservation(id: "r2", propertyId: "p2", guestName: "Anna Muster", checkIn: today, checkOut: today + 2 * day,
-                        platform: "BOOKING", grossAmount: 210, adults: 2, children: 1),
+                        platform: "BOOKING", adults: 2, children: 1),
             Reservation(id: "r3", propertyId: "p1", guestName: nil, checkIn: today + 5 * day, checkOut: today + 8 * day,
-                        platform: "BOOKING", needsReview: true),
+                        platform: "BOOKING"),
             Reservation(id: "r4", propertyId: "p2", guestName: "Luca Bianchi", checkIn: today - 2 * day, checkOut: today + day,
-                        platform: "MANUAL", needsReview: true),
+                        platform: "MANUAL"),
+        ]
+    }
+
+    /// Le stesse prenotazioni con gli importi del telefono, per le Finanze (r3 e r4 senza lordo: «Importi da inserire»).
+    static var financeReservations: [FinReservation] {
+        let today = AgendaLogic.startOfDay(millisFromDate(Date()))
+        let day: Int64 = 86_400_000
+        return [
+            FinReservation(id: "r1", propertyId: "p1", guestName: "Mario Rossi", checkIn: today, checkOut: today + 3 * day,
+                           platform: "AIRBNB", adults: 2, grossAmount: 360),
+            FinReservation(id: "r2", propertyId: "p2", guestName: "Anna Muster", checkIn: today, checkOut: today + 2 * day,
+                           platform: "BOOKING", adults: 2, children: 1, grossAmount: 210),
+            FinReservation(id: "r3", propertyId: "p1", guestName: nil, checkIn: today + 5 * day, checkOut: today + 8 * day,
+                           platform: "BOOKING"),
+            FinReservation(id: "r4", propertyId: "p2", guestName: "Luca Bianchi", checkIn: today - 2 * day, checkOut: today + day,
+                           platform: "MANUAL"),
         ]
     }
 }
@@ -79,7 +95,7 @@ struct UIPreviewRoot: View {
         case "finance":
             AppScreen {
                 FinanceView(scope: UIPreview.scope, model: FinanceModel(db: nil, preview: (
-                    UIPreview.scope.properties, UIPreview.reservations,
+                    UIPreview.scope.properties, UIPreview.financeReservations,
                     [Expense(id: "x1", propertyId: "p1", description: "Bolletta luce", amount: 84),
                      Expense(id: "x2", propertyId: "p2", description: "Detersivi e carta", amount: 32)],
                     [RecurringExpense(id: "f1", propertyId: "p1", description: "Internet", amount: 29.9, startMonth: "2026-01")]

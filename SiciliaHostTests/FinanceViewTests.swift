@@ -65,6 +65,24 @@ final class FinanceViewTests: XCTestCase {
         XCTAssertEqual(all.expenses.count, 3)
     }
 
+    func testAReservationWithoutGrossIsCountedButAddsNothingToTotals() {
+        let now: Int64 = 1_800_000_000_000
+        let day: Int64 = 86_400_000
+        let withGross = FinReservation(id: "r1", propertyId: "p1", guestName: "Ospite r1", checkIn: now - 10 * day,
+                                       checkOut: now - 8 * day, platform: "BOOKING", grossAmount: 100)
+        let withoutGross = FinReservation(id: "r2", propertyId: "p1", guestName: "Ospite r2", checkIn: now - 10 * day,
+                                          checkOut: now - 8 * day, platform: "BOOKING")
+        let view = buildFinanceView(allReservations: [withGross, withoutGross], allExpenses: [], properties: [Property(id: "p1", name: "Casa")],
+                                    importCounts: [:], period: .all, propertyId: nil, now: now)
+        XCTAssertEqual(view.reservations.count, 2)
+        XCTAssertEqual(view.totals, FinanceStats.totals(reservations: [withGross], expenses: []))
+        XCTAssertEqual(view.totals.gross, 100, accuracy: 0.001)
+        // Le statistiche reggono una prenotazione senza importo (il lordo conta solo quelle con importo).
+        XCTAssertEqual(view.stats.gross, 100, accuracy: 0.001)
+        XCTAssertEqual(view.stats.reservationCount, 2)
+        XCTAssertFalse(statsKpis(view, all: true).isEmpty)
+    }
+
     func testLinenExpenseAndAmountParsing() {
         let linen = FinanceActions.linenExpense(propertyId: "p1", reservationId: "r1", guest: nil)
         XCTAssertFalse(linen.id.isEmpty) // id locale: due biancherie non si sostituiscono

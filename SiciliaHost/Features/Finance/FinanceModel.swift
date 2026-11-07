@@ -1,18 +1,26 @@
 import Foundation
 import Observation
 
-/// Dati e azioni delle Finanze (`FinanceViewModel` in `FinanceScreen.kt`).
+/// Chiave di `UserDefaults` dell'avviso «solo su questo telefono» già chiuso (globale: si usa anche nel valore iniziale).
+private let financeNoticeSeenKey = "finance_local_notice_seen"
+
+/// Dati e azioni delle Finanze (`FinanceViewModel` dell'Android). Soldi, spese e contatti stanno solo su questo telefono.
 @MainActor
 @Observable
 final class FinanceModel {
     private(set) var properties: [Property] = []
-    private(set) var reservations: [Reservation] = []
+    private(set) var reservations: [FinReservation] = []
     private(set) var expenses: [Expense] = []
     private(set) var recurring: [RecurringExpense] = []
+    /// Importi da inserire (prenotazioni recenti o future senza lordo).
+    private(set) var pending: [FinReservation] = []
     private(set) var importCounts: [String: BookingImportCounts] = [:]
     private(set) var isLoading = false
-    /// Solo il super-admin cambia il regime a commissione: quel flag gli dà accesso a finanze e prenotazioni della casa.
-    private(set) var isSuperAdmin = false
+    private(set) var loadFailed = false
+    /// Il file del telefono era illeggibile ed è stato messo da parte: lo si dice.
+    private(set) var storeWasCorrupt = false
+    /// «Questi dati restano solo su questo telefono»: si mostra finché non lo si chiude.
+    private(set) var showLocalNotice = !UserDefaults.standard.bool(forKey: financeNoticeSeenKey)
     var message: String?
 
     // Filtri (restano cambiando sezione).
@@ -22,52 +30,56 @@ final class FinanceModel {
     private let db: FirestoreService?
 
     init(db: FirestoreService? = FirestoreService(),
-         preview: (properties: [Property], reservations: [Reservation], expenses: [Expense], recurring: [RecurringExpense])? = nil) {
+         preview: (properties: [Property], reservations: [FinReservation], expenses: [Expense], recurring: [RecurringExpense])? = nil) {
         self.db = db
         if let preview {
             properties = preview.properties
             reservations = preview.reservations
             expenses = preview.expenses
             recurring = preview.recurring
+            pending = pendingAmounts(preview.reservations, now: millisFromDate(Date()))
         }
+    }
+
+    /// Mai in cache: l'account può cambiare (logout/login) mentre il modello vive. Lo store è condiviso per uid
+    /// (`FinanceStore.forUser`), quindi ricrearlo qui è a costo zero e sicuro.
+    private func repository() async throws -> FinanceRepository? {
+        guard let db else { return nil }
+        let scope = try await AccessSession.shared.scope()
+        return FinanceRepository(
+            store: FinanceStore.forUser(scope.uid),
+            loadReservations: { ids in try await db.getReservationsReportingCache(propertyIds: ids) },
+            site: CloudSiteAmounts()
+        )
     }
 
     func load() async {
         guard let db else { return }
         isLoading = true
+        loadFailed = false
         defer { isLoading = false }
         do {
             let scope = try await AccessSession.shared.scope()
-            isSuperAdmin = scope.isSuperAdmin
-            // Case con Finanze accessibili: proprietario/super-admin o collaboratore con FINANCE.
-            let houses = scope.financeProperties
-            let ids = houses.map(\.id)
+            let houses = scope.financeProperties          // solo le case di cui sei OWNER
             properties = houses
             if let f = propertyFilter, !houses.contains(where: { $0.id == f }) { propertyFilter = nil }
-            importCounts = (try? await db.getBookingImportCounts(ids)) ?? [:]
-            recurring = try await db.getRecurringExpenses(propertyIds: ids)
-            var loaded = try await db.getExpenses(propertyIds: ids)
-            // Spese fisse dei mesi mancanti (id deterministici: nessun doppione).
-            let due = RecurringExpenses.dueExpenses(
-                recurring: recurring, existingExpenseIds: Set(loaded.map(\.id)), now: millisFromDate(Date())
-            )
-            if !due.isEmpty {
-                for e in due { try await db.setExpense(e) }
-                loaded = try await db.getExpenses(propertyIds: ids)
-            }
-            expenses = loaded
-            // Le prenotazioni si leggono DOPO le spese: una prenotazione (e la sua spesa) nata tra le due letture non
-            // deve far sembrare orfana una spesa valida.
-            reservations = try await db.getReservations(propertyIds: ids)
-            // Spese rimaste senza prenotazione (cancellata da un collaboratore): le elimina chi ha le finanze.
-            let orphans = orphanExpenseIds(loaded, reservationIds: Set(reservations.map(\.id)))
-            if !orphans.isEmpty, (try? await db.deleteExpenses(orphans)) != nil {
-                let removed = Set(orphans)
-                expenses = loaded.filter { !removed.contains($0.id) }
-            }
+            importCounts = (try? await db.getBookingImportCounts(houses.map(\.id))) ?? [:]
+            guard let repo = try await repository() else { return }
+            let snap = try await repo.load(properties: houses)
+            reservations = snap.reservations
+            expenses = snap.expenses
+            recurring = snap.recurring
+            pending = snap.pending
+            storeWasCorrupt = await repo.store.wasCorrupt
         } catch {
+            loadFailed = true
             message = "Caricamento delle finanze non riuscito. Controlla la connessione."
         }
+    }
+
+    func dismissLocalNotice() {
+        UserDefaults.standard.set(true, forKey: financeNoticeSeenKey)
+        showLocalNotice = false
     }
 
     func view(now: Int64 = millisFromDate(Date())) -> FinanceViewData {
@@ -77,72 +89,41 @@ final class FinanceModel {
 
     func propertyName(_ id: String) -> String { properties.first { $0.id == id }?.name ?? id }
 
-    func setCommissionMode(_ property: Property, _ value: Bool) async {
-        guard let db else { return }
-        var updated = property
-        updated.isManagedOnCommission = value
-        do {
-            try await db.updateProperty(updated)
-            // Le altre schermate leggono il regime dalla cache di sessione: va riletta.
-            await AccessSession.shared.invalidate()
-            properties = properties.map { $0.id == updated.id ? updated : $0 }
-        } catch {
-            message = "Modifica del regime non riuscita."
-        }
-    }
-
-    func saveGross(_ reservation: Reservation, amount: Double) async {
-        guard let db else { return }
-        let commission = properties.first { $0.id == reservation.propertyId }?.isManagedOnCommission ?? false
-        do {
-            try await db.updateReservation(FinanceActions.withGross(reservation, amount: amount, isManagedOnCommission: commission))
-            try await db.addExpense(FinanceActions.linenExpense(for: reservation))
-            await load()
-        } catch {
-            message = "Salvataggio dell'importo non riuscito."
-        }
+    func saveGross(_ r: FinReservation, amount: Double) async {
+        await run("Salvataggio dell'importo non riuscito.") { try await $0.saveGross(r, amount: amount) }
     }
 
     func addExpense(propertyId: String, description: String, amount: Double, category: ExpenseCategory) async {
-        guard let db else { return }
-        do {
-            try await db.addExpense(Expense(propertyId: propertyId, description: description, amount: amount, category: category.key))
-            await load()
-        } catch {
-            message = "Salvataggio della spesa non riuscito."
+        await run("Salvataggio della spesa non riuscito.") {
+            try await $0.addExpense(propertyId: propertyId, description: description, amount: amount, category: category)
         }
     }
 
     func addRecurring(propertyId: String, description: String, amount: Double, category: ExpenseCategory) async {
-        guard let db else { return }
-        do {
-            try await db.addRecurringExpense(RecurringExpense(
-                propertyId: propertyId, description: description, amount: amount,
-                startMonth: RecurringExpenses.monthKey(millisFromDate(Date())), category: category.key
-            ))
-            await load()
-        } catch {
-            message = "Salvataggio della spesa fissa non riuscito."
+        await run("Salvataggio della spesa fissa non riuscito.") {
+            try await $0.addRecurring(propertyId: propertyId, description: description, amount: amount, category: category)
         }
     }
 
-    func deleteRecurring(_ id: String) async {
-        guard let db else { return }
+    func deleteRecurring(_ id: String) async { await run("Eliminazione non riuscita.") { try await $0.deleteRecurring(id) } }
+
+    func deleteExpense(_ e: Expense) async { await run("Eliminazione non riuscita.") { try await $0.deleteExpense(e.id) } }
+
+    /// Scrittura locale, poi ricarica (spese fisse, importi da inserire e totali si ricalcolano).
+    private func run(_ failure: String, _ block: (FinanceRepository) async throws -> Void) async {
         do {
-            try await db.deleteRecurringExpense(id)
+            guard let repo = try await repository() else { return }
+            try await block(repo)
             await load()
         } catch {
-            message = "Eliminazione non riuscita."
+            message = failure
         }
     }
+}
 
-    func deleteExpense(_ expense: Expense) async {
-        guard let db else { return }
-        do {
-            try await db.deleteExpenses([expense.id])
-            expenses.removeAll { $0.id == expense.id }
-        } catch {
-            message = "Eliminazione non riuscita."
-        }
+/// Importi del sito dalla callable `getSiteBookingAmounts` (risponde solo al proprietario).
+struct CloudSiteAmounts: SiteAmountsSource {
+    func amounts(propertyIds: [String]) async throws -> [SiteBookingAmount] {
+        try await HostFunctionsService().getSiteBookingAmounts(propertyIds: propertyIds)
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Finanze (`FinanceScreen.kt`): filtri periodo/casa, bilancio, prenotazioni (→ statistiche), suggerimenti, grafici,
-/// spese per categoria (→ elenco spese), ultime spese, importi da inserire, spese fisse, regime commissioni.
+/// spese per categoria (→ elenco spese), ultime spese, importi da inserire, spese fisse. I dati sono letti dal telefono.
 struct FinanceView: View {
     let scope: AccessScope?
     @State private var model: FinanceModel
@@ -76,12 +76,28 @@ struct FinanceView: View {
             let houseReservations = model.reservations.filter { houseIds.contains($0.propertyId) }
             let houseExpenses = model.expenses.filter { houseIds.contains($0.propertyId) }
             let propertyStats = FinanceStats.perProperty(reservations: view.reservations, expenses: view.expenses, properties: model.properties)
-            let monthly = FinanceStats.monthly(reservations: houseReservations, expenses: houseExpenses, properties: model.properties,
+            let monthly = FinanceStats.monthly(reservations: houseReservations, expenses: houseExpenses,
                                                monthCount: Self.monthlyChartMonths, now: now)
             let platforms = FinanceStats.perPlatform(view.reservations)
-            let pending = houseReservations.filter { $0.grossAmount == nil }
+            let pending = model.pending.filter { houseIds.contains($0.propertyId) }
             ScrollView {
                 LazyVStack(spacing: Dimens.itemSpacing) {
+                    if model.showLocalNotice {
+                        LocalNoticeCard { model.dismissLocalNotice() }
+                    }
+                    if model.storeWasCorrupt {
+                        Text("Il file delle finanze non era leggibile: l'ho messo da parte e ho ripartito da zero.")
+                            .appStyle(.bodySmall).foregroundStyle(Theme.error)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    if model.loadFailed {
+                        HStack {
+                            Text("Non riesco a leggere le prenotazioni: riprova")
+                                .appStyle(.bodySmall).foregroundStyle(Theme.error)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Button("Riprova") { Task { await model.load() } }.buttonStyle(.appText)
+                        }
+                    }
                     FinanceFilters(model: model)
                     BalanceOverview(totals: view.totals).tourTarget(.finanzeBalance)
                     FinanceCard(title: "Prenotazioni", action: {
@@ -152,12 +168,6 @@ struct FinanceView: View {
                     ForEach(model.recurring.filter { houseIds.contains($0.propertyId) }) { rec in
                         RecurringRow(recurring: rec, houseName: model.propertyName(rec.propertyId)) { recurringToDelete = rec }
                     }
-                    FinanceSectionLabel(text: "REGIME COMMISSIONI")
-                    ForEach(view.houses) { p in
-                        CommissionRow(property: p, canChange: model.isSuperAdmin) { value in
-                            Task { await model.setCommissionMode(p, value) }
-                        }
-                    }
                 }
                 .padding(Dimens.screenPadding)
             }
@@ -201,7 +211,7 @@ private struct BalanceOverview: View {
             }
             Divider()
             HStack(spacing: Dimens.cardPadding) {
-                tile("ENTRATE", totals.adminRevenue, Theme.primary)
+                tile("ENTRATE", totals.netOwner, Theme.primary)
                 tile("USCITE", totals.expenses, Theme.error)
             }
             HStack(spacing: Dimens.cardPadding) {
@@ -237,7 +247,7 @@ private struct PropertyDetailCard: View {
             }
             .padding(.bottom, Dimens.itemSpacing)
             row("Lordo", stat.gross, Theme.onSurface)
-            row("Entrate gestione", stat.adminRevenue, Theme.primary)
+            row("Entrate nette", stat.netOwner, Theme.primary)
             row("Spese", stat.expenses, Theme.error)
             Divider().padding(.vertical, Dimens.itemSpacing)
             row("Netto struttura", stat.balance, stat.balance >= 0 ? Theme.primary : Theme.error)
@@ -282,8 +292,27 @@ struct ExpenseRow: View {
     }
 }
 
+/// «Le finanze restano solo su questo telefono»: si chiude una volta per tutte con «Ho capito».
+private struct LocalNoticeCard: View {
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Le finanze di questa app restano solo su questo telefono: non sono sul nostro server e i collaboratori non le vedono. Se cambi telefono ripristina il backup del sistema.")
+                .appStyle(.bodySmall).foregroundStyle(Theme.onSecondaryContainer)
+            HStack {
+                Spacer()
+                Button("Ho capito", action: onDismiss).buttonStyle(.appText)
+            }
+        }
+        .padding(Dimens.cardPadding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(container: Theme.secondaryContainer)
+    }
+}
+
 private struct PendingAmountRow: View {
-    let reservation: Reservation
+    let reservation: FinReservation
     let houseName: String
     let onTap: () -> Void
 
@@ -324,31 +353,6 @@ private struct RecurringRow: View {
         }
         .padding(.leading, Dimens.cardPadding)
         .padding(.vertical, 4)
-        .appCard()
-    }
-}
-
-private struct CommissionRow: View {
-    let property: Property
-    let canChange: Bool
-    let onChange: (Bool) -> Void
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(property.name).appStyle(.titleSmall).foregroundStyle(Theme.onSurface).lineLimit(2)
-                Text(property.isManagedOnCommission ? "Mandato · 25% + 50€ · aliquota 21%" : "Proprietà diretta · incasso intero")
-                    .appStyle(.bodySmall).foregroundStyle(Theme.onSurfaceVariant).lineLimit(2)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            // Solo il super-admin cambia il regime.
-            if canChange {
-                Toggle("In commissione", isOn: Binding(get: { property.isManagedOnCommission }, set: onChange))
-                    .labelsHidden()
-                    .tint(Theme.primary)
-            }
-        }
-        .padding(Dimens.cardPadding)
         .appCard()
     }
 }
@@ -402,7 +406,7 @@ private struct ExpenseFormSheet: View {
 
 /// "Inserisci importo lordo" di una prenotazione da completare (crea anche la spesa biancheria da 20 €).
 private struct GrossAmountSheet: View {
-    let reservation: Reservation
+    let reservation: FinReservation
     let houseName: String
     let onSave: (Double) -> Void
     @Environment(\.dismiss) private var dismiss
