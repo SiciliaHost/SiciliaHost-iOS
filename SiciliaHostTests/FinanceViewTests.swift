@@ -83,16 +83,8 @@ final class FinanceViewTests: XCTestCase {
         XCTAssertFalse(statsKpis(view, all: true).isEmpty)
     }
 
-    func testLinenExpenseAndAmountParsing() {
-        let linen = FinanceActions.linenExpense(propertyId: "p1", reservationId: "r1", guest: nil)
-        XCTAssertFalse(linen.id.isEmpty) // id locale: due biancherie non si sostituiscono
-        XCTAssertNotEqual(linen.id, FinanceActions.linenExpense(propertyId: "p1", reservationId: "r2", guest: nil).id)
-        XCTAssertEqual(linen.propertyId, "p1")
-        XCTAssertEqual(linen.amount, 20)
-        XCTAssertEqual(linen.reservationId, "r1")
-        XCTAssertEqual(linen.authorId, "SYSTEM")
-        XCTAssertEqual(linen.category, "cleaning")
-        XCTAssertEqual(linen.description, "Spesa fissa biancheria (Ospite)")
+    // La biancheria si crea solo in `FinanceRepository` (vedi `FinanceLocalTests`).
+    func testAmountParsing() {
         XCTAssertEqual(FinanceActions.parseAmount("12,50"), 12.5)
         XCTAssertNil(FinanceActions.parseAmount("abc"))
     }

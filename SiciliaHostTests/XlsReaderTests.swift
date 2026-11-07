@@ -182,13 +182,14 @@ final class XlsReaderTests: XCTestCase {
              .text("100 EUR"), .text(""), .text("fr"), .number(1), .number(0)],
         ]
         let data = makeOle2(stream: makeWorkbook(rows))
-        let result = try BookingExcelParser.parse(data: data, propertyId: "prop2", isManagedOnCommission: false)
-        XCTAssertEqual(result.reservations.count, 1)
+        let result = try BookingExcelParser.parse(data: data, propertyId: "prop2")
+        XCTAssertEqual(result.rows.count, 1)
         XCTAssertEqual(result.cancelledRows, 1)
-        XCTAssertEqual(result.reservations[0].icalUid, "booking-xls-5100000001")
-        XCTAssertEqual(result.reservations[0].guestName, "Hans Muster")
-        XCTAssertEqual(result.reservations[0].adults, 4)
-        XCTAssertEqual(result.reservations[0].children, 1)
+        XCTAssertEqual(result.rows[0].reservation.icalUid, "booking-xls-5100000001")
+        XCTAssertEqual(result.rows[0].reservation.guestName, "Hans Muster")
+        XCTAssertEqual(result.rows[0].reservation.adults, 4)
+        XCTAssertEqual(result.rows[0].reservation.children, 1)
+        XCTAssertEqual(try XCTUnwrap(result.rows[0].money.grossAmount), 968, accuracy: 0.001)
         XCTAssertEqual(result.contacts.map(\.phone), ["+491701234567"])
         XCTAssertEqual(result.contacts[0].country, "de")
     }

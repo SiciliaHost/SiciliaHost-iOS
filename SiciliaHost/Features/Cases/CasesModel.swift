@@ -252,54 +252,67 @@ final class CasesModel {
         return failed.isEmpty ? "Sincronizzazione completata" : "Sincronizzazione fallita — " + failed.joined(separator: " | ")
     }
 
-    /// Import dell'export "Arrivi con recapiti" di Booking (.xls o CSV), come `importBookingExcel` dell'Android: il
-    /// prezzo è già nel file, quindi le prenotazioni entrano complete. Una riga sovrapposta a un segnaposto iCal lo
-    /// completa; una prenotazione già completa riceve solo i dati statistici. Restituisce il messaggio per l'utente.
+    /// Import dell'export "Arrivi con recapiti" di Booking (.xls o CSV), come `importBookingExcel` dell'Android, riservato
+    /// al proprietario della casa. Il server riceve solo la parte condivisa (nome, ospiti, paese): importi, commissioni,
+    /// statistiche, contatti e spesa biancheria restano sul telefono di chi importa. Una riga sovrapposta a un
+    /// segnaposto iCal senza nome lo completa; una prenotazione già con nome non cambia sul server, ma i suoi importi
+    /// si aggiornano comunque sul telefono. Restituisce il messaggio per l'utente.
     func importBookingExcel(_ propertyId: String, data: Data) async -> String {
         do {
-            let commission = item(propertyId)?.property.isManagedOnCommission ?? false
-            let result = try BookingExcelParser.parse(data: data, propertyId: propertyId, isManagedOnCommission: commission)
+            let scope = try await AccessSession.shared.scope()
+            // Importi e contatti finiscono sul telefono di chi importa: solo il proprietario della casa.
+            guard let property = item(propertyId)?.property, scope.isOwner(property) else {
+                return "Solo il proprietario della casa può importare l'Excel di Booking"
+            }
+            let result = try BookingExcelParser.parse(data: data, propertyId: propertyId)
             let existing = try await db.getReservations(propertyId: propertyId, platform: "BOOKING")
-            let plan = planBookingImport(rows: result.reservations, existingBooking: existing)
+            let plan = planBookingImport(rows: result.rows, existingBooking: existing)
 
-            var completed: [Reservation] = []
+            // Server: solo la parte condivisa.
             for (placeholder, row) in plan.complete {
-                var updated = row
-                updated.id = placeholder.id
-                updated.icalUid = placeholder.icalUid
-                try await db.updateReservation(updated)
-                completed.append(updated)
+                try await db.completePlaceholder(placeholder.id, row: row.reservation)
             }
-            // Già complete: solo i dati statistici, nessuna nuova spesa biancheria.
-            for (existingReservation, row) in plan.enrich {
-                let fields = statsFields(row)
-                if !fields.isEmpty { try await db.mergeReservationFields(existingReservation.id, fields: fields) }
-            }
-            let inserted = try await db.syncIcalReservationsBatch(plan.insert)
-            // La rubrica contiene dati personali di clienti ed è riservata al super-admin (regole).
-            let savedContacts = (try? await AccessSession.shared.scope())?.isSuperAdmin == true
-            if savedContacts { try await db.saveContactsBatch(result.contacts) }
+            let created = try await db.syncIcalReservationsBatch(plan.insert.map { $0.reservation })
+            // I documenti creati si abbinano per `icalUid`, che `syncIcalReservationsBatch` usa come id.
+            let createdByUid = Dictionary(
+                created.compactMap { r in r.icalUid.map { ($0, r) } }, uniquingKeysWith: { first, _ in first }
+            )
 
-            // Spesa biancheria da 20 € solo per le prenotazioni nuove o appena completate.
-            for reservation in inserted + completed {
-                try await db.addExpense(Expense(
-                    propertyId: reservation.propertyId, reservationId: reservation.id,
-                    description: "Spesa fissa biancheria", amount: 20, authorId: "SYSTEM",
-                    category: ExpenseCategory.pulizie.key
-                ))
+            // Telefono: soldi, statistiche, contatti e biancheria (solo per prenotazioni nuove o completate).
+            var moneyRows: [ExcelMoneyRow] = []
+            for (placeholder, row) in plan.complete {
+                var money = row.money
+                money.reservationId = placeholder.id
+                moneyRows.append(money)
             }
+            for (existingReservation, row) in plan.enrich {
+                var money = row.money
+                money.reservationId = existingReservation.id
+                moneyRows.append(money)
+            }
+            for row in plan.insert {
+                guard let uid = row.reservation.icalUid, let doc = createdByUid[uid] else { continue }
+                var money = row.money
+                money.reservationId = doc.id
+                moneyRows.append(money)
+            }
+            let linenFor = Set(plan.complete.map { $0.existing.id } + created.map { $0.id })
+            let repo = FinanceRepository(
+                store: FinanceStore.forUser(scope.uid), loadReservations: { _ in ([], false) }, site: CloudSiteAmounts()
+            )
+            try await repo.applyExcelImport(moneyRows, contacts: result.contacts, linenFor: linenFor)
+
             let now = Int64(Date().timeIntervalSince1970 * 1000)
             try await db.updatePropertyFields(propertyId, fields: ["lastBookingExcelImportAt": now])
-            // Confermate e cancellate del file: solo per il tasso di cancellazione delle Finanze.
-            var stats: [String: Any] = [
-                "confirmed": result.reservations.count, "cancelled": result.cancelledRows, "importedAt": now,
-            ]
+            // Confermate e cancellate del file: solo per il tasso di cancellazione delle Finanze. Conteggi e date,
+            // nessun importo.
+            var stats: [String: Any] = ["confirmed": result.rows.count, "cancelled": result.cancelledRows, "importedAt": now]
             stats["from"] = result.periodFrom.map { $0 as Any } ?? NSNull()
             stats["to"] = result.periodTo.map { $0 as Any } ?? NSNull()
             try? await db.updatePropertyFields(propertyId, fields: ["bookingImportStats": stats])
 
-            return "Importazione completata: \(result.reservations.count) prenotazioni, \(result.skippedRows) righe scartate"
-                + (savedContacts ? ", \(result.contacts.count) contatti aggiornati" : "")
+            return "Importazione completata: \(result.rows.count) prenotazioni, \(result.skippedRows) righe scartate"
+                + (result.contacts.isEmpty ? "" : ", \(result.contacts.count) contatti salvati su questo telefono")
         } catch {
             return "Importazione fallita: \(error.localizedDescription)"
         }

@@ -96,48 +96,56 @@ final class BookingTests: XCTestCase {
 
     // MARK: Piano di importazione
 
-    private func row(_ n: Int, _ from: Int, _ nights: Int) -> Reservation {
-        Reservation(
-            propertyId: "p1", checkIn: Int64(from) * day, checkOut: Int64(from + nights) * day, platform: "BOOKING",
-            grossAmount: 300, icalUid: "booking-xls-\(n)", adults: 2, bookedAt: Int64(from - 30) * day, guestCountry: "de"
+    private func row(_ uid: String, _ from: Int64, _ to: Int64, name: String? = "Rossi") -> ExcelRow {
+        ExcelRow(
+            reservation: Reservation(propertyId: "p1", guestName: name, checkIn: from * day, checkOut: to * day,
+                                     platform: "BOOKING", icalUid: "booking-xls-\(uid)", adults: 2),
+            money: ExcelMoneyRow(propertyId: "p1", grossAmount: 100)
         )
     }
 
-    private func existing(_ id: String, _ from: Int, _ nights: Int, needsReview: Bool, gross: Double?) -> Reservation {
-        Reservation(
-            id: id, propertyId: "p1", checkIn: Int64(from) * day, checkOut: Int64(from + nights) * day, platform: "BOOKING",
-            grossAmount: gross, icalUid: id, needsReview: needsReview
-        )
+    private func existing(_ id: String, _ from: Int64, _ to: Int64, name: String? = nil, uid: String? = nil) -> Reservation {
+        Reservation(id: id, propertyId: "p1", guestName: name, checkIn: from * day, checkOut: to * day,
+                    platform: "BOOKING", icalUid: uid ?? id)
     }
 
-    func testPlaceholderIsCompleted() {
-        let plan = planBookingImport(rows: [row(1, 100, 3)], existingBooking: [existing("ical-a", 100, 3, needsReview: true, gross: nil)])
-        XCTAssertEqual(plan.complete.map { $0.existing.id }, ["ical-a"])
-        XCTAssertTrue(plan.insert.isEmpty)
+    func testOverlapWithNamelessIcalPlaceholderCompletesIt() {
+        let plan = planBookingImport(rows: [row("1", 10, 12)], existingBooking: [existing("ical-1", 10, 12)])
+        XCTAssertEqual(plan.complete.map { $0.existing.id }, ["ical-1"])
+        XCTAssertTrue(plan.insert.isEmpty && plan.enrich.isEmpty)
     }
 
-    func testAlreadyCompletedPlaceholderIsEnrichedNotDuplicated() {
-        let completed = existing("ical-a", 100, 3, needsReview: false, gross: 300)
-        let plan = planBookingImport(rows: [row(1, 100, 3)], existingBooking: [completed])
-        XCTAssertTrue(plan.insert.isEmpty)
-        XCTAssertTrue(plan.complete.isEmpty)
-        XCTAssertEqual(plan.enrich.map { $0.existing.id }, ["ical-a"])
-        XCTAssertEqual(statsFields(plan.enrich[0].row)["guestCountry"] as? String, "de")
+    func testOverlapWithNamedReservationOnlyEnriches() {
+        let plan = planBookingImport(rows: [row("1", 10, 12)], existingBooking: [existing("ical-1", 10, 12, name: "Rossi")])
+        XCTAssertEqual(plan.enrich.map { $0.existing.id }, ["ical-1"])
+        XCTAssertTrue(plan.complete.isEmpty && plan.insert.isEmpty)
     }
 
-    func testPreviousExcelImportIsEnrichedByItsOwnId() {
-        let plan = planBookingImport(rows: [row(7, 100, 3)], existingBooking: [existing("booking-xls-7", 100, 3, needsReview: false, gross: 300)])
-        XCTAssertEqual(plan.enrich.map { $0.existing.id }, ["booking-xls-7"])
-    }
-
-    func testNewRowsAreInsertedAndEachExistingIsUsedOnce() {
+    func testSameXlsDocumentIsEnrichNeverCompleted() {
         let plan = planBookingImport(
-            rows: [row(1, 100, 3), row(2, 200, 2), row(3, 100, 3)],
-            existingBooking: [existing("ical-a", 100, 3, needsReview: true, gross: nil)]
+            rows: [row("1", 10, 12)], existingBooking: [existing("booking-xls-1", 10, 12, name: nil, uid: "booking-xls-1")]
         )
+        XCTAssertEqual(plan.enrich.count, 1)
+        XCTAssertEqual(plan.complete.count, 0)
+    }
+
+    func testNoOverlapInserts() {
+        XCTAssertEqual(planBookingImport(rows: [row("1", 10, 12)], existingBooking: [existing("ical-1", 20, 22)]).insert.count, 1)
+    }
+
+    func testEachExistingReservationIsUsedOnce() {
+        let plan = planBookingImport(rows: [row("1", 10, 12), row("2", 11, 13)], existingBooking: [existing("ical-1", 10, 13)])
         XCTAssertEqual(plan.complete.count, 1)
-        // La terza riga sulle stesse date non riusa lo stesso segnaposto: va inserita.
-        XCTAssertEqual(plan.insert.map(\.icalUid), ["booking-xls-2", "booking-xls-3"])
+        XCTAssertEqual(plan.insert.count, 1)
+        XCTAssertEqual(plan.insert.map { $0.reservation.icalUid }, ["booking-xls-2"])
+    }
+
+    func testPlaceholderDetection() {
+        XCTAssertTrue(isNamelessIcalPlaceholder(existing("ical-1", 1, 2)))
+        XCTAssertTrue(isNamelessIcalPlaceholder(existing("ical-1", 1, 2, name: "  ")))
+        XCTAssertFalse(isNamelessIcalPlaceholder(existing("ical-1", 1, 2, name: "Rossi")))
+        XCTAssertFalse(isNamelessIcalPlaceholder(existing("booking-xls-1", 1, 2)))
+        XCTAssertFalse(isNamelessIcalPlaceholder(Reservation(id: "m1", propertyId: "p1", platform: "MANUAL")))
     }
 
     // MARK: CSV
@@ -150,16 +158,19 @@ final class BookingTests: XCTestCase {
             + "Stato;N° di prenotazione;Nome ospite(i);Arrivo;Partenza;Prezzo;Indirizzo;Numero di telefono;Booker country;Adulti;Bambini\n"
             + "ok;123;\"Rossi, Mario\";2026-01-16;2026-01-20;400 EUR;\"Via Roma 1; interno 2\";393331234567;it;4;2\n"
             + "cancelled;124;Skip Me;2026-03-01;2026-03-03;100 EUR;;;fr;1;0\n"
-        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "prop1", isManagedOnCommission: false)
-        XCTAssertEqual(result.reservations.count, 1)
+        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "prop1")
+        XCTAssertEqual(result.rows.count, 1)
         XCTAssertEqual(result.skippedRows, 1)
-        XCTAssertEqual(result.reservations[0].guestName, "Rossi, Mario")
-        XCTAssertEqual(result.reservations[0].icalUid, "booking-xls-123")
-        XCTAssertEqual(try XCTUnwrap(result.reservations[0].grossAmount), 400, accuracy: 0.001)
-        XCTAssertEqual(result.reservations[0].adults, 4)
-        XCTAssertEqual(result.reservations[0].children, 2)
-        // Booking 23,8%, casa non in commissione: 400 - 400 * 0,238 = 304,8
-        XCTAssertEqual(try XCTUnwrap(result.reservations[0].netAmountOwner), 304.8, accuracy: 0.001)
+        let r = result.rows[0].reservation
+        XCTAssertEqual(r.guestName, "Rossi, Mario")
+        XCTAssertEqual(r.icalUid, "booking-xls-123")
+        XCTAssertEqual(r.adults, 4)
+        XCTAssertEqual(r.children, 2)
+        XCTAssertEqual(r.guestCountry, "it")
+        // I soldi stanno solo nella parte del telefono.
+        XCTAssertEqual(try XCTUnwrap(result.rows[0].money.grossAmount), 400, accuracy: 0.001)
+        XCTAssertEqual(result.rows[0].money.propertyId, "prop1")
+        XCTAssertEqual(result.rows[0].money.reservationId, "")
         XCTAssertEqual(result.contacts[0].address, "Via Roma 1; interno 2")
         XCTAssertEqual(result.contacts[0].phone, "+393331234567")
         XCTAssertEqual(result.contacts[0].propertyId, "prop1")
@@ -168,15 +179,15 @@ final class BookingTests: XCTestCase {
     func testCommaCsvWithEnglishHeadersAndEuropeanDates() throws {
         let text = "Status,Book number,Guest name(s),Check-in,Check-out,Price,Address,Phone number,Booker country,Adults,Children\n"
             + "ok,5100000001,Hans Muster,16/01/2026,25/01/2026,968 EUR,,491701234567,de,4,1\n"
-        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "prop2", isManagedOnCommission: false)
-        XCTAssertEqual(result.reservations.count, 1)
+        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "prop2")
+        XCTAssertEqual(result.rows.count, 1)
         XCTAssertEqual(result.skippedRows, 0)
-        let r = result.reservations[0]
+        let r = result.rows[0].reservation
         XCTAssertEqual(r.icalUid, "booking-xls-5100000001")
         XCTAssertEqual(r.guestName, "Hans Muster")
         XCTAssertEqual(r.checkIn, date(2026, 1, 16))
         XCTAssertEqual(r.checkOut, date(2026, 1, 25))
-        XCTAssertEqual(try XCTUnwrap(r.grossAmount), 968, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(result.rows[0].money.grossAmount), 968, accuracy: 0.001)
         XCTAssertEqual(result.contacts[0].phone, "+491701234567")
         XCTAssertEqual(result.contacts[0].country, "de")
     }
@@ -184,15 +195,15 @@ final class BookingTests: XCTestCase {
     func testEmptyChildrenCellBecomesZeroNotASkippedRow() throws {
         let text = "Stato;N° di prenotazione;Nome ospite(i);Arrivo;Partenza;Prezzo;Adulti;Bambini\n"
             + "ok;1;Jane Doe;2026-02-01;2026-02-03;250.5 EUR;2;\n"
-        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "p", isManagedOnCommission: false)
-        XCTAssertEqual(result.reservations.count, 1)
-        XCTAssertEqual(result.reservations[0].children, 0)
-        XCTAssertEqual(try XCTUnwrap(result.reservations[0].grossAmount), 250.5, accuracy: 0.001)
+        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "p")
+        XCTAssertEqual(result.rows.count, 1)
+        XCTAssertEqual(result.rows[0].reservation.children, 0)
+        XCTAssertEqual(try XCTUnwrap(result.rows[0].money.grossAmount), 250.5, accuracy: 0.001)
         XCTAssertTrue(result.contacts.isEmpty) // senza telefono nessun contatto
     }
 
     func testRejectsFileWithoutRecognizedHeaders() {
-        XCTAssertThrowsError(try BookingExcelParser.parse(data: csv("Foo;Bar\n1;2\n"), propertyId: "p", isManagedOnCommission: false)) {
+        XCTAssertThrowsError(try BookingExcelParser.parse(data: csv("Foo;Bar\n1;2\n"), propertyId: "p")) {
             XCTAssertTrue(($0 as? BookingImportError)?.message.hasPrefix("Nessuna colonna riconosciuta") == true)
         }
     }
@@ -201,8 +212,8 @@ final class BookingTests: XCTestCase {
         let text = "Stato;N° di prenotazione;Arrivo;Partenza;Prezzo\n"
             + "ok;1;2026-01-16;2026-01-20;400 EUR\n"
             + "cancelled_by_guest;2;2026-02-01;2026-02-03;250 EUR\n"
-        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "p1", isManagedOnCommission: false)
-        XCTAssertEqual(result.reservations.count, 1)
+        let result = try BookingExcelParser.parse(data: csv(text), propertyId: "p1")
+        XCTAssertEqual(result.rows.count, 1)
         XCTAssertEqual(result.cancelledRows, 1)
         XCTAssertEqual(result.periodFrom, date(2026, 1, 16))
         XCTAssertEqual(result.periodTo, date(2026, 2, 1))
@@ -211,12 +222,12 @@ final class BookingTests: XCTestCase {
     func testStatisticsColumnsAreRead() throws {
         let text = "Stato;N° di prenotazione;Arrivo;Partenza;Prezzo;Data di prenotazione;Booker country;Motivo del viaggio;Dispositivo;Importo commissione\n"
             + "ok;1;2026-01-16;2026-01-25;968 EUR;2025-12-14 20:01:12;DE;Svago;Computer;174.24 EUR\n"
-        let r = try BookingExcelParser.parse(data: csv(text), propertyId: "p1", isManagedOnCommission: false).reservations[0]
-        XCTAssertEqual(r.guestCountry, "de")
-        XCTAssertEqual(r.travelPurpose, "Svago")
-        XCTAssertEqual(r.bookingDevice, "Computer")
-        XCTAssertEqual(try XCTUnwrap(r.commissionAmount), 174.24, accuracy: 0.001)
-        XCTAssertEqual((r.checkIn - (r.bookedAt ?? 0)) / day, 33) // 14/12/2025 → 16/01/2026
+        let row = try BookingExcelParser.parse(data: csv(text), propertyId: "p1").rows[0]
+        XCTAssertEqual(row.reservation.guestCountry, "de")
+        XCTAssertEqual(row.money.travelPurpose, "Svago")
+        XCTAssertEqual(row.money.bookingDevice, "Computer")
+        XCTAssertEqual(try XCTUnwrap(row.money.commissionAmount), 174.24, accuracy: 0.001)
+        XCTAssertEqual((row.reservation.checkIn - (row.money.bookedAt ?? 0)) / day, 33) // 14/12/2025 → 16/01/2026
     }
 
     func testDateParsing() {
@@ -249,14 +260,14 @@ final class BookingTests: XCTestCase {
         guard let path = ProcessInfo.processInfo.environment["BOOKING_XLS_FIXTURE"] else {
             throw XCTSkip("BOOKING_XLS_FIXTURE non impostata")
         }
-        let result = try BookingExcelParser.parse(data: try Data(contentsOf: URL(fileURLWithPath: path)), propertyId: "p1", isManagedOnCommission: false)
-        XCTAssertEqual(result.reservations.count, 30)
+        let result = try BookingExcelParser.parse(data: try Data(contentsOf: URL(fileURLWithPath: path)), propertyId: "p1")
+        XCTAssertEqual(result.rows.count, 30)
         XCTAssertEqual(result.cancelledRows, 0)
-        let first = try XCTUnwrap(result.reservations.first)
-        XCTAssertEqual(first.guestCountry, "de")
-        XCTAssertEqual(first.travelPurpose, "Svago")
-        XCTAssertEqual(first.bookingDevice, "Computer")
-        XCTAssertEqual(try XCTUnwrap(first.commissionAmount), 174.24, accuracy: 0.001)
-        XCTAssertEqual((first.checkIn - (first.bookedAt ?? 0)) / day, 33)
+        let first = try XCTUnwrap(result.rows.first)
+        XCTAssertEqual(first.reservation.guestCountry, "de")
+        XCTAssertEqual(first.money.travelPurpose, "Svago")
+        XCTAssertEqual(first.money.bookingDevice, "Computer")
+        XCTAssertEqual(try XCTUnwrap(first.money.commissionAmount), 174.24, accuracy: 0.001)
+        XCTAssertEqual((first.reservation.checkIn - (first.money.bookedAt ?? 0)) / day, 33)
     }
 }

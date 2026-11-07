@@ -164,19 +164,7 @@ func statsKpis(_ view: FinanceViewData, all: Bool) -> [Kpi] {
 }
 
 enum FinanceActions {
-    /// Spesa biancheria creata quando si inserisce il lordo di una prenotazione (stessa forma dell'Android). L'id è
-    /// locale: la spesa sta solo sul telefono, e un id vuoto farebbe sostituire una biancheria con l'altra.
-    static func linenExpense(propertyId: String, reservationId: String, guest: String?) -> Expense {
-        Expense(
-            id: newLocalId(),
-            propertyId: propertyId,
-            reservationId: reservationId,
-            description: "Spesa fissa biancheria (\(guest ?? "Ospite"))",
-            amount: 20,
-            authorId: "SYSTEM",
-            category: ExpenseCategory.pulizie.key
-        )
-    }
+    // La spesa biancheria da 20 € la crea solo `FinanceRepository` (inserimento del lordo e import Excel).
 
     /// Importo scritto a mano ("12,50"): nil se non è un numero.
     static func parseAmount(_ text: String) -> Double? {

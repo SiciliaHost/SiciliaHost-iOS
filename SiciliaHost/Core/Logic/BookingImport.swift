@@ -2,61 +2,59 @@ import Foundation
 
 // MARK: Piano di importazione
 
+/// Una riga dell'Excel: la parte condivisa (server) e quella dei soldi (telefono).
+struct ExcelRow: Equatable {
+    var reservation: Reservation
+    var money: ExcelMoneyRow
+}
+
 /// Cosa fare di ogni riga dell'Excel Booking rispetto alle prenotazioni Booking già salvate della casa.
 ///
 /// Una riga che a suo tempo ha completato un segnaposto iCal vive nel documento del segnaposto (id e `icalUid`
-/// dell'iCal), non in `booking-xls-N`: confrontare solo per id la farebbe reinserire a ogni nuovo import, con
-/// importo e spesa biancheria doppi. Per questo il confronto è per date sovrapposte su TUTTE le prenotazioni Booking:
-/// - `complete`: si sovrappone a un segnaposto senza importo → lo completa;
-/// - `enrich`: si sovrappone a una prenotazione già completa → si aggiungono solo i dati statistici, nessuna nuova spesa;
+/// dell'iCal), non in `booking-xls-N`: confrontare solo per id la farebbe reinserire a ogni nuovo import. Per questo il
+/// confronto è per date sovrapposte su TUTTE le prenotazioni Booking:
+/// - `complete`: si sovrappone a un segnaposto iCal senza nome → lo completa (nome, adulti, bambini, paese);
+/// - `enrich`: si sovrappone a una prenotazione già con nome → il server non cambia, i soldi vanno comunque sul telefono;
 /// - `insert`: nessuna sovrapposizione → prenotazione nuova (passa da `syncIcalReservationsBatch`).
 struct BookingImportPlan {
     /// segnaposto esistente → riga
-    let complete: [(existing: Reservation, row: Reservation)]
+    let complete: [(existing: Reservation, row: ExcelRow)]
     /// prenotazione esistente → riga
-    let enrich: [(existing: Reservation, row: Reservation)]
-    let insert: [Reservation]
+    let enrich: [(existing: Reservation, row: ExcelRow)]
+    let insert: [ExcelRow]
 }
 
-func planBookingImport(rows: [Reservation], existingBooking: [Reservation]) -> BookingImportPlan {
-    var complete: [(existing: Reservation, row: Reservation)] = []
-    var enrich: [(existing: Reservation, row: Reservation)] = []
-    var insert: [Reservation] = []
+/// Segnaposto = Booking creato dall'iCal e mai completato: senza nome e non da Excel.
+func isNamelessIcalPlaceholder(_ r: Reservation) -> Bool {
+    guard let uid = r.icalUid else { return false }
+    return !uid.hasPrefix("booking-xls-") && (r.guestName ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+}
+
+func planBookingImport(rows: [ExcelRow], existingBooking: [Reservation]) -> BookingImportPlan {
+    var complete: [(existing: Reservation, row: ExcelRow)] = []
+    var enrich: [(existing: Reservation, row: ExcelRow)] = []
+    var insert: [ExcelRow] = []
     var used = Set<String>()
     for row in rows {
+        let r = row.reservation
         // Prima lo stesso documento di un import precedente, poi un segnaposto, poi qualunque sovrapposizione.
-        let sameDoc = existingBooking.first { $0.id == row.icalUid && !used.contains($0.id) }
+        let sameDoc = existingBooking.first { $0.id == r.icalUid && !used.contains($0.id) }
         let overlapping = existingBooking.filter {
-            !used.contains($0.id) && dateRangesOverlap($0.checkIn, $0.checkOut, row.checkIn, row.checkOut)
+            !used.contains($0.id) && dateRangesOverlap($0.checkIn, $0.checkOut, r.checkIn, r.checkOut)
         }
-        let match = sameDoc ?? overlapping.first { $0.needsReview } ?? overlapping.first
-        if let match {
-            if match.needsReview && match.grossAmount == nil {
-                complete.append((match, row))
-            } else {
-                enrich.append((match, row))
-            }
-            used.insert(match.id)
-        } else {
+        let match = sameDoc ?? overlapping.first(where: isNamelessIcalPlaceholder) ?? overlapping.first
+        guard let match else {
             insert.append(row)
+            continue
         }
+        if sameDoc == nil && isNamelessIcalPlaceholder(match) {
+            complete.append((existing: match, row: row))
+        } else {
+            enrich.append((existing: match, row: row))
+        }
+        used.insert(match.id)
     }
     return BookingImportPlan(complete: complete, enrich: enrich, insert: insert)
-}
-
-/// I soli campi statistici di `row` da aggiungere a una prenotazione già completa (mai null).
-func statsFields(_ row: Reservation) -> [String: Any] {
-    var fields: [String: Any] = [:]
-    if let v = row.bookedAt { fields["bookedAt"] = v }
-    if let v = row.guestCountry { fields["guestCountry"] = v }
-    if let v = row.travelPurpose { fields["travelPurpose"] = v }
-    if let v = row.bookingDevice { fields["bookingDevice"] = v }
-    if let v = row.commissionAmount { fields["commissionAmount"] = v }
-    if row.adults > 0 {
-        fields["adults"] = row.adults
-        fields["children"] = row.children
-    }
-    return fields
 }
 
 // MARK: Lettura dell'export "Arrivi con recapiti"
@@ -67,14 +65,15 @@ struct BookingImportError: LocalizedError, Equatable {
 }
 
 /// Legge l'export "Arrivi con recapiti" di Booking.com (.xls legacy oppure CSV con le stesse colonne) e produce
-/// prenotazioni già complete (prezzo noto, niente revisione degli importi) più i contatti dei clienti per la
-/// rubrica marketing.
+/// righe in due parti: quella condivisa (nome, date, ospiti, paese: va sul server) e quella dei soldi (lordo,
+/// commissione, statistiche: resta sul telefono del proprietario), più i contatti dei clienti (anche loro solo sul
+/// telefono).
 ///
 /// Booking genera lo stesso report con intestazioni italiane o inglesi a seconda della lingua dell'account: ogni
 /// colonna è quindi cercata con entrambi i nomi.
 enum BookingExcelParser {
     struct ImportResult {
-        let reservations: [Reservation]
+        let rows: [ExcelRow]
         let contacts: [Contact]
         let skippedRows: Int
         /// Righe cancellate nel periodo del file: non diventano prenotazioni (bloccherebbero il calendario del
@@ -107,14 +106,14 @@ enum BookingExcelParser {
     private static let ole2Magic: [UInt8] = [0xD0, 0xCF, 0x11, 0xE0]
 
     /// Legge il file (xls binario oppure CSV) e ne ricava prenotazioni e contatti.
-    static func parse(data: Data, propertyId: String, isManagedOnCommission: Bool) throws -> ImportResult {
+    static func parse(data: Data, propertyId: String) throws -> ImportResult {
         let rows: [[String]]
         if data.count >= ole2Magic.count && Array(data.prefix(ole2Magic.count)) == ole2Magic {
             rows = try XlsReader.readRows(data)
         } else {
             rows = readCsvRows(data)
         }
-        return try parseRows(rows, propertyId: propertyId, isManagedOnCommission: isManagedOnCommission)
+        return try parseRows(rows, propertyId: propertyId)
     }
 
     // MARK: CSV
@@ -232,8 +231,8 @@ enum BookingExcelParser {
         Double(text.components(separatedBy: " ")[0].replacingOccurrences(of: ",", with: "."))
     }
 
-    static func parseRows(_ rows: [[String]], propertyId: String, isManagedOnCommission: Bool) throws -> ImportResult {
-        guard let headerRow = rows.first else { return ImportResult(reservations: [], contacts: [], skippedRows: 0) }
+    static func parseRows(_ rows: [[String]], propertyId: String) throws -> ImportResult {
+        guard let headerRow = rows.first else { return ImportResult(rows: [], contacts: [], skippedRows: 0) }
         var columnIndex: [String: Int] = [:]
         for (i, name) in headerRow.enumerated() { columnIndex[name.trimmed] = i }
         if !columnIndex.keys.contains(where: knownHeaders.contains) {
@@ -245,7 +244,7 @@ enum BookingExcelParser {
             return row[index].trimmed
         }
 
-        var reservations: [Reservation] = []
+        var parsed: [ExcelRow] = []
         var contacts: [Contact] = []
         var skipped = 0
         var cancelled = 0
@@ -277,32 +276,33 @@ enum BookingExcelParser {
                 continue
             }
 
-            let calc = FinancialCalculator.calculate(grossAmount: gross, platform: "BOOKING", isManagedOnCommission: isManagedOnCommission)
             let country = cell(row, "Booker country")
             let purpose = cell(row, "Motivo del viaggio", "Travel purpose")
             let device = cell(row, "Dispositivo", "Device")
 
-            reservations.append(Reservation(
-                propertyId: propertyId,
-                guestName: guestName.isEmpty ? nil : guestName,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                platform: "BOOKING",
-                grossAmount: gross,
-                netAmountOwner: calc.netAmountOwner,
-                netAmountAdmin: calc.netAmountAdmin,
-                // Il prefisso "booking-xls-" resta anche per i CSV: è l'ID documento usato per la deduplicazione,
-                // cambiarlo duplicherebbe le prenotazioni.
-                icalUid: "booking-xls-\(bookingId)",
-                adults: adults,
-                children: children,
-                needsReview: false,
-                // "2025-12-14 20:01:12": basta la data.
-                bookedAt: parseDate(cell(row, "Data di prenotazione", "Booked on").components(separatedBy: " ")[0]),
-                guestCountry: country.isEmpty ? nil : country.lowercased(),
-                travelPurpose: purpose.isEmpty ? nil : purpose,
-                bookingDevice: device.isEmpty ? nil : device,
-                commissionAmount: amount(cell(row, "Importo commissione", "Commission amount"))
+            parsed.append(ExcelRow(
+                reservation: Reservation(
+                    propertyId: propertyId,
+                    guestName: guestName.isEmpty ? nil : guestName,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    platform: "BOOKING",
+                    // Il prefisso "booking-xls-" resta anche per i CSV: è l'ID documento usato per la deduplicazione,
+                    // cambiarlo duplicherebbe le prenotazioni.
+                    icalUid: "booking-xls-\(bookingId)",
+                    adults: adults,
+                    children: children,
+                    guestCountry: country.isEmpty ? nil : country.lowercased()
+                ),
+                money: ExcelMoneyRow(
+                    propertyId: propertyId,
+                    grossAmount: gross,
+                    commissionAmount: amount(cell(row, "Importo commissione", "Commission amount")),
+                    // "2025-12-14 20:01:12": basta la data.
+                    bookedAt: parseDate(cell(row, "Data di prenotazione", "Booked on").components(separatedBy: " ")[0]),
+                    travelPurpose: purpose.isEmpty ? nil : purpose,
+                    bookingDevice: device.isEmpty ? nil : device
+                )
             ))
 
             let phoneDigits = cell(row, "Numero di telefono", "Phone number")
@@ -315,7 +315,7 @@ enum BookingExcelParser {
         }
 
         return ImportResult(
-            reservations: reservations, contacts: contacts, skippedRows: skipped,
+            rows: parsed, contacts: contacts, skippedRows: skipped,
             cancelledRows: cancelled, periodFrom: periodFrom, periodTo: periodTo
         )
     }

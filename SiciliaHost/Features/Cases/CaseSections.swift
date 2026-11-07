@@ -214,15 +214,18 @@ struct GestioneSection: View {
         SubsectionTitle(text: "Sincronizzazione calendari (iCal)")
         AppTextField(label: "URL iCal Airbnb", text: $draft.icalUrlAirbnb, keyboard: .URL, capitalization: .never)
         AppTextField(label: "URL iCal Booking", text: $draft.icalUrlBooking, keyboard: .URL, capitalization: .never)
-        SectionNote(text: "L'iCal Booking importa le date bloccate come prenotazioni da completare (nome/importo). Per prezzo e contatti già pronti usa anche \"Importa Excel Booking\".")
+        SectionNote(text: "L'iCal Booking importa le date bloccate come prenotazioni da completare (nome/importo). Per prezzo e contatti già pronti usa anche \"Importa Excel Booking\": importi, commissioni e contatti restano solo su questo telefono.")
         FlowButtons {
             // "Sincronizza ora" usa gli URL salvati: con modifiche non salvate si salva prima.
             if !ICalSyncService.feeds(of: property).isEmpty {
                 Button("Sincronizza ora", action: onSyncNow).buttonStyle(.appOutlined)
             }
-            Button("Importa Excel Booking") { picking = true }
-                .buttonStyle(.appOutlined)
-                .tourTarget(.caseBookingImport)
+            // Importi e contatti finiscono sul telefono di chi importa: solo il proprietario.
+            if isOwner {
+                Button("Importa Excel Booking") { picking = true }
+                    .buttonStyle(.appOutlined)
+                    .tourTarget(.caseBookingImport)
+            }
             if isOwner { Button("Membri e inviti", action: onOpenMembers).buttonStyle(.appOutlined) }
         }
         .fileImporter(isPresented: $picking, allowedContentTypes: [.item]) { result in
@@ -244,7 +247,7 @@ struct GestioneSection: View {
         }
 
         if isSuperAdmin {
-            SwitchRow(label: "Gestione a commissione (21% tasse + tuo 25%+50€)", isOn: $draft.isManagedOnCommission)
+            SwitchRow(label: "Gestita in commissione (il super-admin può aiutarti nella gestione)", isOn: $draft.isManagedOnCommission)
                 .padding(.top, 6)
         }
 
