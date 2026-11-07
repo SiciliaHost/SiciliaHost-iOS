@@ -2,29 +2,20 @@ import Foundation
 
 // MARK: Calcolo dei netti
 
-/// Commissioni e quote: 23,8% Booking, 17,5% Airbnb; casa in commissione = 21% di tasse e il 25% del netto + 50 €.
+/// Netto per il proprietario: lordo meno la commissione della piattaforma. Niente più regime a commissione
+/// (2026-11-06): non esistono tasse del 21% né quota dell'amministratore. La formula vive SOLO qui.
 enum FinancialCalculator {
-    struct Result: Equatable {
-        let netAmountOwner: Double
-        let netAmountAdmin: Double
+    static func platformCommissionRate(_ platform: String) -> Double {
+        switch platform.uppercased() {
+        case "BOOKING": return 0.238
+        case "AIRBNB": return 0.175
+        default: return 0.0
+        }
     }
 
-    static func calculate(grossAmount: Double, platform: String, isManagedOnCommission: Bool) -> Result {
-        let platformCommRate: Double
-        switch platform.uppercased() {
-        case "BOOKING": platformCommRate = 0.238
-        case "AIRBNB": platformCommRate = 0.175
-        default: platformCommRate = 0.0
-        }
-        let platformComm = grossAmount * platformCommRate
-
-        if isManagedOnCommission {
-            let tax = grossAmount * 0.21
-            let netOwner = grossAmount - tax - platformComm
-            return Result(netAmountOwner: netOwner, netAmountAdmin: (netOwner * 0.25) + 50.0)
-        }
-        let netOwner = grossAmount - platformComm
-        return Result(netAmountOwner: netOwner, netAmountAdmin: netOwner)
+    /// `realCommission` = commissione reale dell'export Booking (€): se c'è vince sul tasso fisso.
+    static func netOwner(gross: Double, platform: String, realCommission: Double? = nil) -> Double {
+        gross - (realCommission ?? gross * platformCommissionRate(platform))
     }
 }
 

@@ -6,34 +6,12 @@ import XCTest
 final class FinanceTests: XCTestCase {
     // MARK: FinancialCalculator
 
-    func testStandardPropertyBooking() {
-        let r = FinancialCalculator.calculate(grossAmount: 100, platform: "BOOKING", isManagedOnCommission: false)
-        XCTAssertEqual(r.netAmountOwner, 76.2, accuracy: 0.0001)
-        XCTAssertEqual(r.netAmountAdmin, 76.2, accuracy: 0.0001)
-    }
-
-    func testStandardPropertyAirbnbAndManual() {
-        let a = FinancialCalculator.calculate(grossAmount: 100, platform: "AIRBNB", isManagedOnCommission: false)
-        XCTAssertEqual(a.netAmountOwner, 82.5, accuracy: 0.0001)
-        XCTAssertEqual(a.netAmountAdmin, 82.5, accuracy: 0.0001)
-        let m = FinancialCalculator.calculate(grossAmount: 100, platform: "MANUAL", isManagedOnCommission: false)
-        XCTAssertEqual(m.netAmountOwner, 100, accuracy: 0.0001)
-    }
-
-    func testManagedPropertyBooking() {
-        // 100 - 21 (tasse) - 23,8 (Booking) = 55,2; admin = 55,2 * 25% + 50 = 63,8
-        let r = FinancialCalculator.calculate(grossAmount: 100, platform: "BOOKING", isManagedOnCommission: true)
-        XCTAssertEqual(r.netAmountOwner, 55.2, accuracy: 0.0001)
-        XCTAssertEqual(r.netAmountAdmin, 63.8, accuracy: 0.0001)
-    }
-
-    func testManagedPropertyAirbnbAndManual() {
-        let a = FinancialCalculator.calculate(grossAmount: 100, platform: "AIRBNB", isManagedOnCommission: true)
-        XCTAssertEqual(a.netAmountOwner, 61.5, accuracy: 0.0001)
-        XCTAssertEqual(a.netAmountAdmin, 65.375, accuracy: 0.0001)
-        let m = FinancialCalculator.calculate(grossAmount: 100, platform: "MANUAL", isManagedOnCommission: true)
-        XCTAssertEqual(m.netAmountOwner, 79, accuracy: 0.0001)
-        XCTAssertEqual(m.netAmountAdmin, 69.75, accuracy: 0.0001)
+    func testNetOwner() {
+        XCTAssertEqual(FinancialCalculator.netOwner(gross: 1000, platform: "BOOKING"), 762, accuracy: 0.001)
+        XCTAssertEqual(FinancialCalculator.netOwner(gross: 1000, platform: "airbnb"), 825, accuracy: 0.001)
+        XCTAssertEqual(FinancialCalculator.netOwner(gross: 1000, platform: "MANUAL"), 1000, accuracy: 0.001)
+        XCTAssertEqual(FinancialCalculator.netOwner(gross: 1000, platform: "BOOKING", realCommission: 180), 820, accuracy: 0.001)
+        XCTAssertEqual(FinancialCalculator.netOwner(gross: 1000, platform: "BOOKING", realCommission: 0), 1000, accuracy: 0.001)
     }
 
     // MARK: FinanceStats
