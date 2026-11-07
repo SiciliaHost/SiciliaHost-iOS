@@ -25,6 +25,24 @@ struct ReservationMoney: Codable, Equatable, Sendable {
     }
 }
 
+extension ReservationMoney {
+    /// Decodifica tollerante (come `FinanceData`): una chiave mancante (es. `source` in un file scritto da una versione
+    /// precedente) prende il default invece di rendere illeggibile l'intero file, che finirebbe in `.bad`.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            reservationId: c.value(.reservationId, ""),
+            propertyId: c.value(.propertyId, ""),
+            grossAmount: c.optional(.grossAmount),
+            commissionAmount: c.optional(.commissionAmount),
+            bookedAt: c.optional(.bookedAt),
+            travelPurpose: c.optional(.travelPurpose),
+            bookingDevice: c.optional(.bookingDevice),
+            source: c.value(.source, ReservationMoney.manual)
+        )
+    }
+}
+
 /// Tutto ciò che sta nel file del telefono.
 struct FinanceData: Codable, Equatable, Sendable {
     var version = 1

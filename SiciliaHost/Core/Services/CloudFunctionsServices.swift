@@ -79,6 +79,11 @@ struct HostFunctionsService: InviteAPI {
         parseClaimed(try await call("claimPendingTransfers", [:]))
     }
 
+    /// Importi delle prenotazioni dirette del sito per le case di cui si è OWNER (risponde solo al proprietario).
+    func getSiteBookingAmounts(propertyIds: [String]) async throws -> [SiteBookingAmount] {
+        parseSiteBookingAmounts(try await call("getSiteBookingAmounts", ["propertyIds": propertyIds]))
+    }
+
     private func call(_ name: String, _ payload: [String: Any?]) async throws -> Any? {
         try await callCloud(functions, name, payload)
     }

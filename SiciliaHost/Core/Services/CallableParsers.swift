@@ -192,3 +192,16 @@ func parseContactDetails(_ data: Any?) -> HostContactDetails? {
     guard let map = dict(data) else { return nil }
     return HostContactDetails(phone: map["phone"] as? String, whatsapp: map["whatsapp"] as? String)
 }
+
+// MARK: Finanze
+
+/// Risposta di `getSiteBookingAmounts`: `{ amounts: [{ reservationId, propertyId, totalPrice }] }`. Voci senza id,
+/// senza casa, senza prezzo o con prezzo negativo scartate.
+func parseSiteBookingAmounts(_ data: Any?) -> [SiteBookingAmount] {
+    guard let list = dict(data)?["amounts"] as? [Any] else { return [] }
+    return list.compactMap { item in
+        guard let m = dict(item), let id = m["reservationId"] as? String, let pid = m["propertyId"] as? String,
+              let price = double(m["totalPrice"]), price >= 0 else { return nil }
+        return SiteBookingAmount(reservationId: id, propertyId: pid, totalPrice: price)
+    }
+}

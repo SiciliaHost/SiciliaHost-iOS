@@ -160,6 +160,20 @@ final class CallableParsersTests: XCTestCase {
         XCTAssertEqual(parseMissing("x"), [])
     }
 
+    // MARK: Finanze
+
+    func testParseSiteBookingAmountsKeepsCompleteRowsOnly() {
+        let data: [String: Any] = ["amounts": [
+            ["reservationId": "r1", "propertyId": "p1", "totalPrice": 250] as [String: Any],
+            ["reservationId": "r2"],
+            ["reservationId": "r3", "propertyId": "p1", "totalPrice": -5] as [String: Any],
+            "junk",
+        ] as [Any]]
+        XCTAssertEqual(parseSiteBookingAmounts(data), [SiteBookingAmount(reservationId: "r1", propertyId: "p1", totalPrice: 250)])
+        XCTAssertEqual(parseSiteBookingAmounts(nil), [])
+        XCTAssertEqual(parseSiteBookingAmounts(["amounts": "boh"]), [])
+    }
+
     // MARK: Prezzi
 
     func testParseSeasonalRatesWithIntAndDoublePrices() {

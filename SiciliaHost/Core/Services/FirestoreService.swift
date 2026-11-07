@@ -160,6 +160,16 @@ struct FirestoreService: @unchecked Sendable {
         }
     }
 
+    /// Come `getReservations(propertyIds:)` ma dice anche se almeno una lettura è venuta dalla cache locale di Firestore
+    /// (offline): in quel caso l'elenco può essere parziale e il riallineamento delle finanze non deve cancellare nulla.
+    func getReservationsReportingCache(propertyIds: [String]) async throws -> (reservations: [Reservation], fromCache: Bool) {
+        let pages: [ReservationsPage] = try await fanOut(propertyIds) { id in
+            let snapshot = try await db.collection("reservations").whereField("propertyId", isEqualTo: id).getDocuments()
+            return [ReservationsPage(reservations: decodeAll(snapshot), fromCache: snapshot.metadata.isFromCache)]
+        }
+        return (pages.flatMap(\.reservations), pages.contains(where: \.fromCache))
+    }
+
     /// Come `getReservations(propertyIds:)`, più gli id delle prenotazioni con il segno `checkin` (check-in inviato). Il
     /// segno si legge a parte e non è un campo di `Reservation`: un salvataggio della prenotazione non lo riscrive mai.
     func getReservationsWithCheckin(propertyIds: [String]) async throws -> ReservationsWithCheckin {
@@ -345,6 +355,12 @@ struct BookingImportCounts: Equatable, Sendable {
 }
 
 /// Una prenotazione e se ha il segno `checkin`.
+/// Le prenotazioni di una casa e se la lettura è venuta dalla cache (`getReservationsReportingCache`).
+struct ReservationsPage: Sendable {
+    let reservations: [Reservation]
+    let fromCache: Bool
+}
+
 struct ReservationWithMark: Sendable {
     let reservation: Reservation
     let sent: Bool
