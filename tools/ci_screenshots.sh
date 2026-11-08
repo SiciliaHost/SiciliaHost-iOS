@@ -4,7 +4,7 @@
 set -uo pipefail
 APP="$1"; UDID="$2"; OUT="$3"
 BUNDLE="com.siciliahost.cactushost"
-SCREENS="login intro onboarding home arrivals agenda inventory finance tour profile failed terms gallery"
+SCREENS="login intro loading onboarding home arrivals agenda inventory finance tour profile failed terms gallery"
 mkdir -p "$OUT"
 
 xcrun simctl boot "$UDID" 2>/dev/null || true

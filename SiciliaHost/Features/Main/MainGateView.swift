@@ -23,7 +23,7 @@ struct MainGateView: View {
                 Group {
                     switch model.access {
                     case .loading:
-                        ProgressView().tint(Theme.primary)
+                        CactusLoading()
                     case .ready:
                         NavigationStack(path: $router.path) {
                             MainTabView(scope: model.scope, router: router, onSignOut: onSignOut)

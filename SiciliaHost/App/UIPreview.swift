@@ -72,6 +72,8 @@ struct UIPreviewRoot: View {
             LoginView(auth: AuthService())
         case "intro":
             IntroScreen(onDone: {})
+        case "loading":
+            CactusLoading()
         case "onboarding":
             AppScreen {
                 OnboardingView(isBusy: false, error: nil, onCreateHouse: {}, onInviteCode: { _ in }, onDismissError: {}, onLogout: {}, showsAccountActions: false)

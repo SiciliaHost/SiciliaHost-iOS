@@ -137,10 +137,12 @@ Totale (alla baseline): 249 file Kotlin (alle baseline precedenti 242 e 211).
 | `ui/common/CompactTopBar.kt` | 74 | `UI/Style/CompactTopBar.swift` | scritto |
 | `ui/intro/IntroLogic.kt` | 10 | `Core/Logic/OnboardingLogic.swift` | scritto |
 | `ui/intro/IntroOverlay.kt` | 90 | `Features/Intro/IntroOverlay.swift` | scritto |
-| `ui/intro/IntroScreen.kt` | 252 | `Features/Intro/IntroScreen.swift` | scritto (senza lo spostamento del fondo con lo sfoglio) |
+| `ui/intro/IntroScreen.kt` | 252 | `Features/Intro/IntroScreen.swift` | scritto (2026-11-08: fondo verde `BrandBackdrop`, Cactus fisso in alto con una posa per pagina, testi dell'Android; Cactus = render 3D animato, non motore 3D) |
 | `ui/intro/OnboardingController.kt` | 33 | `Core/State/OnboardingState.swift` | scritto |
-| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | scritto (solo Google, come l'Android; vedi DIARIO: accesso con Apple) |
-| `ui/login/LoginViewModel.kt` | 46 | `Core/Services/AuthService.swift (signInWithGoogle)` | scritto |
+| `ui/login/LoginScreen.kt` | 145 | `Features/Login/LoginView.swift` | scritto (2026-11-08: Cactus su fondo verde, Google + Apple + «Accesso revisori» con email e password; vedi DIARIO) |
+| `ui/login/LoginViewModel.kt` | 46 | `Core/Services/AuthService.swift (signInWithGoogle, signInWithEmail)` | scritto |
+| `ui/brand/BrandStage.kt` | 162 | `UI/Style/BrandStage.swift` (`BrandBackdrop`, `CactusHero`, `PoweredBySiciliaHost`) | scritto (Cactus = `cactus_avatar_3d.png` con movimento per posa, niente Filament/SceneKit) |
+| `ui/brand/CactusLoading.kt` | 57 | `UI/Style/BrandStage.swift` (`CactusLoading`, usata da `MainGateView`) | scritto |
 | `ui/main/AccessState.kt` | 13 | `Features/Main/MainViewModel.swift` | scritto+test |
 | `ui/main/LoadErrorScreen.kt` | 79 | `Features/Main/MainGateView.swift` | scritto |
 | `ui/main/MainGate.kt` | 77 | `Features/Main/MainGateView.swift` | scritto |

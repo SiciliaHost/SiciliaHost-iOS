@@ -71,6 +71,13 @@ final class AccountDeletionModel {
             error = AccountDeletionLogic.ownedHousesMessage(owned)
             return false
         }
+        if let user = Auth.auth().currentUser, user.providerData.map(\.providerID).contains("password"),
+           AccountDeletionLogic.provider(for: user.providerData.map(\.providerID)) == nil {
+            // Account dimostrativo dei revisori (accesso con email e password): non si può rifare l'accesso con Google/Apple
+            // e il server non lo ammette. Niente messaggio fuorviante di «sessione scaduta».
+            error = "Questo è l'account dimostrativo dei revisori: non si elimina dall'app."
+            return false
+        }
         guard let user = Auth.auth().currentUser,
               let provider = AccountDeletionLogic.provider(for: user.providerData.map(\.providerID)) else {
             error = "Sessione scaduta: esci, accedi di nuovo e riprova."

@@ -9,9 +9,12 @@ import UIKit
 /// Sessione di accesso. Firebase Auth salva la sessione nel Keychain: se c'è già un utente si entra direttamente
 /// nell'app (come fa l'Android all'avvio).
 ///
-/// **Google e Apple, niente email.** Le firestore.rules, le storage.rules e le Cloud Functions ammettono come "host" chi
-/// ha effettuato l'accesso con Google o con Apple (`sign_in_provider` = `google.com` / `apple.com`); un account
-/// email/password (quelli del sito) è escluso apposta. L'accesso con Apple è obbligatorio da App Store se si offre Google.
+/// **Google e Apple; email e password solo per i revisori.** Le Cloud Functions ammettono come "host" chi ha effettuato
+/// l'accesso con Google o con Apple (`sign_in_provider` = `google.com` / `apple.com`); un account email/password (quelli del
+/// sito) è escluso apposta. Le firestore.rules e le storage.rules (deploy del 2026-11-08) ammettono il provider `password`
+/// SOLO per l'uid fisso dell'account dimostrativo dei revisori degli store (`signInWithEmail`, «Accesso revisori» nel
+/// login): ogni altro account email/password non ottiene nulla. Le callable condivise (`callerFromRequest`) invece lo
+/// rifiutano ancora (`permission-denied`). L'accesso con Apple è obbligatorio da App Store se si offre Google.
 /// **L'accesso con Apple funziona solo dopo il deploy delle regole e delle Functions che lo ammettono** (branch
 /// `feat/apple-signin-host` di Androidapp e del sito): vedi DIARIO.md.
 /// Tiene il riferimento all'ascoltatore di Firebase Auth e lo toglie quando `AuthService` sparisce (il `deinit` di una
@@ -88,6 +91,14 @@ final class AuthService {
         }
     }
 
+    /// Accesso con email e password: serve solo ai revisori degli store (account dimostrativo, come `loginWithEmail`
+    /// dell'Android). Le credenziali non si salvano da nessuna parte. Ritorna sempre `true` (gli errori sono lanciati).
+    @discardableResult
+    func signInWithEmail(email: String, password: String) async throws -> Bool {
+        try await Auth.auth().signIn(withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
+        return true
+    }
+
     /// Esce da Firebase e anche dall'account Google ricordato dal dispositivo: senza, il prossimo "Accedi con Google"
     /// rientra in silenzio con lo stesso account e non permette di cambiarlo. Svuota la sessione di accesso condivisa
     /// (un altro account non deve ereditare le case del precedente).
@@ -121,6 +132,7 @@ final class AuthService {
         case .tooManyRequests: return "Troppi tentativi. Riprova tra poco."
         case .userDisabled: return "Questo account è stato disattivato."
         case .credentialAlreadyInUse, .accountExistsWithDifferentCredential: return "Esiste già un account con questa email."
+        case .wrongPassword, .invalidCredential, .userNotFound, .invalidEmail: return "Email o password non corrette."
         default: return error.localizedDescription
         }
     }
