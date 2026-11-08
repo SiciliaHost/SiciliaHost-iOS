@@ -9,14 +9,14 @@ import UIKit
 /// Sessione di accesso. Firebase Auth salva la sessione nel Keychain: se c'è già un utente si entra direttamente
 /// nell'app (come fa l'Android all'avvio).
 ///
-/// **Google e Apple; email e password solo per i revisori.** Le Cloud Functions ammettono come "host" chi ha effettuato
-/// l'accesso con Google o con Apple (`sign_in_provider` = `google.com` / `apple.com`); un account email/password (quelli del
-/// sito) è escluso apposta. Le firestore.rules e le storage.rules (deploy del 2026-11-08) ammettono il provider `password`
-/// SOLO per l'uid fisso dell'account dimostrativo dei revisori degli store (`signInWithEmail`, «Accesso revisori» nel
-/// login): ogni altro account email/password non ottiene nulla. Le callable condivise (`callerFromRequest`) invece lo
-/// rifiutano ancora (`permission-denied`). L'accesso con Apple è obbligatorio da App Store se si offre Google.
-/// **L'accesso con Apple funziona solo dopo il deploy delle regole e delle Functions che lo ammettono** (branch
-/// `feat/apple-signin-host` di Androidapp e del sito): vedi DIARIO.md.
+/// **Google, Apple, email e password.** Le regole e le Cloud Functions ammettono come "host" chi accede con Google o con
+/// Apple (`sign_in_provider` = `google.com` / `apple.com`) e, dal ramo `feat/login-email-password`, anche chi accede con
+/// email e password purché l'email sia VERIFICATA (`email_verified`): per questo `signInWithEmail` fa uscire un account
+/// non verificato e gli rimanda il link di conferma (`EmailAuthLogic`). Fa eccezione l'account dimostrativo dei revisori
+/// (uid fisso, email non verificata). Il super-admin resta solo Google. L'accesso con Apple è obbligatorio da App Store se
+/// si offre Google.
+/// **Funziona solo dopo il deploy delle regole e delle Functions** (Androidapp `firestore.rules`/`storage.rules` e sito
+/// `callerFromRequest`): vedi DIARIO.md.
 /// Tiene il riferimento all'ascoltatore di Firebase Auth e lo toglie quando `AuthService` sparisce (il `deinit` di una
 /// classe isolata al main actor non può toccare le sue proprietà isolate).
 private final class AuthListenerBox: @unchecked Sendable {
@@ -91,12 +91,30 @@ final class AuthService {
         }
     }
 
-    /// Accesso con email e password: serve solo ai revisori degli store (account dimostrativo, come `loginWithEmail`
-    /// dell'Android). Le credenziali non si salvano da nessuna parte. Ritorna sempre `true` (gli errori sono lanciati).
+    /// Accesso con email e password (come `loginWithEmail` dell'Android). Le credenziali non si salvano da nessuna parte.
+    /// Un account con email non verificata (salvo il dimostrativo) esce subito e riceve di nuovo il link di conferma:
+    /// le regole lo respingerebbero ovunque. Ritorna sempre `true` (gli errori sono lanciati).
     @discardableResult
     func signInWithEmail(email: String, password: String) async throws -> Bool {
-        try await Auth.auth().signIn(withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
+        let result = try await Auth.auth().signIn(withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
+        if EmailAuthLogic.needsEmailVerification(uid: result.user.uid, emailVerified: result.user.isEmailVerified) {
+            try? await result.user.sendEmailVerification()
+            try? Auth.auth().signOut()
+            throw SignInError(message: EmailAuthLogic.notVerifiedMessage)
+        }
         return true
+    }
+
+    /// Crea l'account e manda il link di conferma, poi esce: si entra solo dopo aver confermato l'email.
+    func registerWithEmail(email: String, password: String) async throws {
+        let result = try await Auth.auth().createUser(withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
+        try? await result.user.sendEmailVerification()
+        try? Auth.auth().signOut()
+    }
+
+    /// Firebase non rivela se l'indirizzo esiste: risponde con successo comunque.
+    func sendPasswordReset(email: String) async throws {
+        try await Auth.auth().sendPasswordReset(withEmail: email.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
     /// Esce da Firebase e anche dall'account Google ricordato dal dispositivo: senza, il prossimo "Accedi con Google"
@@ -131,6 +149,8 @@ final class AuthService {
         case .networkError: return "Nessuna connessione. Riprova."
         case .tooManyRequests: return "Troppi tentativi. Riprova tra poco."
         case .userDisabled: return "Questo account è stato disattivato."
+        case .emailAlreadyInUse: return EmailAuthLogic.alreadyInUseMessage
+        case .weakPassword: return EmailAuthLogic.weakPasswordMessage
         case .credentialAlreadyInUse, .accountExistsWithDifferentCredential: return "Esiste già un account con questa email."
         case .wrongPassword, .invalidCredential, .userNotFound, .invalidEmail: return "Email o password non corrette."
         default: return error.localizedDescription

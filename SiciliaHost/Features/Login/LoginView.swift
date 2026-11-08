@@ -4,9 +4,9 @@ import SwiftUI
 /// Accesso (`LoginScreen.kt`): Cactus al centro (si muove da solo e «pensa» mentre l'accesso è in corso), il nome dell'app,
 /// i pulsanti e, in fondo, «powered by SiciliaHost» con il logo: il marchio dell'azienda resta sullo sfondo. Il fondo è il
 /// palcoscenico verde del marchio (`BrandBackdrop`), uguale in chiaro e in scuro.
-/// «Accedi con Google» e «Accedi con Apple» (obbligatorio da App Store) sono gli accessi veri. «Accesso revisori»
-/// (email e password, chiuso di default) serve solo all'account dimostrativo per i revisori degli store: le regole di
-/// Firestore e Storage lo ammettono per quell'unico uid (vedi `AuthService`).
+/// «Accedi con Google» e «Accedi con Apple» (obbligatorio da App Store) sono gli accessi principali. «Accesso con Email e
+/// Password» (chiuso di default) vale per tutti gli host: accesso, creazione dell'account con link di conferma via email e
+/// «Password dimenticata». Si entra solo con l'email verificata (vedi `AuthService` ed `EmailAuthLogic`).
 struct LoginView: View {
     let auth: AuthService
     @State private var isBusy = false
@@ -14,12 +14,14 @@ struct LoginView: View {
     /// Stringa casuale il cui hash è stato mandato ad Apple nella richiesta in corso.
     @State private var appleNonce: String?
     @State private var isDemoActive = false
-    @State private var reviewerOpen = false
+    @State private var emailOpen = false
+    @State private var creating = false
+    @State private var notice: String?
     @State private var email = ""
     @State private var password = ""
-    @FocusState private var focus: ReviewerField?
+    @FocusState private var focus: EmailField?
 
-    private enum ReviewerField { case email, password }
+    private enum EmailField { case email, password }
 
     private let ink = Color(hex: Brand.ink)
     private let yellow = Color(hex: Brand.yellow)
@@ -89,11 +91,11 @@ struct LoginView: View {
                             .buttonStyle(.plain)
                             .padding(.top, 8)
 
-                            // Accesso con email e password: solo per i revisori degli store (account dimostrativo).
+                            // Accesso con email e password: per tutti gli host (serve l'email verificata).
                             Button {
-                                withAnimation(.emphasized) { reviewerOpen.toggle() }
+                                withAnimation(.emphasized) { emailOpen.toggle() }
                             } label: {
-                                Text("Accesso revisori")
+                                Text("Accesso con Email e Password")
                                     .appStyle(.labelMedium)
                                     .foregroundStyle(Color.white.opacity(0.8))
                                     .padding(.vertical, 8)
@@ -101,7 +103,7 @@ struct LoginView: View {
                             }
                             .buttonStyle(.plain)
 
-                            if reviewerOpen { reviewerForm }
+                            if emailOpen { emailForm }
                         }
                     }
                     .frame(maxWidth: 380)
@@ -125,8 +127,9 @@ struct LoginView: View {
         }
     }
 
-    /// Campi email e password dell'accesso revisori. Niente viene salvato: restano solo in memoria finché la vista è aperta.
-    private var reviewerForm: some View {
+    /// Campi email e password: accesso, creazione dell'account e «Password dimenticata». Niente viene salvato: restano solo
+    /// in memoria finché la vista è aperta.
+    private var emailForm: some View {
         VStack(spacing: 8) {
             TextField("", text: $email, prompt: Text("Email").foregroundStyle(Color.white.opacity(0.6)))
                 .textContentType(.username)
@@ -137,17 +140,52 @@ struct LoginView: View {
                 .focused($focus, equals: .email)
                 .onSubmit { focus = .password }
                 .reviewerFieldStyle()
-            SecureField("", text: $password, prompt: Text("Password").foregroundStyle(Color.white.opacity(0.6)))
-                .textContentType(.password)
+            SecureField("", text: $password,
+                        prompt: Text(creating ? "Password (almeno \(EmailAuthLogic.minPasswordLength) caratteri)" : "Password")
+                            .foregroundStyle(Color.white.opacity(0.6)))
+                .textContentType(creating ? .newPassword : .password)
                 .submitLabel(.go)
                 .focused($focus, equals: .password)
-                .onSubmit(signInWithEmail)
+                .onSubmit(submitEmail)
                 .reviewerFieldStyle()
-            Button(action: signInWithEmail) {
-                Text("Accedi").appStyle(.titleMedium).frame(maxWidth: .infinity)
+            Button(action: submitEmail) {
+                Text(creating ? "Crea account" : "Accedi").appStyle(.titleMedium).frame(maxWidth: .infinity)
             }
             .buttonStyle(AppPrimaryButtonStyle(container: yellow, content: ink, cornerRadius: 12))
             .disabled(email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty)
+            if !creating {
+                Button(action: resetPassword) {
+                    Text("Password dimenticata?")
+                        .appStyle(.labelMedium)
+                        .foregroundStyle(Color.white.opacity(0.8))
+                        .frame(minHeight: 36)
+                }
+                .buttonStyle(.plain)
+            }
+            Button {
+                creating.toggle()
+                notice = nil
+                errorMessage = nil
+            } label: {
+                Text(creating ? "Hai già un account? Accedi" : "Non hai un account? Creane uno")
+                    .appStyle(.labelMedium)
+                    .foregroundStyle(Color.white.opacity(0.8))
+                    .frame(minHeight: 36)
+            }
+            .buttonStyle(.plain)
+            if creating {
+                Text("Riceverai una email con il link per confermare l'indirizzo: si entra solo dopo la conferma.")
+                    .appStyle(.labelSmall)
+                    .foregroundStyle(Color.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+            }
+            if let notice {
+                Text(notice)
+                    .appStyle(.bodyMedium)
+                    .foregroundStyle(yellow)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 4)
+            }
         }
     }
 
@@ -178,11 +216,20 @@ struct LoginView: View {
         }
     }
 
-    private func signInWithEmail() {
+    private func submitEmail() {
         guard !email.trimmingCharacters(in: .whitespaces).isEmpty, !password.isEmpty, !isBusy else { return }
+        notice = nil
+        errorMessage = nil
+        if creating {
+            registerWithEmail()
+        } else {
+            signInWithEmail()
+        }
+    }
+
+    private func signInWithEmail() {
         focus = nil
         isBusy = true
-        errorMessage = nil
         let mail = email
         let pass = password
         Task {
@@ -191,6 +238,43 @@ struct LoginView: View {
                 password = "" // entrato: la password non resta in memoria nella vista
             } catch {
                 errorMessage = "Errore: \(AuthService.describe(error))"
+            }
+            isBusy = false
+        }
+    }
+
+    private func registerWithEmail() {
+        guard EmailAuthLogic.isPlausibleEmail(email) else { notice = EmailAuthLogic.invalidEmailNotice; return }
+        guard password.count >= EmailAuthLogic.minPasswordLength else { notice = EmailAuthLogic.weakPasswordMessage; return }
+        focus = nil
+        isBusy = true
+        let mail = email
+        let pass = password
+        Task {
+            do {
+                try await auth.registerWithEmail(email: mail, password: pass)
+                password = ""
+                creating = false
+                notice = EmailAuthLogic.registeredNotice
+            } catch {
+                notice = AuthService.describe(error)
+            }
+            isBusy = false
+        }
+    }
+
+    private func resetPassword() {
+        guard EmailAuthLogic.isPlausibleEmail(email) else { notice = EmailAuthLogic.emailForResetNotice; return }
+        notice = nil
+        errorMessage = nil
+        isBusy = true
+        let mail = email
+        Task {
+            do {
+                try await auth.sendPasswordReset(email: mail)
+                notice = EmailAuthLogic.resetNotice
+            } catch {
+                notice = AuthService.describe(error)
             }
             isBusy = false
         }

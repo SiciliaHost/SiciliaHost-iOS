@@ -41,6 +41,7 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Stato attuale
 
+- **2026-11-08: login con email e password per tutti (richiede email verificata), registrazione e «Password dimenticata»** scritti, NON compilati qui e backend NON deployato (vedi voce del Registro).
 - Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario in `docs/INVENTARIO.md`, ora con **tutti i 249 file Kotlin** di `main` (`a43eb44`): 31 file aggiunti il 2026-11-03 (F3/F9/F10) e 7 della scheda Messaggi (F1/F12); righe aperte 120.
 - **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
 - **F4 (Home) e F5 (Agenda, modifica prenotazione, Modifica prezzi): COMPILANO in CI e i test passano (2026-11-03, run 41677922733: 187 test, 0 falliti)**
@@ -151,6 +152,11 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-08 — Claude Sonnet 5.5 (Windows senza Swift) — Accesso con Email e Password per tutti (login)
+- **Cosa**: la voce «Accesso revisori» diventa «Accesso con Email e Password» (chiusa di default) e vale per tutti: accesso, «Crea account» (manda il link di conferma e poi esce) e «Password dimenticata?». Si entra solo con l'email **verificata**: `AuthService.signInWithEmail` fa uscire un account non verificato (salvo l'uid dimostrativo) e rimanda il link. Nuovo `Core/Services/EmailAuthLogic.swift` (parte pura: verifica, email plausibile, messaggi) con `SiciliaHostTests/EmailAuthLogicTests.swift`; `AuthService.registerWithEmail`/`sendPasswordReset`, nuovi messaggi per `.emailAlreadyInUse`/`.weakPassword`; `LoginView`: `emailForm`, `submitEmail`, `registerWithEmail`, `resetPassword`.
+- **Backend** (non deployato): regole `firestore.rules`/`storage.rules` (Androidapp, commit `efe65b9`, in locale) e `callerFromRequest` del sito (ramo `feat/login-email-password`, commit `b0f6d04`, in locale) ammettono il provider `password` con `email_verified`. Il super-admin resta Google. Corretto anche l'uid demo nelle regole (era `2fJQ…`, ora `IsUz1W7sSwcOGHHh5kRDOBizm0c2` come nelle Functions). **Senza il deploy di regole e Functions l'accesso con password riesce ma l'app non vede nulla.** Ordine: Functions → regole → app.
+- **NON compilato né provato** (Windows senza Swift): la CI dirà se compila; il form aperto non è stato visto a schermo. Android: compila e i 7 test di `EmailAuthLogicTest` passano. Noto: «Elimina account» con un account password non è gestito (nessun provider per il nuovo accesso). Dopo la registrazione/accesso non verificato l'auth listener mostra per un istante la sessione prima dell'uscita (non verificato).
 
 ### 2026-11-08 — Claude Sonnet 5.5 (Windows senza Swift) — Presentazione: testo pagina «siciliahost.com» accorciato
 - `Features/Intro/IntroScreen.swift`: tolta da quella pagina la frase «A regime tratterremo solo il 5% sulle prenotazioni ricevute, meno delle piattaforme più note.» (modifica del testo fatta dall'utente, uguale all'Android `IntroScreen.kt`, già su `origin/main`). Solo testo: non compilato qui, nessuna logica toccata.
