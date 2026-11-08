@@ -152,6 +152,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-08 — Claude Sonnet 5.5 (Windows senza Swift) — Presentazione: testo pagina «siciliahost.com» accorciato
+- `Features/Intro/IntroScreen.swift`: tolta da quella pagina la frase «A regime tratterremo solo il 5% sulle prenotazioni ricevute, meno delle piattaforme più note.» (modifica del testo fatta dall'utente, uguale all'Android `IntroScreen.kt`, già su `origin/main`). Solo testo: non compilato qui, nessuna logica toccata.
+- Non committati, lasciati com'erano: `.github/workflows/store-screenshots.yml` e `tools/store_screenshots.sh` (non miei).
+
 ### 2026-11-08 — Claude Sonnet 5.5 (Windows senza Swift) — Icona nuova, accesso/presentazione/caricamento come Android, accesso revisori, TestFlight
 - **Icona**: `AppIcon.appiconset/icon-1024.png` rifatta da `iconaappcactus.jpg` (2048 → 1024, Pillow LANCZOS, **RGB senza alfa**, quadrata senza angoli arrotondati). Copia sorgente anche in `Androidapp/store/play/icon-source-2048.jpg`.
 - **Nuovo `UI/Style/BrandStage.swift`** (porta di `BrandStage.kt` + `CactusLoading.kt`): `BrandBackdrop` (gradiente 0F2A18 → 285532 → 3C9650 con tre macchie giallo/rosso/verde), `CactusHero`, `PoweredBySiciliaHost` (usa sempre `Logo`, non `LogoDark`: la pastiglia è chiara), `CactusLoading` (usata al posto del `ProgressView` in `MainGateView`).

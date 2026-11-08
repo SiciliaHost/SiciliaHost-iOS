@@ -32,7 +32,7 @@ private let pages: [IntroPage] = [
     IntroPage(
         pose: .speaking, icon: "building.2.fill",
         title: "Vuoi più prenotazioni? Usa siciliahost.com",
-        text: "È facoltativo. Il sito è in beta gratuita: nessuna commissione, e i pagamenti li gestisci direttamente tu con l'ospite. A regime tratterremo solo il 5% sulle prenotazioni ricevute, meno delle piattaforme più note."
+        text: "È facoltativo. Il sito è in beta gratuita: nessuna commissione, e i pagamenti li gestisci direttamente tu con l'ospite."
     ),
     IntroPage(
         pose: .idle, icon: "hands.clap.fill",
