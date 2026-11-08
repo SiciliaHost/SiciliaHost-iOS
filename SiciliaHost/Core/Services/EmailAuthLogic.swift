@@ -8,7 +8,7 @@ import Foundation
 /// Per questo, dopo l'accesso, un account non verificato esce subito e riceve di nuovo il link di conferma.
 enum EmailAuthLogic {
     /// Account dimostrativo dei revisori degli store: email non verificata, ammesso per uid (stesso valore di `firestore.rules`).
-    static let demoReviewerUid = "IsUz1W7sSwcOGHHh5kRDOBizm0c2"
+    static let demoReviewerUid = "2fJQ2O1jESS23Lh0hgwhBJBiGPS2"
 
     /// Lunghezza minima della password richiesta da Firebase Auth.
     static let minPasswordLength = 6
