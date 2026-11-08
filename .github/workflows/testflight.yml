@@ -17,6 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Dal 2026 App Store Connect accetta solo build con l'SDK iOS 26 (Xcode 26+): il run 42204884330 era fallito con
+      # «SDK version issue. This app was built with the iOS 18.5 SDK» perché macos-15 usa di default Xcode 16.4.
+      - name: Seleziona Xcode 26
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.2.app
+          xcodebuild -version
+
       - name: Strumenti
         run: |
           brew install xcodegen
