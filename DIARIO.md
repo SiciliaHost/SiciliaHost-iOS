@@ -155,6 +155,10 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Calendario da esportare su Airbnb e Booking
+- Impostazioni → «Calendari» (una voce per casa in `scope.managed`) apre `IcalExportSheet` (`Features/Profile/IcalExportSheet.swift`): indirizzo `IcalExport.url(propertyId:)` (`Core/Logic/IcalExport.swift`, stesso formato dell'Android) con «Copia il link» e `ShareLink`. Il calendario lo serve la Function `exportIcalFeed` del sito (ramo `feat/export-ical-blocchi`, NON ancora ridistribuita): prenotazioni dirette confermate + blocchi di date fatti su SiciliaHost; niente prenotazioni «Aggiungi ospite», niente importate dai portali. Test: `ProfileTests.testIcalExportUrl`.
+- **NON compilato** (Windows senza Swift), non visto a schermo. Da guardare in CI: `ShareLink` con `.buttonStyle(.appOutlined)`, `.sheet(item:)` accanto alla `.sheet(isPresented:)` esistente.
+
 ### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Bozza o cancella tornando indietro da una nuova prenotazione manuale
 - Richiesta: «Aggiungi ospite» crea subito la prenotazione manuale (oggi → domani, `MANUAL`) su Firestore e apre il check-in; tornando indietro restava lì come bozza senza chiedere. Ora, se la prenotazione è nuova (`isNew`) e il check-in non è stato inviato (`lastSentAt == nil`), il «indietro» della barra apre un `confirmationDialog`: **Salva come bozza** (tiene tutto e torna), **Cancella** (`CheckinModel.discardReservation`: `deleteReservation` sul server + schede ospite sul telefono; se fallisce resta sulla schermata con l'errore), **Continua** (annulla). Gli arrivi già esistenti toccati dalla Home NON chiedono nulla (`isNew = false`).
 - Cablaggio: `Route.checkin(reservationId:propertyId:isNew: = false)`, `HomeView.onCheckin` a 3 argomenti (`true` solo da «Aggiungi ospite»), `MainTabView`/`MainGateView` lo passano a `CheckinView(isNewReservation:)`. Logica pura `CheckinLogic.shouldAskDraftOnBack`, test in `CheckinTests`.

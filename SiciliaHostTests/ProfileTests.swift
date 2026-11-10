@@ -37,6 +37,14 @@ final class ProfileTests: XCTestCase {
         XCTAssertEqual(rows.map(\.propertyId), ["2", "3", "1"])
     }
 
+    // Specifica: IcalExportTest dell'Android (calendario da incollare su Airbnb e Booking).
+    func testIcalExportUrl() {
+        XCTAssertEqual(IcalExport.url(propertyId: "AbC123xyz"),
+                       "https://us-central1-siciliahostmanager.cloudfunctions.net/exportIcalFeed/AbC123xyz.ics")
+        XCTAssertEqual(IcalExport.url(propertyId: "a b"), "\(IcalExport.baseURL)/a%20b.ics")
+        XCTAssertEqual(IcalExport.url(propertyId: "a/b"), "\(IcalExport.baseURL)/a%2Fb.ics")
+    }
+
     // Specifica: HouseAccessLogicTest.collaboratorsOverview_* (sottomenù Collaboratori).
     func testCollaboratorsOverviewSplitsOwnedFromShared() {
         let overview = collaboratorsOverview(scope([house("1", "Mia", "OWNER"), house("2", "Altrui", "COLLABORATOR"), house("3", "Altra mia", "OWNER")]))

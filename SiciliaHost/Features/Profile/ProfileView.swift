@@ -19,6 +19,7 @@ struct ProfileView: View {
 
     @State private var model = ProfileModel()
     @State private var editingName = false
+    @State private var calendarHouse: CalendarHouse?
     @State private var notificationsDenied = false
     @State private var leaving = false
     @State private var confirmLogout = false
@@ -39,6 +40,11 @@ struct ProfileView: View {
                     CollaboratorsCard(summary: collaboratorsSummary(collaboratorsOverview(scope)), action: onCollaborators)
 
                     SettingsGroup(title: "Le mie case", items: houseItems, emptyText: "Nessuna casa.")
+
+                    // Il calendario da incollare su Airbnb e Booking, uno per casa che l'utente gestisce.
+                    if !calendarItems.isEmpty {
+                        SettingsGroup(title: "Calendari", items: calendarItems)
+                    }
 
                     SettingsGroup(title: "Notifiche", items: notificationItems)
 
@@ -109,6 +115,9 @@ struct ProfileView: View {
         .alert("Non sono riuscito a cancellare le schede. Riprova.", isPresented: $clearFailed) {
             Button("OK", role: .cancel) {}
         }
+        .sheet(item: $calendarHouse) { house in
+            IcalExportSheet(house: house) { calendarHouse = nil }
+        }
         .sheet(isPresented: $editingName, onDismiss: { model.error = nil }) {
             EditNameSheet(model: model) { editingName = false }
         }
@@ -159,6 +168,18 @@ struct ProfileView: View {
                 subtitle: [row.roleLabel, row.permissionsText].compactMap { $0 }.joined(separator: " · ")
             ) { onHouse(row.propertyId) }
         }
+    }
+
+    private var calendarItems: [SettingsItem] {
+        (scope?.managed ?? [])
+            .sorted { $0.name.lowercased() < $1.name.lowercased() }
+            .map { property in
+                let name = property.name.trimmed.isEmpty ? "Casa senza nome" : property.name
+                return SettingsItem(
+                    systemImage: "calendar", title: "Calendario di \(name)",
+                    subtitle: "Per Airbnb e Booking: prenotazioni del sito e date bloccate"
+                ) { calendarHouse = CalendarHouse(id: property.id, name: name) }
+            }
     }
 
     private var notificationItems: [SettingsItem] {
