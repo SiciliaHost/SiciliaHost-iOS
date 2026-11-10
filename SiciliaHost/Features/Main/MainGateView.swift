@@ -129,8 +129,8 @@ struct MainGateView: View {
                 onScan: { router.push(.mrzScan(reservationId: reservationId, propertyId: propertyId)) },
                 onEditGuest: { router.push(.guestForm(reservationId: reservationId, propertyId: propertyId, guestRecordId: $0)) },
                 onSend: { router.push(.checkinSend(reservationId: reservationId, propertyId: propertyId)) },
-                isNewReservation: isNew,
-                onBack: router.pop
+                onBack: router.pop,
+                isNewReservation: isNew
             )
         case let .mrzScan(reservationId, propertyId):
             MrzScannerView(
