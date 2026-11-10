@@ -27,7 +27,7 @@ private let allTourSteps: [TourStep] = [
     TourStep(target: .homeReview, tab: "Home", title: "Da completare",
              text: "Le prenotazioni arrivate da Airbnb, Booking o dal sito a cui manca l'importo finiscono qui: un tocco e le completi."),
     TourStep(target: .agendaPrices, tab: "Agenda", title: "Calendario e prezzi",
-             text: "Vedi arrivi e partenze giorno per giorno. Con Modifica prezzi scegli le notti e cambi il prezzo sul sito."),
+             text: "Le prenotazioni sono barre sul calendario, con il prezzo di ogni notte. Con Modifica prezzi scegli le notti e cambi il prezzo sul sito."),
     TourStep(target: .scorteScan, tab: "Scorte", title: "Scorte con la fotocamera",
              text: "Inquadra il codice a barre di un prodotto per aggiungerlo. L'app ti avvisa quando sta per finire."),
     TourStep(target: .finanzeBalance, tab: "Finanze", title: "Le tue finanze",

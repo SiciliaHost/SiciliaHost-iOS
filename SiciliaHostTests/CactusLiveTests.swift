@@ -80,6 +80,20 @@ final class CactusLiveTests: XCTestCase {
         XCTAssertEqual(merged[1].keys, ["t1"])
     }
 
+    // Specifica: CactusLiveLogicTest dell'Android (prezzi per date → calendario).
+    func testPricesForSpecificDatesGoToTheCalendar() {
+        for keys in [["seasonal.2026-12-20..2026-12-27"], ["surcharge.3", "surcharge.4"], ["promo.new.2026-12-01..2026-12-10"], ["promo.abc123"]] {
+            let target = liveTargetFor(step: LiveStep(section: .prices, propertyId: "p1", keys: keys))
+            XCTAssertEqual(target.tab, .agenda, "\(keys)")
+            XCTAssertEqual(target.propertyId, "p1")
+            XCTAssertNil(target.caseSection)
+        }
+        // Prezzo base e pulizie restano nella sezione Prezzi della casa.
+        let base = liveTargetFor(step: LiveStep(section: .prices, propertyId: "p1", keys: ["price.base", "price.cleaning"]))
+        XCTAssertEqual(base.tab, .case_)
+        XCTAssertEqual(base.caseSection, .prezzi)
+    }
+
     func testLiveTargetFor() {
         let ov = liveTargetFor(step: LiveStep(section: .overview, propertyId: "", keys: []))
         XCTAssertEqual(ov.tab, .home)

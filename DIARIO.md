@@ -155,6 +155,15 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Registro (più recente in alto)
 
+### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Agenda a mesi con barre delle prenotazioni (stile Airbnb)
+- Richiesta: il calendario dell'Agenda deve somigliare a quello di Airbnb (screenshot dell'utente): mesi che scorrono in verticale, celle con prezzo e «% di sconto», prenotazioni come barre «Nome + N». Scelte dell'utente: prezzi e sconti sì; **una casa alla volta** (menu in alto con più case).
+- Nuovi: `Core/Logic/MonthCalendarLogic.swift` (`MonthCalendar`: settimane da lunedì, `weekBars` con corsie e estremi dritti/tondi, `daysTouched`, `stayLabel`, `nightlyPrice`, `discountLabel`, `formatEuro`; giorni a Roma) e `SiciliaHostTests/MonthCalendarTests.swift` (specchio di `MonthCalendarLogicTest` dell'Android). `Features/Agenda/AgendaView.swift` riscritto: `LazyVStack` di mesi (3 prima, 24 dopo, parte dal corrente con `ScrollViewReader`), «Oggi» quando il mese corrente non è visibile, `AgendaModel` con casa scelta e `HousePrices` (prezzo base, `getSeasonalRates`, `listPromotions`: solo con permesso prezzi e annuncio approvato). Tolti griglia a pallini ed elenco del giorno; `AgendaReservationRow` e `AgendaLogic` restano.
+- **NON compilato** (Windows senza Swift), non visto a schermo. Da guardare in CI: `UnevenRoundedRectangle`, `let` dentro i `ViewBuilder` di `WeekRowView`, `SelectField` con id come opzioni, closure di default di `AgendaModel.init`.
+
+### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Cactus: i prezzi per date portano al calendario
+- Segnalazione: cambiando il prezzo di date precise Cactus apriva sotto il velo la sezione Prezzi della casa (prezzo base) invece del calendario. Causa: `liveTargetFor` mandava ogni passo `prices` a Case → Prezzi. Ora i passi `prices` con chiavi `seasonal.*`, `surcharge.*`, `promo.*` (prezzi per date, extra per ospiti, promozioni) vanno ad **Agenda** (`isCalendarPriceKey`, `CactusLiveLogic.swift`); `price.base`/`price.cleaning` restano su Case → Prezzi. Non si apre il foglio «Modifica prezzi» perché starebbe sopra l'overlay di Cactus. Test: `CactusLiveTests.testPricesForSpecificDatesGoToTheCalendar`. Stessa modifica sull'Android (test verdi).
+- **NON compilato** (Windows senza Swift): da controllare in CI.
+
 ### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Calendario da esportare su Airbnb e Booking
 - Impostazioni → «Calendari» (una voce per casa in `scope.managed`) apre `IcalExportSheet` (`Features/Profile/IcalExportSheet.swift`): indirizzo `IcalExport.url(propertyId:)` (`Core/Logic/IcalExport.swift`, stesso formato dell'Android) con «Copia il link» e `ShareLink`. Il calendario lo serve la Function `exportIcalFeed` del sito (ramo `feat/export-ical-blocchi`, NON ancora ridistribuita): prenotazioni dirette confermate + blocchi di date fatti su SiciliaHost; niente prenotazioni «Aggiungi ospite», niente importate dai portali. Test: `ProfileTests.testIcalExportUrl`.
 - **NON compilato** (Windows senza Swift), non visto a schermo. Da guardare in CI: `ShareLink` con `.buttonStyle(.appOutlined)`, `.sheet(item:)` accanto alla `.sheet(isPresented:)` esistente.

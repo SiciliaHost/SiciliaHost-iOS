@@ -262,6 +262,12 @@ struct LiveAppTarget: Equatable, Sendable {
     }
 }
 
+/// Le chiavi di `Change` (sito: `functions/src/tools/contentWriteTools.ts`) dei prezzi che si modificano dal calendario:
+/// `seasonal.<da>..<a>` (prezzo di date precise), `surcharge.<n>` (extra per ospiti), `promo.…` (promozioni automatiche).
+func isCalendarPriceKey(_ key: String) -> Bool {
+    key.hasPrefix("seasonal.") || key.hasPrefix("surcharge.") || key.hasPrefix("promo.")
+}
+
 func liveTargetFor(step: LiveStep) -> LiveAppTarget {
     let propId = step.propertyId.isEmpty ? nil : step.propertyId
     switch step.section {
@@ -274,6 +280,11 @@ func liveTargetFor(step: LiveStep) -> LiveAppTarget {
     case .inventory:
         return LiveAppTarget(tab: .scorte, propertyId: propId)
     case .prices:
+        // Prezzo base e pulizie stanno nella sezione Prezzi della casa; i prezzi per date, gli extra per ospiti e le
+        // promozioni si gestiscono dal calendario (Agenda → Modifica prezzi), non in quella sezione.
+        if step.keys.contains(where: isCalendarPriceKey) {
+            return LiveAppTarget(tab: .agenda, propertyId: propId)
+        }
         return LiveAppTarget(tab: .case_, propertyId: propId, caseSection: .prezzi)
     case .conditions:
         let keys = step.keys
