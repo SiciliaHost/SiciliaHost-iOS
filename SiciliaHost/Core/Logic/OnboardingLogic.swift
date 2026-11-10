@@ -34,8 +34,8 @@ private let allTourSteps: [TourStep] = [
              text: "Entrate nette già calcolate per piattaforma, spese e grafici del periodo."),
     TourStep(target: .caseBookingImport, tab: "Case", title: "Aggiorna da Booking",
              text: "Scarica da Booking il file \"Arrivi con recapiti\" e caricalo qui: prenotazioni, importi e finanze si aggiornano da soli."),
-    TourStep(target: .profile, tab: "Home", title: "Profilo e guida",
-             text: "Qui trovi membri e inviti, e puoi rivedere questa guida quando vuoi."),
+    TourStep(target: .profile, tab: "Home", title: "Impostazioni e guida",
+             text: "Qui trovi i collaboratori e gli inviti, le notifiche e la privacy, e puoi rivedere questa guida quando vuoi."),
 ]
 
 /// I passi per questo utente: si salta un passo il cui tab non c'è (permessi), l'import Booking se l'utente non gestisce

@@ -111,7 +111,7 @@ struct UIPreviewRoot: View {
                 }
         case "profile":
             AppScreen {
-                ProfileView(roleLabel: "PROPRIETARIO", scope: UIPreview.scope, onBack: {}, onHouse: { _ in }, onPrivacy: {}, onReplayTour: {}, onLogout: {}, showsAccountActions: false)
+                ProfileView(roleLabel: "PROPRIETARIO", scope: UIPreview.scope, onBack: {}, onHouse: { _ in }, onPrivacy: {}, onCollaborators: {}, onReplayTour: {}, onLogout: {}, showsAccountActions: false)
             }
         case "failed":
             AppScreen {

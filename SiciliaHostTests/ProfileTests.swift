@@ -37,6 +37,29 @@ final class ProfileTests: XCTestCase {
         XCTAssertEqual(rows.map(\.propertyId), ["2", "3", "1"])
     }
 
+    // Specifica: HouseAccessLogicTest.collaboratorsOverview_* (sottomenù Collaboratori).
+    func testCollaboratorsOverviewSplitsOwnedFromShared() {
+        let overview = collaboratorsOverview(scope([house("1", "Mia", "OWNER"), house("2", "Altrui", "COLLABORATOR"), house("3", "Altra mia", "OWNER")]))
+        // Per nome, come in houseRows: «Altra mia» prima di «Mia».
+        XCTAssertEqual(overview.owned.map(\.propertyId), ["3", "1"])
+        XCTAssertEqual(overview.shared.map(\.propertyId), ["2"])
+        XCTAssertFalse(overview.isEmpty)
+    }
+
+    func testCollaboratorsOverviewSuperAdminOnForeignHouseHasNeitherList() {
+        let foreign = Property(id: "9", name: "Altrui", members: ["x": "OWNER"], memberUids: ["x"])
+        XCTAssertTrue(collaboratorsOverview(scope([foreign], admin: true)).isEmpty)
+        XCTAssertTrue(collaboratorsOverview(nil).isEmpty)
+    }
+
+    func testCollaboratorsSummaryFollowsWhatTheUserHas() {
+        XCTAssertEqual(collaboratorsSummary(collaboratorsOverview(scope([house("1", "A", "OWNER")]))),
+                       "Invita e gestisci chi lavora nelle tue case, con i permessi di ognuno")
+        XCTAssertEqual(collaboratorsSummary(collaboratorsOverview(scope([house("2", "B", "COLLABORATOR")]))),
+                       "Le case in cui collabori e il tuo accesso")
+        XCTAssertEqual(collaboratorsSummary(collaboratorsOverview(nil)), "Invita chi ti aiuta a gestire le tue case")
+    }
+
     func testHouseRowsShowPermissionsOnlyForCollaborators() {
         let rows = Dictionary(uniqueKeysWithValues: houseRows(scope([
             house("1", "Casa A", "OWNER"), house("2", "Casa B", "COLLABORATOR", perms: ["PRICES", "FINANCE"]),

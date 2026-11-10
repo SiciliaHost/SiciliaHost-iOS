@@ -69,6 +69,34 @@ func canLeaveHouse(_ scope: AccessScope, _ property: Property) -> Bool { scope.r
 
 func canManageMembers(_ scope: AccessScope, _ property: Property) -> Bool { scope.isOwner(property) }
 
+// MARK: Collaboratori (sottomenù delle impostazioni)
+
+/// Le case di cui l'utente è proprietario (`owned`: qui invita e gestisce i collaboratori) e quelle in cui è lui il
+/// collaboratore (`shared`: qui vede il proprio ruolo e può lasciare la casa).
+struct CollaboratorsOverview: Equatable, Sendable {
+    let owned: [HouseRow]
+    let shared: [HouseRow]
+    var isEmpty: Bool { owned.isEmpty && shared.isEmpty }
+}
+
+func collaboratorsOverview(_ scope: AccessScope?) -> CollaboratorsOverview {
+    guard let scope else { return CollaboratorsOverview(owned: [], shared: []) }
+    let rows = houseRows(scope)
+    let ownedIds = Set(scope.properties.filter { scope.isOwner($0) }.map(\.id))
+    let sharedIds = Set(scope.properties.filter { scope.roleIn($0) == .collaborator }.map(\.id))
+    return CollaboratorsOverview(
+        owned: rows.filter { ownedIds.contains($0.propertyId) },
+        shared: rows.filter { sharedIds.contains($0.propertyId) }
+    )
+}
+
+/// La riga sotto «Collaboratori» nelle impostazioni.
+func collaboratorsSummary(_ overview: CollaboratorsOverview) -> String {
+    if !overview.owned.isEmpty { return "Invita e gestisci chi lavora nelle tue case, con i permessi di ognuno" }
+    if !overview.shared.isEmpty { return "Le case in cui collabori e il tuo accesso" }
+    return "Invita chi ti aiuta a gestire le tue case"
+}
+
 // MARK: Privacy
 
 struct PrivacySection: Equatable, Sendable {

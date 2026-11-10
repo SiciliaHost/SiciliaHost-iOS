@@ -7,8 +7,12 @@ enum WizardLevel: String, Hashable, Codable { case app = "APP", site = "SITE" }
 /// Le destinazioni dell'app (`NavigationKeys.kt`), spinte sullo stack sopra la schermata principale.
 /// Il login e la schermata principale non sono destinazioni: li sceglie `RootView` in base alla sessione.
 enum Route: Hashable {
+    /// Impostazioni (il nome interno resta `profile`, come `ProfileScreen` dell'Android).
     case profile
-    case members
+    /// Sottomenù Collaboratori delle impostazioni.
+    case collaborators
+    /// Membri e inviti; `propertyId` nil lascia scegliere la casa dentro la schermata.
+    case members(propertyId: String?)
     /// Ruolo e permessi su una casa (dal Profilo → Le mie case).
     case houseAccess(propertyId: String)
     case privacy

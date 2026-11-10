@@ -99,6 +99,7 @@ struct MainGateView: View {
                 onBack: router.pop,
                 onHouse: { router.push(.houseAccess(propertyId: $0)) },
                 onPrivacy: { router.push(.privacy) },
+                onCollaborators: { router.push(.collaborators) },
                 onReplayTour: {
                     OnboardingController.shared.tourForced = true
                     OnboardingController.shared.tourRequested = true
@@ -109,12 +110,19 @@ struct MainGateView: View {
         case let .houseAccess(propertyId):
             HouseAccessView(
                 propertyId: propertyId, onBack: router.pop,
-                onOpenMembers: { router.push(.members) },
+                onOpenMembers: { router.push(.members(propertyId: propertyId)) },
                 onLeft: { router.popToRoot() }
             )
         case .privacy:
             PrivacyView(onBack: router.pop)
-        case .members:            MembersView(onBack: router.pop)
+        case let .members(propertyId): MembersView(onBack: router.pop, propertyId: propertyId)
+        case .collaborators:
+            CollaboratorsView(
+                scope: model.scope,
+                onBack: router.pop,
+                onMembers: { router.push(.members(propertyId: $0)) },
+                onHouseAccess: { router.push(.houseAccess(propertyId: $0)) }
+            )
         case let .checkin(reservationId, propertyId):
             CheckinView(
                 model: checkinModels.model(reservationId: reservationId, propertyId: propertyId),

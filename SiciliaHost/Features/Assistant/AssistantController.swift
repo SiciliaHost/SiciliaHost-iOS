@@ -83,7 +83,8 @@ func showFloatingAssistant(
         return mainReady
     }
     switch route {
-    case .mrzScan, .newCaseWizard, .checkin, .checkinSend, .guestForm, .editReservation:
+    // Impostazioni e sottomenù Collaboratori: come sull'Android, nessun pulsante flottante (non deve coprire le voci in fondo).
+    case .mrzScan, .newCaseWizard, .checkin, .checkinSend, .guestForm, .editReservation, .profile, .collaborators:
         return false
     default:
         return true

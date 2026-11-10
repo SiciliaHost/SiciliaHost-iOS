@@ -2,7 +2,8 @@ import FirebaseAuth
 import SwiftUI
 import UserNotifications
 
-/// Profilo (`ProfileScreen.kt`): intestazione con nome modificabile, "Le mie case", notifiche, aiuto, privacy, versione, "Esci".
+/// Impostazioni (ex «Profilo», `ProfileScreen.kt`): intestazione con nome modificabile, Collaboratori in evidenza (apre il
+/// suo sottomenù), poi le voci per categoria: Le mie case, Notifiche, Guida, Privacy e sicurezza, Account, versione.
 /// Non portati perché non esistono su iPhone: la riga diagnostica del Fold e il widget Cactus.
 struct ProfileView: View {
     let roleLabel: String
@@ -10,6 +11,7 @@ struct ProfileView: View {
     let onBack: () -> Void
     let onHouse: (String) -> Void
     let onPrivacy: () -> Void
+    let onCollaborators: () -> Void
     let onReplayTour: () -> Void
     let onLogout: () -> Void
     /// Falso nell'anteprima con dati dimostrativi: lì non c'è un account da eliminare.
@@ -28,65 +30,51 @@ struct ProfileView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            CompactTopBar(title: "Profilo", onBack: onBack)
+            CompactTopBar(title: "Impostazioni", onBack: onBack)
             ScrollView {
                 VStack(alignment: .leading, spacing: Dimens.itemSpacing) {
                     header
 
-                    section("Le mie case")
-                    let rows = scope.map(houseRows) ?? []
-                    if rows.isEmpty {
-                        Text("Nessuna casa.").appStyle(.bodyMedium).foregroundStyle(Theme.onSurface)
-                    }
-                    ForEach(rows) { row in
-                        NavRow(
-                            title: row.name,
-                            subtitle: [row.roleLabel, row.permissionsText].compactMap { $0 }.joined(separator: " · ")
-                        ) { onHouse(row.propertyId) }
-                    }
+                    // Collaboratori in primo piano, subito sotto l'intestazione.
+                    CollaboratorsCard(summary: collaboratorsSummary(collaboratorsOverview(scope)), action: onCollaborators)
 
-                    section("Notifiche")
-                    if notificationsDenied {
-                        NavRow(
-                            title: "Le notifiche sono disattivate",
-                            subtitle: "Attivale dalle impostazioni del telefono per non perdere prenotazioni e avvisi."
-                        ) { openNotificationSettings() }
-                    }
-                    NavRow(title: "Impostazioni notifiche", subtitle: "Nuove prenotazioni, importi da inserire, avvisi dal sito e promemoria Booking") {
-                        openNotificationSettings()
-                    }
+                    SettingsGroup(title: "Le mie case", items: houseItems, emptyText: "Nessuna casa.")
 
-                    section("Aiuto")
-                    NavRow(title: "Rivedi la presentazione", subtitle: nil) { OnboardingController.shared.introRequested = true }
-                    NavRow(title: "Rivedi il tour", subtitle: nil, action: onReplayTour)
+                    SettingsGroup(title: "Notifiche", items: notificationItems)
 
-                    section("Privacy e sicurezza")
-                    NavRow(title: "Come proteggiamo i tuoi dati", subtitle: nil, action: onPrivacy)
-                    NavRow(title: "Schede del check-in su questo telefono",
-                           subtitle: "Le schede degli ospiti restano solo qui. Tocca per cancellarle tutte.") {
-                        confirmClearRecords = true
+                    SettingsGroup(title: "Guida", items: [
+                        SettingsItem(systemImage: "play.rectangle", title: "Rivedi la presentazione") {
+                            OnboardingController.shared.introRequested = true
+                        },
+                        SettingsItem(systemImage: "safari", title: "Rivedi il tour", action: onReplayTour),
+                    ])
+
+                    SettingsGroup(title: "Privacy e sicurezza", items: [
+                        SettingsItem(systemImage: "lock.shield", title: "Come proteggiamo i tuoi dati", action: onPrivacy),
+                        SettingsItem(
+                            systemImage: "trash", title: "Schede del check-in su questo telefono",
+                            subtitle: "Le schede degli ospiti restano solo qui. Tocca per cancellarle tutte."
+                        ) { confirmClearRecords = true },
+                    ])
+
+                    SettingsGroup(title: "Account", items: [
+                        SettingsItem(systemImage: "rectangle.portrait.and.arrow.right", title: "Esci", enabled: !leaving) {
+                            guard !leaving else { return }
+                            // Nel dubbio (archivio illeggibile) si chiede conferma: uscendo le schede si cancellano.
+                            if GuestRecordStore.shared.hasUnsent() {
+                                confirmLogout = true
+                            } else {
+                                logout()
+                            }
+                        },
+                    ])
+                    if showsAccountActions {
+                        AccountActionsSection(scope: scope, onDeleted: onLogout)
                     }
 
                     Text("SiciliaHost \(appVersion)")
                         .appStyle(.labelSmall).foregroundStyle(Theme.onSurfaceVariant)
                         .padding(.top, Dimens.sectionSpacing)
-
-                    Button("Esci") {
-                        guard !leaving else { return }
-                        // Nel dubbio (archivio illeggibile) si chiede conferma: uscendo le schede si cancellano.
-                        if GuestRecordStore.shared.hasUnsent() {
-                            confirmLogout = true
-                        } else {
-                            logout()
-                        }
-                    }
-                    .buttonStyle(.appOutlined)
-                    .disabled(leaving)
-
-                    if showsAccountActions {
-                        section("Account")
-                        AccountActionsSection(scope: scope, onDeleted: onLogout)
-                    }
                 }
                 .frame(maxWidth: 400, alignment: .leading)
                 .padding(Dimens.screenPadding)
@@ -164,8 +152,28 @@ struct ProfileView: View {
         }
     }
 
-    private func section(_ title: String) -> some View {
-        SectionLabel(title).padding(.top, Dimens.itemSpacing)
+    private var houseItems: [SettingsItem] {
+        (scope.map(houseRows) ?? []).map { row in
+            SettingsItem(
+                systemImage: "building.2", title: row.name,
+                subtitle: [row.roleLabel, row.permissionsText].compactMap { $0 }.joined(separator: " · ")
+            ) { onHouse(row.propertyId) }
+        }
+    }
+
+    private var notificationItems: [SettingsItem] {
+        var items: [SettingsItem] = []
+        if notificationsDenied {
+            items.append(SettingsItem(
+                systemImage: "bell.slash", title: "Le notifiche sono disattivate",
+                subtitle: "Attivale dalle impostazioni del telefono per non perdere prenotazioni e avvisi."
+            ) { openNotificationSettings() })
+        }
+        items.append(SettingsItem(
+            systemImage: "bell", title: "Impostazioni notifiche",
+            subtitle: "Nuove prenotazioni, importi da inserire, avvisi dal sito e promemoria Booking"
+        ) { openNotificationSettings() })
+        return items
     }
 
     private var appVersion: String {

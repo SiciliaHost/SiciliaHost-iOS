@@ -123,7 +123,7 @@ struct MainTabView: View {
         case .case_:
             CasesView(
                 model: cases, tourTarget: tour.current?.target,
-                onOpenMembers: { router.push(.members) },
+                onOpenMembers: { router.push(.members(propertyId: nil)) },
                 onNewCase: { router.push(.newCaseWizard(propertyId: nil, level: .app)) },
                 onOpenSiteWizard: { router.push(.newCaseWizard(propertyId: $0, level: .site)) }
             )

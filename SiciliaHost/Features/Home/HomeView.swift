@@ -147,11 +147,11 @@ struct HomeView: View {
             // Senza prenotazioni da completare il tour indica l'intestazione della Home.
             .modifier(TourTargetIf(target: .homeReview, active: model.pendingReview.isEmpty))
             Button(action: onProfile) {
-                Image(systemName: "person.crop.circle").font(.system(size: 26))
+                Image(systemName: "gearshape").font(.system(size: 26))
             }
             .buttonStyle(.appIcon)
             .tourTarget(.profile)
-            .accessibilityLabel("Profilo")
+            .accessibilityLabel("Impostazioni")
         }
     }
 

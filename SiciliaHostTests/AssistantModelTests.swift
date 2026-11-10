@@ -64,7 +64,11 @@ final class AssistantModelTests: XCTestCase {
         // Con navbar nascosta e assistente disponibile
         XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: nil))
         XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .houseAccess(propertyId: "p1")))
-        XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .members))
+        XCTAssertTrue(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .members(propertyId: nil)))
+
+        // Impostazioni e sottomenù Collaboratori: mai flottante
+        XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .profile))
+        XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .collaborators))
 
         // Su schermate escluse (form / scanner)
         XCTAssertFalse(showFloatingAssistant(available: true, open: false, navbarVisible: false, isKeyboardShowing: false, mainReady: true, route: .mrzScan(reservationId: "r1", propertyId: "p1")))
