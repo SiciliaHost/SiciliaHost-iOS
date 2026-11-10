@@ -4,6 +4,14 @@ import XCTest
 // Le schermate Android del check-in non hanno test: questi coprono la logica estratta in `CheckinLogic` (validazione
 // come `GuestFormScreen.kt`, esiti per indice come `CheckinSendScreen.kt`, schede da inviare come `CheckinViewModel.kt`).
 final class CheckinTests: XCTestCase {
+    // Specifica: NewReservationDraftTest dell'Android.
+    func testAsksDraftOnlyForNewReservationNotSent() {
+        XCTAssertTrue(CheckinLogic.shouldAskDraftOnBack(isNew: true, sent: false))
+        XCTAssertFalse(CheckinLogic.shouldAskDraftOnBack(isNew: true, sent: true))
+        XCTAssertFalse(CheckinLogic.shouldAskDraftOnBack(isNew: false, sent: false))
+        XCTAssertFalse(CheckinLogic.shouldAskDraftOnBack(isNew: false, sent: true))
+    }
+
     private let luoghi = [
         LookupEntry(code: "100000100", description: "ITALIA"),
         LookupEntry(code: "100000216", description: "GERMANIA"),

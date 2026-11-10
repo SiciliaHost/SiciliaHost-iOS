@@ -78,7 +78,7 @@ final class HomeModel {
 struct HomeView: View {
     let scope: AccessScope?
     let onProfile: () -> Void
-    let onCheckin: (_ reservationId: String, _ propertyId: String) -> Void
+    let onCheckin: (_ reservationId: String, _ propertyId: String, _ isNew: Bool) -> Void
     let onEditReservation: (_ reservationId: String) -> Void
     @State var model: HomeModel
 
@@ -89,7 +89,7 @@ struct HomeView: View {
     init(
         scope: AccessScope?,
         onProfile: @escaping () -> Void,
-        onCheckin: @escaping (String, String) -> Void = { _, _ in },
+        onCheckin: @escaping (String, String, Bool) -> Void = { _, _, _ in },
         onEditReservation: @escaping (String) -> Void = { _ in },
         model: HomeModel? = nil
     ) {
@@ -191,7 +191,7 @@ struct HomeView: View {
         } else {
             VStack(spacing: Dimens.itemSpacing) {
                 ForEach(model.arrivalsToday) { res in
-                    Button { onCheckin(res.id, res.propertyId) } label: {
+                    Button { onCheckin(res.id, res.propertyId, false) } label: {
                         ArrivalRow(reservation: res, checkinSent: model.checkinSentIds.contains(res.id))
                     }
                         .buttonStyle(.plain)
@@ -238,7 +238,7 @@ struct HomeView: View {
     private func startNewGuest(_ propertyId: String) {
         Task {
             if let created = await model.createManualReservation(propertyId: propertyId) {
-                onCheckin(created.id, propertyId)
+                onCheckin(created.id, propertyId, true)
             }
         }
     }

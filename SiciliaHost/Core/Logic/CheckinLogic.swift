@@ -19,6 +19,10 @@ struct GuestFormValues: Equatable {
 }
 
 enum CheckinLogic {
+    /// «Aggiungi ospite» crea subito la prenotazione manuale e apre il check-in. Tornando indietro si chiede se tenerla come
+    /// bozza o cancellarla, ma solo se è davvero nuova e il check-in non è già stato inviato (non si cancella per sbaglio).
+    static func shouldAskDraftOnBack(isNew: Bool, sent: Bool) -> Bool { isNew && !sent }
+
     /// Titolo della schermata: "Nome · gg/mm/aaaa → gg/mm/aaaa" (o "Check-in" senza prenotazione).
     static func headerTitle(_ reservation: Reservation?) -> String {
         guard let r = reservation else { return "Check-in" }

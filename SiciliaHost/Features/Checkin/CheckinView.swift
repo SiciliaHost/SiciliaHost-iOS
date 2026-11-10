@@ -9,13 +9,22 @@ struct CheckinView: View {
     let onEditGuest: (String) -> Void
     let onSend: () -> Void
     let onBack: () -> Void
+    /// La prenotazione è stata appena creata da «Aggiungi ospite»: tornando indietro si chiede bozza o cancella.
+    var isNewReservation = false
 
     @State private var toDelete: GuestRecord?
+    @State private var askDraft = false
+
+    private var mustAsk: Bool {
+        CheckinLogic.shouldAskDraftOnBack(isNew: isNewReservation, sent: model.lastSentAt != nil)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             // Nome e date su una riga sola.
-            CompactTopBar(title: CheckinLogic.headerTitle(model.reservation), onBack: onBack)
+            CompactTopBar(title: CheckinLogic.headerTitle(model.reservation), onBack: {
+                if mustAsk { askDraft = true } else { onBack() }
+            })
             CheckinNotices(model: model)
             if let error = model.error { ErrorBanner(text: error) { model.error = nil } }
             ZStack(alignment: .bottomTrailing) {
@@ -44,6 +53,16 @@ struct CheckinView: View {
         // A ogni ingresso (anche al ritorno dal modulo o dall'invio): il modello può essere riusato dopo un'uscita
         // dall'account o la cancellazione delle schede.
         .task { await model.load() }
+        // Toccare fuori dal menù = restare qui a completare.
+        .confirmationDialog("Salvare la prenotazione come bozza?", isPresented: $askDraft, titleVisibility: .visible) {
+            Button("Salva come bozza", action: onBack)
+            Button("Cancella", role: .destructive) {
+                Task { if await model.discardReservation() { onBack() } }
+            }
+            Button("Continua", role: .cancel) {}
+        } message: {
+            Text("Hai creato una nuova prenotazione manuale. Puoi tenerla come bozza e completarla più tardi, oppure cancellarla insieme alle schede degli ospiti inserite.")
+        }
         .confirmationDialog("Elimina ospite", isPresented: Binding(
             get: { toDelete != nil }, set: { if !$0 { toDelete = nil } }
         ), titleVisibility: .visible, presenting: toDelete) { record in

@@ -41,7 +41,8 @@ e correggere gli errori (vedi Prossimi passi).
 
 ## Stato attuale
 
-- **2026-11-10: Impostazioni a categorie + sottomenù Collaboratori + icona ingranaggio** (parità con l'Android) scritti, NON compilati, NON committati (vedi voce del Registro).
+- **2026-11-10: nuova prenotazione manuale: tornando indietro dal check-in si chiede «Salva come bozza / Cancella / Continua»** (parità con l'Android) scritto, NON compilato, NON committato (vedi Registro).
+- **2026-11-10: Impostazioni a categorie + sottomenù Collaboratori + icona ingranaggio** (parità con l'Android) committati e pushati (`a8319bb`), NON compilati qui: l'esito della CI non è stato controllato (vedi voce del Registro).
 - **2026-11-08: login con email e password per tutti (richiede email verificata), registrazione e «Password dimenticata»** scritti, NON compilati qui e backend NON deployato (vedi voce del Registro).
 - Piano completo in `docs/PIANO.md` (fasi F1–F11) e inventario in `docs/INVENTARIO.md`, ora con **tutti i 249 file Kotlin** di `main` (`a43eb44`): 31 file aggiunti il 2026-11-03 (F3/F9/F10) e 7 della scheda Messaggi (F1/F12); righe aperte 120.
 - **F1 (livello dati), F2 (logica pura) e F3 (accesso/stile/navigazione): COMPILANO in CI e i 156 test passano (2026-10-18).** Checklist in `docs/funzioni/F1.md`, `F2.md`, `F3.md`.
@@ -153,6 +154,12 @@ e correggere gli errori (vedi Prossimi passi).
 - Per i link d'invito `https://siciliahost.com/invito/CODICE` sull'iPhone: servire `https://siciliahost.com/.well-known/apple-app-site-association` dal sito (repo Siciliahost.it, come già si fa con `assetlinks.json` per Android) con l'ID dell'app (Team ID + Bundle ID).
 
 ## Registro (più recente in alto)
+
+### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Bozza o cancella tornando indietro da una nuova prenotazione manuale
+- Richiesta: «Aggiungi ospite» crea subito la prenotazione manuale (oggi → domani, `MANUAL`) su Firestore e apre il check-in; tornando indietro restava lì come bozza senza chiedere. Ora, se la prenotazione è nuova (`isNew`) e il check-in non è stato inviato (`lastSentAt == nil`), il «indietro» della barra apre un `confirmationDialog`: **Salva come bozza** (tiene tutto e torna), **Cancella** (`CheckinModel.discardReservation`: `deleteReservation` sul server + schede ospite sul telefono; se fallisce resta sulla schermata con l'errore), **Continua** (annulla). Gli arrivi già esistenti toccati dalla Home NON chiedono nulla (`isNew = false`).
+- Cablaggio: `Route.checkin(reservationId:propertyId:isNew: = false)`, `HomeView.onCheckin` a 3 argomenti (`true` solo da «Aggiungi ospite»), `MainTabView`/`MainGateView` lo passano a `CheckinView(isNewReservation:)`. Logica pura `CheckinLogic.shouldAskDraftOnBack`, test in `CheckinTests`.
+- Stessa modifica sull'Android (`Androidapp`: `Checkin.isNew`, `CheckinScreen` con `BackHandler` + dialog, `CheckinViewModel.discardReservation`, `NewReservationDraftTest`; `testDebugUnitTest` e `assembleDebug` verdi).
+- **NON compilato** (Windows senza Swift), nessun test eseguito, non visto a schermo. Da guardare in CI: pattern `case let .checkin(r, p, _)` in `Router.checkinKey` con il terzo valore di default; `confirmationDialog` con tre pulsanti. Il gesto di swipe-back è già disattivato (`navigationBarBackButtonHidden`), quindi non dovrebbe aggirare il dialog: non provato.
 
 ### 2026-11-10 — Claude Sonnet 5.5 (Windows senza Swift) — Impostazioni a categorie, sottomenù Collaboratori, icona ingranaggio (parità con l'Android)
 - Specchio della modifica fatta lo stesso giorno sull'Android (`Androidapp` `ProfileScreen`/`CollaboratorsScreen`). `ProfileView` ora si intitola «Impostazioni» e ha le voci in schede per categoria (`SettingsGroup`/`SettingsRow` in `Features/Profile/SettingsComponents.swift`): Le mie case, Notifiche, Guida (presentazione, tour), Privacy e sicurezza, Account («Esci» + `AccountActionsSection`), versione in fondo. **Collaboratori** è una scheda evidenziata (`CollaboratorsCard`) subito sotto l'intestazione, che apre il nuovo sottomenù `CollaboratorsView` (`Features/Profile/CollaboratorsView.swift`, rotta `.collaborators`): case di cui sei proprietario → «Invita un collaboratore» + «Membri e inviti» per casa; case in cui collabori → `HouseAccessView`.

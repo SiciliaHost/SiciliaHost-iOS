@@ -106,7 +106,7 @@ struct MainTabView: View {
             HomeView(
                 scope: scope,
                 onProfile: { router.push(.profile) },
-                onCheckin: { reservationId, propertyId in router.push(.checkin(reservationId: reservationId, propertyId: propertyId)) },
+                onCheckin: { reservationId, propertyId, isNew in router.push(.checkin(reservationId: reservationId, propertyId: propertyId, isNew: isNew)) },
                 onEditReservation: { router.push(.editReservation(reservationId: $0)) }
             )
         case .agenda:

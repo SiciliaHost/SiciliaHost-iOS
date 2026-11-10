@@ -267,6 +267,19 @@ final class CheckinModel {
         }
     }
 
+    /// «Cancella» alla domanda sulla bozza: la prenotazione manuale appena creata sparisce dal server e le sue schede dal
+    /// telefono. Vero se è andata a buon fine; altrimenti `error` spiega e la prenotazione resta com'era.
+    func discardReservation() async -> Bool {
+        do {
+            try await db.deleteReservation(reservationId)
+            try? store.deleteReservation(propertyId: propertyId, reservationId: reservationId)
+            return true
+        } catch {
+            self.error = "Non sono riuscito a cancellare la prenotazione. Controlla la connessione e riprova."
+            return false
+        }
+    }
+
     /// «Elimina le schede di questa prenotazione» (anche quelle mai inviate).
     func deleteAll() {
         do {

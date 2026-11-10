@@ -16,7 +16,8 @@ enum Route: Hashable {
     /// Ruolo e permessi su una casa (dal Profilo → Le mie case).
     case houseAccess(propertyId: String)
     case privacy
-    case checkin(reservationId: String, propertyId: String)
+    /// `isNew`: prenotazione manuale appena creata da «Aggiungi ospite»; tornando indietro si chiede bozza o cancella.
+    case checkin(reservationId: String, propertyId: String, isNew: Bool = false)
     case mrzScan(reservationId: String, propertyId: String)
     case guestForm(reservationId: String, propertyId: String, guestRecordId: String?)
     case checkinSend(reservationId: String, propertyId: String)
@@ -31,7 +32,7 @@ extension Route {
     /// Chiave del check-in a cui appartiene la schermata (`<prenotazione>_<casa>`), nil per le altre.
     var checkinKey: String? {
         switch self {
-        case let .checkin(r, p), let .mrzScan(r, p), let .checkinSend(r, p): return "\(r)_\(p)"
+        case let .checkin(r, p, _), let .mrzScan(r, p), let .checkinSend(r, p): return "\(r)_\(p)"
         case let .guestForm(r, p, _): return "\(r)_\(p)"
         default: return nil
         }

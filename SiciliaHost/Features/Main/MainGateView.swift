@@ -123,12 +123,13 @@ struct MainGateView: View {
                 onMembers: { router.push(.members(propertyId: $0)) },
                 onHouseAccess: { router.push(.houseAccess(propertyId: $0)) }
             )
-        case let .checkin(reservationId, propertyId):
+        case let .checkin(reservationId, propertyId, isNew):
             CheckinView(
                 model: checkinModels.model(reservationId: reservationId, propertyId: propertyId),
                 onScan: { router.push(.mrzScan(reservationId: reservationId, propertyId: propertyId)) },
                 onEditGuest: { router.push(.guestForm(reservationId: reservationId, propertyId: propertyId, guestRecordId: $0)) },
                 onSend: { router.push(.checkinSend(reservationId: reservationId, propertyId: propertyId)) },
+                isNewReservation: isNew,
                 onBack: router.pop
             )
         case let .mrzScan(reservationId, propertyId):
